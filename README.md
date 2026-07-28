@@ -2,7 +2,7 @@
 
 **Give your coding agent a definition of done.**
 
-[Website](https://berwinsingh.github.io/adaptive-development-workflow-skills/)
+[Website](https://berwinsingh.github.io/oldhand/)
 
 Oldhand is one portable development workflow for Claude Code and ChatGPT
 Codex. It accepts a Jira, Asana, monday.com, Linear, or GitHub issue—or just a
@@ -17,7 +17,7 @@ verify the result end to end.
 Run these as two separate prompts inside Claude Code:
 
 ```text
-/plugin marketplace add berwinsingh/adaptive-development-workflow-skills
+/plugin marketplace add berwinsingh/oldhand
 /plugin install oldhand@oldhand
 ```
 
@@ -30,7 +30,7 @@ Then start a new session and use:
 ### ChatGPT Codex / Codex CLI
 
 ```sh
-codex plugin marketplace add berwinsingh/adaptive-development-workflow-skills
+codex plugin marketplace add berwinsingh/oldhand
 codex plugin add oldhand@oldhand
 ```
 

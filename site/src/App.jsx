@@ -23,11 +23,11 @@ import {
 
 const installs = {
   claude: [
-    "/plugin marketplace add berwinsingh/adaptive-development-workflow-skills",
+    "/plugin marketplace add berwinsingh/oldhand",
     "/plugin install oldhand@oldhand",
   ],
   codex: [
-    "codex plugin marketplace add berwinsingh/adaptive-development-workflow-skills",
+    "codex plugin marketplace add berwinsingh/oldhand",
     "codex plugin add oldhand@oldhand",
   ],
 };
@@ -203,7 +203,7 @@ export function App() {
         </nav>
         <a
           className="header-github"
-          href="https://github.com/berwinsingh/adaptive-development-workflow-skills"
+          href="https://github.com/berwinsingh/oldhand"
           target="_blank"
           rel="noreferrer"
         >
@@ -240,7 +240,7 @@ export function App() {
               </button>
               <a
                 className="button button--secondary"
-                href="https://github.com/berwinsingh/adaptive-development-workflow-skills#readme"
+                href="https://github.com/berwinsingh/oldhand#readme"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -484,7 +484,7 @@ export function App() {
           <div className="install-footer">
             <strong>Give it the work. Get back proof.</strong>
             <a
-              href="https://github.com/berwinsingh/adaptive-development-workflow-skills#integrations"
+              href="https://github.com/berwinsingh/oldhand#integrations"
               target="_blank"
               rel="noreferrer"
             >
@@ -501,10 +501,10 @@ export function App() {
           <span>Development discipline for Claude Code and ChatGPT Codex.</span>
         </div>
         <div>
-          <a href="https://github.com/berwinsingh/adaptive-development-workflow-skills" target="_blank" rel="noreferrer">
+          <a href="https://github.com/berwinsingh/oldhand" target="_blank" rel="noreferrer">
             GitHub
           </a>
-          <a href="https://github.com/berwinsingh/adaptive-development-workflow-skills/blob/main/LICENSE" target="_blank" rel="noreferrer">
+          <a href="https://github.com/berwinsingh/oldhand/blob/main/LICENSE" target="_blank" rel="noreferrer">
             MIT License
           </a>
         </div>
