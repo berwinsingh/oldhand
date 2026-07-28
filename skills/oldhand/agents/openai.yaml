@@ -1,0 +1,4 @@
+interface:
+  display_name: "Oldhand"
+  short_description: "From request to proof"
+  default_prompt: "Use $oldhand to analyze and deliver this development request through realistic end-to-end verification."

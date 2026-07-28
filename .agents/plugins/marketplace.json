@@ -1,0 +1,21 @@
+{
+  "name": "oldhand",
+  "interface": {
+    "displayName": "Oldhand"
+  },
+  "plugins": [
+    {
+      "name": "oldhand",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/berwinsingh/adaptive-development-workflow-skills.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

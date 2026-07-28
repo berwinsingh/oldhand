@@ -1,4 +1,0 @@
-interface:
-  display_name: "Adaptive Development Workflow"
-  short_description: "Deliver any dev request with real E2E QA"
-  default_prompt: "Use $ticket-to-browser-delivery to analyze and deliver this development request through real browser QA."

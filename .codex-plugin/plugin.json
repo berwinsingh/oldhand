@@ -1,0 +1,36 @@
+{
+  "name": "oldhand",
+  "version": "1.0.0",
+  "description": "A tracker-agnostic development workflow with prior-art research, minimal implementation, and real end-to-end verification.",
+  "author": {
+    "name": "Berwin Singh",
+    "url": "https://github.com/berwinsingh"
+  },
+  "homepage": "https://berwinsingh.github.io/oldhand/",
+  "repository": "https://github.com/berwinsingh/adaptive-development-workflow-skills",
+  "license": "MIT",
+  "keywords": [
+    "development-workflow",
+    "browser-qa",
+    "open-source-research",
+    "ponytail"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Oldhand",
+    "shortDescription": "From request to proof",
+    "longDescription": "Understand the real flow, research prior art, implement the smallest safe change, and verify it end to end.",
+    "developerName": "Berwin Singh",
+    "category": "Productivity",
+    "capabilities": [
+      "Instructions"
+    ],
+    "websiteURL": "https://berwinsingh.github.io/oldhand/",
+    "defaultPrompt": [
+      "Use Oldhand to implement this request end to end.",
+      "Use Oldhand to investigate and fix this bug.",
+      "Use Oldhand to turn this ticket into a verified change."
+    ],
+    "brandColor": "#B9FF66"
+  }
+}

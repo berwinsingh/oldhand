@@ -1,0 +1,9 @@
+{
+  "name": "oldhand",
+  "version": "1.0.0",
+  "description": "A tracker-agnostic development workflow with prior-art research, minimal implementation, and real end-to-end verification.",
+  "author": {
+    "name": "Berwin Singh",
+    "url": "https://github.com/berwinsingh"
+  }
+}

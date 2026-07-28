@@ -1,4 +1,4 @@
-name: Smoke test
+name: Validate Oldhand
 
 on:
   push:
