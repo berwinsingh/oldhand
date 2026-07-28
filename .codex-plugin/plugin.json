@@ -27,9 +27,9 @@
     ],
     "websiteURL": "https://berwinsingh.github.io/oldhand/",
     "defaultPrompt": [
-      "Use Oldhand to implement this request end to end.",
-      "Use Oldhand to investigate and fix this bug.",
-      "Use Oldhand to turn this ticket into a verified change."
+      "Use Oldhand for this ticket. Apply my changed requirements and assumptions, preserve the named non-goals, and prove each acceptance criterion end to end.",
+      "Use Oldhand without a ticket. Treat this prompt, supplied files, constraints, partial work, and requested proof as the complete source of truth.",
+      "Use Oldhand in plan-only mode. Reconcile the ticket with my newer context, state material assumptions, and do not edit until I approve the plan."
     ],
     "brandColor": "#B9FF66"
   }

@@ -32,6 +32,17 @@ const installs = {
   ],
 };
 
+const usageExamples = {
+  claude: `/oldhand:oldhand Implement DOCQ-123.
+Changes since ticket: support guests; keep the admin flow unchanged.
+Assumptions: the current session cookie remains authoritative.
+Prove: finish guest signup, reload, and confirm persistence.`,
+  codex: `$oldhand No ticket. Fix intermittent CSV imports.
+Current behavior: files over 20 MB sometimes create duplicate rows.
+Constraints: no schema migration; preserve queued jobs.
+Acceptance: one persisted batch even after a retry.`,
+};
+
 const failures = [
   {
     title: "Starts before understanding",
@@ -89,13 +100,13 @@ const steps = [
 ];
 
 const sources = [
-  ["Jira issue", "PROJ-1234"],
+  ["Jira issue", "PROJ-1234 + newer changes"],
   ["Asana task", "Launch / improve signup"],
   ["monday.com item", "Fix onboarding flow"],
-  ["Linear issue", "ENG-4567"],
+  ["Linear issue", "ENG-4567 + assumptions"],
   ["GitHub issue", "owner/repo#812"],
   ["Document", "PRD, ADR, runbook"],
-  ["Plain prompt", "Make the search faster"],
+  ["Plain prompt", "Context + constraints + proof"],
 ];
 
 function CopyButton({ value, label = "Copy command" }) {
@@ -168,6 +179,16 @@ function InstallPanel({ compact = false }) {
         <CheckCircle size={18} weight="fill" />
         Complete install. Add tracker or browser integrations only when you need them.
       </div>
+
+      {!compact && (
+        <div className="usage-example">
+          <div>
+            <strong>Give it the full context</strong>
+            <span>Ticket optional · assumptions welcome · newer changes win</span>
+          </div>
+          <pre><code>{usageExamples[platform]}</code></pre>
+        </div>
+      )}
     </div>
   );
 }
@@ -336,7 +357,7 @@ export function App() {
             })}
           </div>
           <p className="intake-note">
-            No tracker? No problem. A plain prompt is still a valid source of truth.
+            No tracker? No problem. Give Oldhand the prompt, assumptions, changed requirements, constraints, partial work, and proof you expect.
           </p>
         </div>
 
@@ -351,7 +372,7 @@ export function App() {
               <span>CLAUDE CODE</span>
               <strong>Fable orchestrates</strong>
             </div>
-            <p>Routes Haiku, Sonnet, and Opus by complexity, then reviews the integrated result.</p>
+            <p>Routes Haiku, Sonnet, and Opus by complexity. If Fable is unavailable, Opus becomes orchestrator and final verifier.</p>
             <div className="model-status">
               <span><Check size={15} />Understood</span>
               <span><Check size={15} />Reused</span>

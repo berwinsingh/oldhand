@@ -391,6 +391,53 @@ h3 {
   font-weight: 700;
 }
 
+.usage-example {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+  border-top: 1.5px solid var(--ink);
+}
+
+.usage-example > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.usage-example strong,
+.usage-example span {
+  font-family: "Space Mono", monospace;
+  text-transform: uppercase;
+}
+
+.usage-example strong {
+  font-size: 11px;
+}
+
+.usage-example span {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.usage-example pre {
+  min-width: 0;
+  margin: 0;
+  padding: 15px;
+  overflow-x: auto;
+  color: var(--paper);
+  background: var(--ink);
+  white-space: pre-wrap;
+}
+
+.usage-example code {
+  color: #d5ee92;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
 .section {
   padding-block: 92px;
   border-top: 1.5px solid var(--ink);
@@ -1064,7 +1111,8 @@ h3 {
     padding: 10px;
   }
 
-  .command-row {
+  .command-row,
+  .usage-example {
     grid-template-columns: 1fr;
   }
 

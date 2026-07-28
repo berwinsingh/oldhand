@@ -1,6 +1,6 @@
 ---
 name: oldhand
-description: Analyze and deliver non-trivial development requests from Jira, Asana, monday.com, Linear, GitHub Issues, another tracker, documents, or plain user prompts through end-to-end tracing, maintained MIT or Apache-2.0 prior-art research, minimal Ponytail implementation, proportional automated checks, and realistic browser or computer-use QA. Use when asked to implement, build, fix, investigate, plan, pick up a ticket, or verify development work across any project.
+description: Analyze and deliver non-trivial development requests from Jira, Asana, monday.com, Linear, GitHub Issues, another tracker, documents, or context-rich plain prompts that may include assumptions, changed requirements, constraints, partial work, and acceptance criteria. Use for implementation, builds, fixes, investigations, plans, ticket work, or verification that requires end-to-end tracing, maintained MIT or Apache-2.0 prior-art research, minimal Ponytail implementation, proportional automated checks, and realistic browser or computer-use QA across any project.
 ---
 
 # Oldhand
@@ -10,6 +10,46 @@ production. Understand first. Reuse proven work. Change the minimum. Do not call
 it done until the real path works.
 
 For a trivial lookup, explanation, or typo, do not force this workflow.
+
+## Accept the whole request
+
+Do not reduce a rich request to a ticket key or a verb such as “implement.” Treat
+all user-supplied context as first-class input, including:
+
+- assumptions and decisions the user wants used;
+- requirements that changed after a ticket or document was written;
+- desired behavior, current behavior, and known failures;
+- constraints, exclusions, affected environments, and non-goals;
+- partial work, relevant files, screenshots, links, or prior attempts; and
+- acceptance criteria and the proof the user expects.
+
+A ticket is optional and never outranks the user's newer explicit context. If no
+ticket exists, use the prompt and supplied artifacts directly without asking the
+user to create one or treating the work as less valid.
+
+Example requests:
+
+```text
+/oldhand:oldhand Implement DOCQ-123.
+Changes since the ticket: keep the current API and support guest users.
+Assumptions: the existing session cookie remains authoritative.
+Do not change: the admin flow.
+Prove: complete signup as a guest, reload, and confirm persistence.
+```
+
+```text
+$oldhand No ticket. Fix intermittent CSV imports.
+Current behavior: files over 20 MB sometimes create duplicate rows.
+Context: retry logic was added last week in src/imports/worker.ts.
+Constraints: no schema migration and preserve existing queued jobs.
+Acceptance: one import produces one persisted batch even after a retry.
+```
+
+```text
+$oldhand Plan only for ENG-456; do not edit files.
+The ticket is stale: use OAuth instead of API keys and assume mobile is out of scope.
+Call out any assumption that would materially change the plan.
+```
 
 ## Non-negotiable gates
 
@@ -43,8 +83,10 @@ State the active orchestrator in every non-trivial plan.
   review.
 - Fable reviews and integrates every delegated result, then performs the final
   browser or computer-use verification itself.
-- If Fable is unavailable, use Opus as the explicit fallback orchestrator and
-  name that substitution. Use only models available on the host.
+- If Fable is unavailable, promote Opus to orchestrator **and final verifier**.
+  Never silently promote Sonnet or Haiku to the lead role. Name the substitution
+  in the plan and give Opus the same integration and end-to-end verification
+  ownership that Fable would have. Use only models available on the host.
 
 ### ChatGPT Codex
 
@@ -72,8 +114,10 @@ Identify the source of truth:
   status, priority, owner, sprint, and release context.
 - If no matching connector exists, use an accessible browser link or ask for
   the relevant content. Never infer requirements from a ticket key alone.
-- If there is no ticket, use the user's prompt and supplied files as the source
-  of truth. Never require the user to create a ticket.
+- If there is no ticket, use the user's complete prompt and supplied artifacts
+  as the source of truth. Carry forward its assumptions, changed requirements,
+  constraints, partial work, exclusions, and requested proof. Never require the
+  user to create a ticket or treat a prompt-only request as lower-confidence work.
 
 Write a compact contract:
 

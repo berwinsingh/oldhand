@@ -44,6 +44,43 @@ That is the complete installation. The plugin contains the skill and its
 platform manifests. It does not require a tracker integration or MCP server to
 install.
 
+## Give it the real context
+
+A ticket key is optional, and `implement` is not the only useful instruction.
+Include assumptions, decisions, changed requirements, constraints, partial
+work, exclusions, relevant files or links, and the proof you expect.
+
+### Claude Code
+
+```text
+/oldhand:oldhand Implement DOCQ-123.
+Changes since the ticket: support guest users without changing the admin flow.
+Assumptions: the current session cookie remains authoritative.
+Prove: finish guest signup, reload, and confirm persistence.
+```
+
+### ChatGPT Codex
+
+```text
+$oldhand No ticket. Fix intermittent CSV imports.
+Current behavior: files over 20 MB sometimes create duplicate rows.
+Context: retry logic changed last week in src/imports/worker.ts.
+Constraints: no schema migration; preserve queued jobs.
+Acceptance: one import produces one persisted batch even after a retry.
+```
+
+### Plan only with corrected requirements
+
+```text
+$oldhand Plan only for ENG-456; do not edit files.
+The ticket is stale: use OAuth instead of API keys and assume mobile is out of scope.
+State every material assumption and map the plan to observable acceptance checks.
+```
+
+Oldhand treats the user's latest explicit context as authoritative, reconciles
+it with older ticket text, and asks only when an unresolved choice would be
+unsafe or materially change the result.
+
 ## What it changes
 
 Without Oldhand, coding agents often:
