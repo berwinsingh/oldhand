@@ -1,0 +1,8 @@
+.serena/
+site/node_modules/
+site/dist/
+site/qa-*.png
+site/implementation-desktop.png
+site/implementation-desktop-tall.png
+site/implementation-desktop-v2.png
+site/implementation-mobile.png
