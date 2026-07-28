@@ -174,7 +174,7 @@ Then verify discovery without authorizing edits:
 
 ```sh
 codex exec --ephemeral -C "$PWD" \
-  'Use $ticket-to-browser-delivery. Do not edit files. Reply with the skill name and its five delivery phases.'
+  'Use $ticket-to-browser-delivery. Do not edit files. Reply with the skill name, orchestrator, and accepted request sources.'
 
 claude --print --no-session-persistence \
   '/dev-workflow Do not edit files. Reply with the skill name and its five phases.'
