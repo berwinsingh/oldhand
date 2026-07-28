@@ -2,6 +2,8 @@
 
 **Give your coding agent a definition of done.**
 
+[Website](https://berwinsingh.github.io/adaptive-development-workflow-skills/)
+
 Oldhand is one portable development workflow for Claude Code and ChatGPT
 Codex. It accepts a Jira, Asana, monday.com, Linear, or GitHub issue—or just a
 plain prompt—then makes the agent understand the real flow, research permissive
