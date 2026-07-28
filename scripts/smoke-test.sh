@@ -28,6 +28,8 @@ grep -q 'ticket is optional' "$skill"
 grep -Eqi 'browser.*computer-use|computer-use.*browser' "$skill"
 grep -q '"name": "oldhand"' "$repo_root/.claude-plugin/marketplace.json"
 grep -q '"name": "oldhand"' "$repo_root/.codex-plugin/plugin.json"
+grep -q '"version": "1.1.0"' "$repo_root/.claude-plugin/plugin.json"
+grep -q '"version": "1.1.0"' "$repo_root/.codex-plugin/plugin.json"
 grep -q '"name": "oldhand"' "$repo_root/.agents/plugins/marketplace.json"
 
 if grep -R -q '/Users/' \
