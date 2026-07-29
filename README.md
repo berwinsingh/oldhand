@@ -171,6 +171,10 @@ pull requests, tracker changes, deployments, migrations, and destructive
 actions still require the authority supplied by the user's request. A blocked
 end-to-end gate is reported as blocked, never as passed.
 
+## Community
+
+Ask questions and share ideas in [Discussions](https://github.com/berwinsingh/oldhand/discussions). Use [Issues](https://github.com/berwinsingh/oldhand/issues) for reproducible bugs and read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Report vulnerabilities through GitHub's [private reporting form](https://github.com/berwinsingh/oldhand/security/advisories/new).
+
 ## License
 
 MIT
