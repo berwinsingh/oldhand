@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowDown,
   ArrowRight,
@@ -109,6 +109,79 @@ const sources = [
   ["Plain prompt", "Context + constraints + proof"],
 ];
 
+const GA_MEASUREMENT_ID = "G-75YW6HE9FT";
+const ANALYTICS_CONSENT_KEY = "oldhand-analytics-consent";
+
+function readAnalyticsChoice() {
+  try {
+    const choice = window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
+    return choice === "granted" || choice === "denied" ? choice : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveAnalyticsChoice(choice) {
+  try {
+    window.localStorage.setItem(ANALYTICS_CONSENT_KEY, choice);
+  } catch {
+    // The choice still applies for this page when storage is unavailable.
+  }
+}
+
+function loadAnalytics() {
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function gtag() {
+    window.dataLayer.push(arguments);
+  };
+
+  if (document.querySelector("script[data-oldhand-analytics]")) {
+    window.gtag("consent", "update", { analytics_storage: "granted" });
+    return;
+  }
+
+  window.gtag("consent", "default", {
+    analytics_storage: "denied",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+  });
+  window.gtag("consent", "update", { analytics_storage: "granted" });
+  window.gtag("js", new Date());
+  window.gtag("config", GA_MEASUREMENT_ID);
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.dataset.oldhandAnalytics = "true";
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+}
+
+function AnalyticsConsent({ choice, onChoose }) {
+  if (choice !== null) return null;
+
+  return (
+    <aside className="analytics-consent" aria-labelledby="analytics-consent-title">
+      <strong id="analytics-consent-title">Help improve Oldhand?</strong>
+      <p>
+        Allow Google Analytics so we can see visits and improve the site. We keep
+        advertising storage off, and Analytics loads only if you allow it. {" "}
+        <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer">
+          How Google uses data
+        </a>
+      </p>
+      <div className="analytics-actions">
+        <button type="button" className="analytics-choice analytics-choice--allow" onClick={() => onChoose("granted")}>
+          Allow analytics
+        </button>
+        <button type="button" className="analytics-choice" onClick={() => onChoose("denied")}>
+          No thanks
+        </button>
+      </div>
+    </aside>
+  );
+}
+
 function CopyButton({ value, label = "Copy command" }) {
   const [copied, setCopied] = useState(false);
 
@@ -195,7 +268,12 @@ function InstallPanel({ compact = false }) {
 
 export function App() {
   const [selectedSources, setSelectedSources] = useState([0, 6]);
+  const [analyticsChoice, setAnalyticsChoice] = useState(readAnalyticsChoice);
   const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
+
+  useEffect(() => {
+    if (analyticsChoice === "granted") loadAnalytics();
+  }, [analyticsChoice]);
 
   function toggleSource(index) {
     setSelectedSources((current) =>
@@ -207,6 +285,14 @@ export function App() {
 
   function scrollToInstall() {
     document.querySelector("#install")?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function chooseAnalytics(choice) {
+    saveAnalyticsChoice(choice);
+    if (choice === "denied") {
+      window.gtag?.("consent", "update", { analytics_storage: "denied" });
+    }
+    setAnalyticsChoice(choice);
   }
 
   return (
@@ -528,8 +614,13 @@ export function App() {
           <a href="https://github.com/berwinsingh/oldhand/blob/main/LICENSE" target="_blank" rel="noreferrer">
             MIT License
           </a>
+          <button type="button" className="analytics-preferences" onClick={() => setAnalyticsChoice(null)}>
+            Analytics preferences
+          </button>
         </div>
       </footer>
+
+      <AnalyticsConsent choice={analyticsChoice} onChoose={chooseAnalytics} />
     </main>
   );
 }

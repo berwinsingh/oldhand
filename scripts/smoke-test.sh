@@ -41,6 +41,9 @@ grep -q '"version": "1.1.1"' "$repo_root/.codex-plugin/plugin.json"
 grep -q '"composerIcon": "./assets/logo.png"' "$repo_root/.codex-plugin/plugin.json"
 grep -q '"logo": "./assets/logo.png"' "$repo_root/.codex-plugin/plugin.json"
 grep -q '"name": "oldhand"' "$repo_root/.agents/plugins/marketplace.json"
+grep -q 'G-75YW6HE9FT' "$repo_root/site/src/App.jsx"
+grep -q 'analytics_storage: "denied"' "$repo_root/site/src/App.jsx"
+grep -q 'Analytics preferences' "$repo_root/site/src/App.jsx"
 
 if grep -R -q '/Users/' \
   "$repo_root/skills" \
