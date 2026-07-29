@@ -1,0 +1,51 @@
+name: Bug report
+description: Report reproducible Oldhand behavior
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping make Oldhand more reliable. Remove secrets and private project data before submitting.
+  - type: dropdown
+    id: host
+    attributes:
+      label: Host
+      options:
+        - Claude Code
+        - ChatGPT Codex
+        - Website
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Oldhand version
+      placeholder: "1.1.1"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include the smallest prompt, command, or flow that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Add relevant logs or screenshots after removing secrets and private data.
