@@ -1,6 +1,6 @@
 {
   "name": "oldhand",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A tracker-agnostic development workflow with prior-art research, minimal implementation, and real end-to-end verification.",
   "author": {
     "name": "Berwin Singh",
@@ -31,6 +31,8 @@
       "Use Oldhand without a ticket. Treat this prompt, supplied files, constraints, partial work, and requested proof as the complete source of truth.",
       "Use Oldhand in plan-only mode. Reconcile the ticket with my newer context, state material assumptions, and do not edit until I approve the plan."
     ],
-    "brandColor": "#B9FF66"
+    "brandColor": "#B9FF66",
+    "composerIcon": "./assets/logo.png",
+    "logo": "./assets/logo.png"
   }
 }
