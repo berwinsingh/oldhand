@@ -975,6 +975,68 @@ h3 {
   margin-left: 16px;
 }
 
+.analytics-preferences {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  font-family: "Space Mono", monospace;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.analytics-consent {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 100;
+  width: min(420px, calc(100% - 32px));
+  padding: 22px;
+  color: var(--paper);
+  background: var(--ink);
+  border: 2px solid var(--orange);
+  box-shadow: 8px 8px 0 var(--green);
+}
+
+.analytics-consent strong {
+  display: block;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 19px;
+}
+
+.analytics-consent p {
+  margin: 10px 0 18px;
+  font-family: "Space Mono", monospace;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.analytics-consent a {
+  text-decoration: underline;
+}
+
+.analytics-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.analytics-choice {
+  padding: 9px 12px;
+  color: var(--paper);
+  background: transparent;
+  border: 1px solid var(--paper);
+  font-family: "Space Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.analytics-choice--allow {
+  color: var(--ink);
+  background: var(--paper);
+}
+
 @media (max-width: 980px) {
   .site-header {
     grid-template-columns: 1fr auto;
