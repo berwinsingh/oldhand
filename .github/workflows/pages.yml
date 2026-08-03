@@ -31,6 +31,39 @@ jobs:
         working-directory: site
       - run: npm run build
         working-directory: site
+      - name: Generate social preview image
+        working-directory: site
+        shell: bash
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/oldhand-preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+
+          for attempt in {1..30}; do
+            if curl --fail --silent "http://127.0.0.1:4173/?social-preview=1" > /dev/null; then
+              break
+            fi
+
+            if [ "$attempt" -eq 30 ]; then
+              cat /tmp/oldhand-preview.log
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          google-chrome \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --hide-scrollbars \
+            --force-device-scale-factor=1 \
+            --window-size=1200,627 \
+            --virtual-time-budget=3000 \
+            --screenshot="$PWD/dist/client/og-image.png" \
+            "http://127.0.0.1:4173/?social-preview=1"
+
+          test -s dist/client/og-image.png
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
