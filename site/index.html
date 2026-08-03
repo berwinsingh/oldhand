@@ -3,13 +3,63 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>OldHand — Give your coding agent a definition of done</title>
     <meta
       name="description"
-      content="Oldhand gives Claude Code and ChatGPT Codex a disciplined path from any request to a minimal, browser-verified change."
+      content="OldHand gives Claude Code and ChatGPT Codex a disciplined path from a vague request to a minimal, end-to-end verified change."
     />
     <meta name="theme-color" content="#f3eedf" />
+    <link rel="canonical" href="https://berwinsingh.github.io/oldhand/" />
     <link rel="icon" type="image/png" href="./favicon.png" />
-    <title>Oldhand — From vague request to verified change</title>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="OldHand" />
+    <meta property="og:title" content="OldHand — Give your coding agent a definition of done" />
+    <meta
+      property="og:description"
+      content="Understand the request, trace the real flow, make the smallest safe change, and verify it end to end with Claude Code or Codex."
+    />
+    <meta property="og:url" content="https://berwinsingh.github.io/oldhand/" />
+    <meta property="og:image" content="https://berwinsingh.github.io/oldhand/og-image.png" />
+    <meta property="og:image:secure_url" content="https://berwinsingh.github.io/oldhand/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="627" />
+    <meta
+      property="og:image:alt"
+      content="OldHand website hero showing the path from a vague request to a verified change."
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OldHand — Give your coding agent a definition of done" />
+    <meta
+      name="twitter:description"
+      content="A proof-driven development workflow for Claude Code and ChatGPT Codex."
+    />
+    <meta name="twitter:image" content="https://berwinsingh.github.io/oldhand/og-image.png" />
+    <meta
+      name="twitter:image:alt"
+      content="OldHand website hero showing the path from a vague request to a verified change."
+    />
+
+    <script>
+      if (new URLSearchParams(window.location.search).has("social-preview")) {
+        document.documentElement.classList.add("social-preview");
+      }
+    </script>
+    <style>
+      html.social-preview,
+      html.social-preview body {
+        width: 1200px;
+        height: 627px;
+        overflow: hidden;
+      }
+
+      html.social-preview .analytics-consent {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
