@@ -1,7 +1,7 @@
 {
   "name": "oldhand",
-  "version": "1.1.1",
-  "description": "A tracker-agnostic development workflow with prior-art research, minimal implementation, and real end-to-end verification.",
+  "version": "2.0.0",
+  "description": "A pack of 11 Agent Skills that take a ticket, doc or prompt to a verified change: a conductor plus contract, trace, rca, research, plan, build, review, qa, ship and learn. Small scripts compute the verdict, not the model.",
   "author": {
     "name": "Berwin Singh",
     "url": "https://github.com/berwinsingh"
@@ -10,16 +10,20 @@
   "repository": "https://github.com/berwinsingh/oldhand",
   "license": "MIT",
   "keywords": [
+    "agent-skills",
     "development-workflow",
+    "acceptance-criteria",
+    "root-cause-analysis",
+    "code-review",
     "browser-qa",
-    "open-source-research",
+    "sub-agents",
     "ponytail"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Oldhand",
     "shortDescription": "From request to proof",
-    "longDescription": "Understand the real flow, research prior art, implement the smallest safe change, and verify it end to end.",
+    "longDescription": "Eleven skills, one job each: write the contract, trace the real path, find the root cause, check prior art, plan the smallest change, build it, review it with a panel, test it in the real app, and ship only what the ledger verifies. The learn stage writes down what the next session should know.",
     "developerName": "Berwin Singh",
     "category": "Productivity",
     "capabilities": [
@@ -27,11 +31,11 @@
     ],
     "websiteURL": "https://berwinsingh.github.io/oldhand/",
     "defaultPrompt": [
-      "Use Oldhand for this ticket. Apply my changed requirements and assumptions, preserve the named non-goals, and prove each acceptance criterion end to end.",
-      "Use Oldhand without a ticket. Treat this prompt, supplied files, constraints, partial work, and requested proof as the complete source of truth.",
-      "Use Oldhand in plan-only mode. Reconcile the ticket with my newer context, state material assumptions, and do not edit until I approve the plan."
+      "Use Oldhand on this ticket. Write the contract, trace the real path, plan, build, review and QA it end to end, then ship only if the ledger says VERIFIED.",
+      "Use Oldhand to find the root cause of this bug. Run contract, trace and rca first, fix the class of bug, and replay the original failing case.",
+      "Use Oldhand in plan-only mode. Run contract, trace, research and plan, then stop and wait for my approval before any edit."
     ],
-    "brandColor": "#B9FF66",
+    "brandColor": "#b4441c",
     "composerIcon": "./assets/logo.png",
     "logo": "./assets/logo.png"
   }

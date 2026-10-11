@@ -1,0 +1,13 @@
+{
+ "id": "S6",
+ "status": "pass",
+ "observed": "Import printed exactly 'import 1: 5 rows in 3 batches', exit=0, no stderr. list: done batches=3 rows=5 stored=5.",
+ "expected": "stdout is exactly 'import 1: 5 rows in 3 batches', nothing on stderr, exit=0 | list shows 'done' and 'batches=3 rows=5 stored=5'",
+ "evidence": [
+  "<project>/.oldhand/csv-import-dupes/qa/evidence/S6/run.txt"
+ ],
+ "console_errors": [],
+ "network_failures": [],
+ "blocker": "",
+ "notes": "Run by the lead in turn (no sub-agent tool on this host)."
+}

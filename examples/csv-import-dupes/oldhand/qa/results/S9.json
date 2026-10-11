@@ -1,0 +1,13 @@
+{
+ "id": "S9",
+ "status": "pass",
+ "observed": "exit=2; stderr \"error: line 4: bad row {'sku': 'E-502', 'name': 'Broken', 'qty': 'lots'}\". list: '1 ... failed batches=1 rows=2 stored=2'.",
+ "expected": "stderr starts with 'error: line 4: bad row' and exit=2 | list shows import 1 'failed' with 'batches=1 rows=2 stored=2'",
+ "evidence": [
+  "<project>/.oldhand/csv-import-dupes/qa/evidence/S9/run.txt"
+ ],
+ "console_errors": [],
+ "network_failures": [],
+ "blocker": "",
+ "notes": "Run by the lead in turn (no sub-agent tool on this host)."
+}

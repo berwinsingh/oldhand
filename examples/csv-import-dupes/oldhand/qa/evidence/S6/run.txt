@@ -1,0 +1,6 @@
+$ cd <project>
+$ env -u IMPORTER_FAULTS /usr/bin/python3 -m importer import samples/products.csv --batch-size 2 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S6/s6.db; echo exit=$?
+[stdout] import 1: 5 rows in 3 batches
+[stdout] exit=0
+$ /usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S6/s6.db
+[stdout] 1	samples/products.csv	done	batches=3	rows=5	stored=5

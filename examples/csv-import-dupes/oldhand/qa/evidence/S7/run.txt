@@ -1,0 +1,8 @@
+$ cd <project>
+$ /usr/bin/python3 -m importer import samples/products.tsv --dry-run --db <project>/.oldhand/csv-import-dupes/qa/evidence/S7/s7.db; echo exit=$?
+[stdout] dry run: 3 rows in 1 batches, nothing written
+[stdout] exit=0
+$ ls -la <project>/.oldhand/csv-import-dupes/qa/evidence/S7/
+[stdout] total 0
+[stdout] drwxr-xr-x@  2 berwinsingh  wheel   64 Oct 11 00:46 .
+[stdout] drwxr-xr-x@ 11 berwinsingh  wheel  352 Oct 11 00:46 ..

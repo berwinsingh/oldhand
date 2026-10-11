@@ -1,0 +1,30 @@
+$ cd <project>
+$ /usr/bin/python3 -m importer import --help
+[stdout] usage: importer import [-h] [--db DB] [--retries RETRIES]
+[stdout]                        [--batch-size BATCH_SIZE] [--dry-run]
+[stdout]                        file
+[stdout] 
+[stdout] positional arguments:
+[stdout]   file
+[stdout] 
+[stdout] optional arguments:
+[stdout]   -h, --help            show this help message and exit
+[stdout]   --db DB
+[stdout]   --retries RETRIES
+[stdout]   --batch-size BATCH_SIZE
+[stdout]   --dry-run
+$ /usr/bin/python3 -m importer list --help
+[stdout] usage: importer list [-h] [--db DB]
+[stdout] 
+[stdout] optional arguments:
+[stdout]   -h, --help  show this help message and exit
+[stdout]   --db DB
+$ /usr/bin/python3 -m importer import samples/products.tsv --db <project>/.oldhand/csv-import-dupes/qa/evidence/S8/s8.db --retries 0 --batch-size 1; echo exit=$?
+[stdout] import 1: 3 rows in 3 batches
+[stdout] exit=0
+$ /usr/bin/python3 -m importer import samples/products.tsv --db <project>/.oldhand/csv-import-dupes/qa/evidence/S8/s8.db --retries 2 --batch-size 2 --dry-run; echo exit=$?
+[stdout] dry run: 3 rows in 2 batches, nothing written
+[stdout] exit=0
+$ /usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S8/s8.db; echo exit=$?
+[stdout] 1	samples/products.tsv	done	batches=3	rows=3	stored=3
+[stdout] exit=0

@@ -1,0 +1,6 @@
+$ sqlite3 .oldhand/csv-import-dupes/qa/evidence/S4/s4.db "SELECT batch_no, quote(sku), quote(name), qty FROM records ORDER BY id"
+1|'C-300'|'Hinge pin'|3
+1|'C-301'|'Bracket, steel'|8
+2|'C-302'|'Café shelf'|2
+2|'C-303'|'Rivet'|40
+3|'C-304'|'Spring'|6

@@ -1,0 +1,221 @@
+{
+ "scenarios_file": "<project>/.oldhand/csv-import-dupes/qa/scenarios.json",
+ "sha256": "d6737cf37513a6bc9d525d02430df4634aa548013b527dee893568327fa272c7",
+ "bug": true,
+ "quick": false,
+ "scenarios": [
+  {
+   "id": "S1",
+   "criterion": "AC1",
+   "kind": "acceptance",
+   "env": "local",
+   "title": "A batch hit twice by a transient lock is retried and stored once",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet",
+   "entry": "/usr/bin/python3 -m importer import samples/products.csv",
+   "steps": [
+    "cd <project>",
+    "IMPORTER_FAULTS=progress:2 /usr/bin/python3 -m importer import samples/products.csv --batch-size 2 --retries 3 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S1/s1.db; echo exit=$?",
+    "/usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S1/s1.db"
+   ],
+   "expect": [
+    "stderr shows two lines 'transient error (database is locked), retry 1/3' and 'retry 2/3'; the import prints 'import 1: 5 rows in 3 batches' and exit=0",
+    "list prints one line for import 1 with status done and 'batches=3 rows=5 stored=5' (stored is the count of rows actually in the database)"
+   ],
+   "data": "samples/products.csv (5 rows); IMPORTER_FAULTS is the project's own fault hook (importer/faults.py)",
+   "tier": "worker"
+  },
+  {
+   "id": "S2",
+   "criterion": "AC1",
+   "kind": "failing-case",
+   "env": "local",
+   "title": "The reported case: one transient lock after the rows are written, then a retry",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet",
+   "entry": "/usr/bin/python3 -m importer import samples/products.csv",
+   "steps": [
+    "cd <project>",
+    "IMPORTER_FAULTS=progress:1 /usr/bin/python3 -m importer import samples/products.csv --batch-size 2 --retries 3 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S2/s2.db; echo exit=$?",
+    "/usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S2/s2.db"
+   ],
+   "expect": [
+    "stderr shows one 'retry 1/3' line; the import prints 'import 1: 5 rows in 3 batches' and exit=0",
+    "list shows 'done' and 'batches=3 rows=5 stored=5'; before the fix stored was 7"
+   ],
+   "data": "samples/products.csv (5 rows)",
+   "tier": "worker"
+  },
+  {
+   "id": "S3",
+   "criterion": "AC1",
+   "kind": "negative",
+   "env": "local",
+   "title": "The lock outlasts the retries: the import fails visibly and leaves no doubled or half batch",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet",
+   "entry": "/usr/bin/python3 -m importer import samples/products.csv",
+   "steps": [
+    "cd <project>",
+    "IMPORTER_FAULTS=progress:5 /usr/bin/python3 -m importer import samples/products.csv --batch-size 2 --retries 1 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S3/s3.db; echo exit=$?",
+    "/usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S3/s3.db"
+   ],
+   "expect": [
+    "stderr ends with 'error: storage failed after retries: database is locked' and exit=1",
+    "list shows import 1 'failed' with 'batches=0 rows=0 stored=0' (judgement from the contract: no half-written or doubled batch is left)"
+   ],
+   "data": "samples/products.csv (5 rows)",
+   "tier": "worker"
+  },
+  {
+   "id": "S4",
+   "criterion": "AC2",
+   "kind": "acceptance",
+   "env": "local",
+   "title": "A messy CSV (BOM, CRLF, padded cells, quoted comma, accented name) under two transient locks stores each row once",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet",
+   "entry": "/usr/bin/python3 -m importer import .oldhand/csv-import-dupes/rca/data/messy.csv",
+   "steps": [
+    "cd <project>",
+    "IMPORTER_FAULTS=progress:2 /usr/bin/python3 -m importer import .oldhand/csv-import-dupes/rca/data/messy.csv --batch-size 2 --retries 3 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S4/s4.db; echo exit=$?",
+    "/usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S4/s4.db"
+   ],
+   "expect": [
+    "the import prints 'import 1: 5 rows in 3 batches' and exit=0",
+    "list shows 'done' and 'batches=3 rows=5 stored=5'"
+   ],
+   "data": ".oldhand/csv-import-dupes/rca/data/messy.csv (5 data rows, UTF-8 BOM, CRLF line ends, padded cells)",
+   "tier": "worker"
+  },
+  {
+   "id": "S5",
+   "criterion": "AC2",
+   "kind": "messy",
+   "env": "local",
+   "title": "A messy TSV, one row per batch, with locks both before and after the rows are written",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet",
+   "entry": "/usr/bin/python3 -m importer import .oldhand/csv-import-dupes/rca/data/messy.tsv",
+   "steps": [
+    "cd <project>",
+    "IMPORTER_FAULTS=insert:1,progress:2 /usr/bin/python3 -m importer import .oldhand/csv-import-dupes/rca/data/messy.tsv --batch-size 1 --retries 3 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S5/s5.db; echo exit=$?",
+    "/usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S5/s5.db"
+   ],
+   "expect": [
+    "the import prints 'import 1: 3 rows in 3 batches' and exit=0, with retry lines on stderr",
+    "list shows 'done' and 'batches=3 rows=3 stored=3'"
+   ],
+   "data": ".oldhand/csv-import-dupes/rca/data/messy.tsv (3 data rows, BOM, CRLF, padded cells)",
+   "tier": "worker"
+  },
+  {
+   "id": "S6",
+   "criterion": "R1",
+   "kind": "regression",
+   "env": "local",
+   "title": "A plain CSV import with no faults works as before",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet; IMPORTER_FAULTS is not set",
+   "entry": "/usr/bin/python3 -m importer import samples/products.csv",
+   "steps": [
+    "cd <project>",
+    "env -u IMPORTER_FAULTS /usr/bin/python3 -m importer import samples/products.csv --batch-size 2 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S6/s6.db; echo exit=$?",
+    "/usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S6/s6.db"
+   ],
+   "expect": [
+    "stdout is exactly 'import 1: 5 rows in 3 batches', nothing on stderr, exit=0",
+    "list shows 'done' and 'batches=3 rows=5 stored=5'"
+   ],
+   "data": "samples/products.csv (5 rows)",
+   "tier": "worker"
+  },
+  {
+   "id": "S7",
+   "criterion": "R2",
+   "kind": "regression",
+   "env": "local",
+   "title": "A dry run counts the rows and writes nothing",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet",
+   "entry": "/usr/bin/python3 -m importer import samples/products.tsv --dry-run",
+   "steps": [
+    "cd <project>",
+    "/usr/bin/python3 -m importer import samples/products.tsv --dry-run --db <project>/.oldhand/csv-import-dupes/qa/evidence/S7/s7.db; echo exit=$?",
+    "ls -la <project>/.oldhand/csv-import-dupes/qa/evidence/S7/"
+   ],
+   "expect": [
+    "stdout is 'dry run: 3 rows in 1 batches, nothing written' and exit=0",
+    "the listing shows no file s7.db"
+   ],
+   "data": "samples/products.tsv (3 rows)",
+   "tier": "scout"
+  },
+  {
+   "id": "S8",
+   "criterion": "R3",
+   "kind": "regression",
+   "env": "local",
+   "title": "Every CLI flag is still accepted",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet",
+   "entry": "/usr/bin/python3 -m importer --help",
+   "steps": [
+    "cd <project>",
+    "/usr/bin/python3 -m importer import --help",
+    "/usr/bin/python3 -m importer list --help",
+    "/usr/bin/python3 -m importer import samples/products.tsv --db <project>/.oldhand/csv-import-dupes/qa/evidence/S8/s8.db --retries 0 --batch-size 1; echo exit=$?",
+    "/usr/bin/python3 -m importer import samples/products.tsv --db <project>/.oldhand/csv-import-dupes/qa/evidence/S8/s8.db --retries 2 --batch-size 2 --dry-run; echo exit=$?",
+    "/usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S8/s8.db; echo exit=$?"
+   ],
+   "expect": [
+    "import --help lists exactly: file, --db DB, --retries RETRIES, --batch-size BATCH_SIZE, --dry-run; list --help lists --db DB",
+    "the three commands print 'import 1: 3 rows in 3 batches' (exit=0), 'dry run: 3 rows in 2 batches, nothing written' (exit=0) and one list line with stored=3 (exit=0)"
+   ],
+   "data": "samples/products.tsv (3 rows)",
+   "tier": "scout"
+  },
+  {
+   "id": "S9",
+   "criterion": "R4",
+   "kind": "regression",
+   "env": "local",
+   "title": "A bad row stops the import with a clear message and keeps the earlier batch once",
+   "surface": "cli",
+   "actor": "a user running the importer CLI from the repo root",
+   "state": "the database file named in the steps does not exist yet",
+   "entry": "/usr/bin/python3 -m importer import .oldhand/csv-import-dupes/rca/data/badrow.csv",
+   "steps": [
+    "cd <project>",
+    "/usr/bin/python3 -m importer import .oldhand/csv-import-dupes/rca/data/badrow.csv --batch-size 2 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S9/s9.db; echo exit=$?",
+    "/usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S9/s9.db"
+   ],
+   "expect": [
+    "stderr starts with 'error: line 4: bad row' and exit=2",
+    "list shows import 1 'failed' with 'batches=1 rows=2 stored=2'"
+   ],
+   "data": ".oldhand/csv-import-dupes/rca/data/badrow.csv (row on line 4 has qty 'lots')",
+   "tier": "worker"
+  }
+ ],
+ "recorded": {
+  "S1": "e0c1afbb849a6ca3c1e6b682ba68c0151e68f9058d36d40b0ad488ca5edd0452",
+  "S2": "85df89130f73f45c43dc1eb37beb83d84ca4e288b3ce2da72d9aa6a323ded788",
+  "S3": "56b6c2fed586ebc98c116e340a338b649d8b8f535d57919f3bd109634f829488",
+  "S4": "18bd6907144c94d653ab8483864fd323d25dfed05b508b70536d353f687edb3a",
+  "S5": "768ca96bce94f787c5a43a7c829bae06c945c3cef24bbd075e125a102d097ad9",
+  "S6": "8a14609515021b40d0a559200ae022a7948966911ca4d8d4fc1d1dbd6f9a53ab",
+  "S7": "92aab0ee047bd308cb6d665458049062609bb283f3247a30a842b7885e416dc9",
+  "S8": "229d604817a943c90a5206bdfb4a3ef16685ee1f4c043d6fdf8ed08a36f42f57",
+  "S9": "2d9afff334cc766f66da221b276bdbcf8dd019fce1c23c12f4a4b8ea4c667e84"
+ },
+ "created": "2026-10-10T19:16:04+00:00"
+}

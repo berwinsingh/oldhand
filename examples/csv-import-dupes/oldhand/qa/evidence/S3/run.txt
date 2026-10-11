@@ -1,0 +1,7 @@
+$ cd <project>
+$ IMPORTER_FAULTS=progress:5 /usr/bin/python3 -m importer import samples/products.csv --batch-size 2 --retries 1 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S3/s3.db; echo exit=$?
+[stdout] exit=1
+[stderr] transient error (database is locked), retry 1/1
+[stderr] error: storage failed after retries: database is locked
+$ /usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S3/s3.db
+[stdout] 1	samples/products.csv	failed	batches=0	rows=0	stored=0

@@ -4,45 +4,52 @@
 
 [Website](https://berwinsingh.github.io/oldhand/)
 
-Oldhand is one portable development workflow for Claude Code and ChatGPT
-Codex. It accepts a Jira, Asana, monday.com, Linear, or GitHub issue—or just a
-plain prompt—then makes the agent understand the real flow, research permissive
-open-source prior art, implement the smallest safe change with Ponytail, and
-verify the result end to end.
+Oldhand is a pack of 11 Agent Skills for any coding agent that reads
+`SKILL.md` files: Claude Code, Codex, GitHub Copilot, Cursor, Gemini CLI and
+Antigravity, OpenCode and more. A conductor (`oldhand`) routes a Jira, Asana,
+monday.com, Linear or GitHub issue, a document or a plain prompt through ten
+stages: contract, trace, rca, research, plan, build, review, qa, ship and learn.
+Each stage does one job and writes to a shared task folder, and small scripts,
+not the model, decide when the work is verified.
 
 ## Install
 
-### Claude Code
+Install the whole pack. Every stage calls `skills/oldhand/scripts/ledger.py`,
+so a single stage installed on its own stops and asks for the rest. Pick one
+install method per host: a plugin plus a skill-folder install shows twice.
 
-Run these as two separate prompts inside Claude Code:
-
-```text
-/plugin marketplace add berwinsingh/oldhand
-/plugin install oldhand@oldhand
-```
-
-Then start a new session and use:
-
-```text
-/oldhand:oldhand Implement DOCQ-123
-```
-
-### ChatGPT Codex / Codex CLI
+| host | install |
+| --- | --- |
+| any agent | `npx skills add berwinsingh/oldhand --skill '*' -g` (all eleven skills; add `-a cursor`, `-a codex` and so on to skip the picker) |
+| Claude Code plugin | `/plugin marketplace add berwinsingh/oldhand`, then `/plugin install oldhand@oldhand` (two separate prompts) |
+| Codex plugin | `codex plugin marketplace add berwinsingh/oldhand`, then `codex plugin add oldhand@oldhand` |
+| git clone | see below |
 
 ```sh
-codex plugin marketplace add berwinsingh/oldhand
-codex plugin add oldhand@oldhand
+git clone https://github.com/berwinsingh/oldhand ~/.oldhand
+mkdir -p ~/.agents/skills ~/.claude/skills
+for s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/.claude/skills/; done
 ```
 
-Restart Codex or start a new task, then use:
+`~/.agents/skills` is read by Codex, Cursor, Copilot, Gemini CLI, OpenCode,
+Amp, Roo, Goose, Droid and Junie; `~/.claude/skills` by Claude Code. An
+installer that takes one skill at a time must be given all eleven.
 
-```text
-$oldhand Implement DOCQ-123
-```
+Start a new session after installing. Then invoke it:
 
-That is the complete installation. The plugin contains the skill and its
-platform manifests. It does not require a tracker integration or MCP server to
-install.
+| host | invoke |
+| --- | --- |
+| Claude Code plugin | `/oldhand:oldhand Implement DOCQ-123` (a stage: `/oldhand:oldhand-qa`) |
+| Claude Code skill folder | `/oldhand Implement DOCQ-123` |
+| Codex | `$oldhand Implement DOCQ-123` |
+| Cursor, Copilot, Kiro, Cline, Factory Droid, Junie, Antigravity app and `agy` | `/oldhand Implement DOCQ-123` |
+| Devin Desktop (was Windsurf) | `@oldhand Implement DOCQ-123` |
+| Gemini CLI, OpenCode, Roo Code, Amp, Goose, Antigravity IDE | automatic from the description, or "use the oldhand skill to implement DOCQ-123" |
+
+A stage runs alone the same way: replace `oldhand` with `oldhand-<stage>`.
+Per-host details and fallbacks are in
+[skills/oldhand/references/hosts.md](skills/oldhand/references/hosts.md). No
+tracker integration or MCP server is needed to install.
 
 ## Give it the real context
 
@@ -102,22 +109,16 @@ Oldhand makes the agent:
 
 ## Model orchestration
 
-### Claude Code
+The skills name roles, not models. The lead (the strongest model on the host)
+writes the contract, chairs the review, runs the final end-to-end check and
+makes the release decision. Workers (the standard tier) take implementation
+slices, lens reviews and QA flows; scouts (the fast tier) take sweeps and
+read-only checks. A sub-agent's report is evidence, never verification.
 
-Fable is the orchestrator and final verifier. It may delegate bounded work to
-Haiku, Sonnet, or Opus according to complexity and risk. Fable reviews the
-integrated result and performs the final end-to-end verification through the
-user's browser or computer-use tools. If Fable is unavailable, the workflow
-uses Opus as the explicit fallback orchestrator.
-
-### ChatGPT Codex
-
-GPT-5.6 Sol is the orchestrator and final verifier. It may delegate bounded work
-to GPT-5.6 Terra or GPT-5.6 Luna according to complexity and risk. Sol reviews
-the integrated result and performs the final end-to-end verification through
-the browser or computer-use tools. If an exact named model is unavailable or
-has been superseded, the workflow uses the latest available equivalent and
-names the substitution in the plan.
+The current model for each role on each host, and the substitution rule when
+one is missing, are in
+[skills/oldhand/references/orchestration.md](skills/oldhand/references/orchestration.md):
+the one file to update when model lineups change.
 
 ## Integrations
 
@@ -141,6 +142,16 @@ If a connected tracker is unavailable, paste the ticket text or provide an
 accessible link. If there is no ticket, write the request normally. Oldhand
 derives the smallest observable acceptance criteria and proceeds.
 
+## Examples
+
+[examples/csv-import-dupes](examples/csv-import-dupes) is a real run on a
+seeded bug (a transient write failure plus a retry stored a CSV batch twice),
+kept exactly as the pack wrote it: contract, trace, two root causes, the
+review memo that caught a test gap, nine QA transcripts and the computed
+verdict. [examples/site-rebuild](examples/site-rebuild) is the task folder of
+the run that shipped the website. [examples/README.md](examples/README.md)
+says what to read first and what each run could not verify.
+
 ## Verify the package
 
 Repository validation is dependency-free:
@@ -150,14 +161,27 @@ Repository validation is dependency-free:
 claude plugin validate .
 ```
 
-To test the exact local installation flow before publishing:
+To test this checkout before publishing with Claude Code:
 
 ```sh
 claude plugin marketplace add "$PWD"
 claude plugin install oldhand@oldhand
+```
 
-codex plugin marketplace add "$PWD"
-codex plugin add oldhand@oldhand
+The Codex marketplace in `.agents/plugins/marketplace.json` installs GitHub
+`main`, not this checkout. For Codex, point a throwaway marketplace at the
+checkout with a local source:
+
+```sh
+m=$(mktemp -d) && mkdir -p "$m/.agents/plugins" && ln -s "$PWD" "$m/oldhand"
+cat > "$m/.agents/plugins/marketplace.json" <<'EOF'
+{"name": "oldhand-local", "plugins": [{"name": "oldhand",
+  "source": {"source": "local", "path": "./oldhand"},
+  "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+  "category": "Productivity"}]}
+EOF
+codex plugin marketplace add "$m"
+codex plugin add oldhand@oldhand-local
 ```
 
 Command discovery proves installation only. A development task is complete

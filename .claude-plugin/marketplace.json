@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oldhand",
-  "description": "From any request to a minimally implemented, end-to-end verified change.",
+  "description": "From any request to a minimal change, proven end to end.",
   "owner": {
     "name": "Berwin Singh",
     "url": "https://github.com/berwinsingh"
@@ -9,9 +9,10 @@
   "plugins": [
     {
       "name": "oldhand",
-      "description": "Understand the real flow, reuse proven work, change the minimum, and verify the result.",
+      "description": "A pack of 11 skills: a conductor plus contract, trace, rca, research, plan, build, review, qa, ship and learn. Each stage does one job and writes to a shared task folder; a ledger script decides when the work is verified.",
       "source": "./",
-      "category": "productivity"
+      "category": "productivity",
+      "homepage": "https://berwinsingh.github.io/oldhand/"
     }
   ]
 }

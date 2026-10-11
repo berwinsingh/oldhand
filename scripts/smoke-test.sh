@@ -2,61 +2,27 @@
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-skill="$repo_root/skills/oldhand/SKILL.md"
+cd "$repo_root"
 
-test -f "$repo_root/.claude-plugin/marketplace.json"
-test -f "$repo_root/.claude-plugin/plugin.json"
-test -f "$repo_root/.codex-plugin/plugin.json"
-test -f "$repo_root/assets/logo.png"
-test -f "$repo_root/.agents/plugins/marketplace.json"
-test -f "$skill"
-test -f "$repo_root/skills/oldhand/agents/openai.yaml"
-test -f "$repo_root/.github/PULL_REQUEST_TEMPLATE.md"
-test -f "$repo_root/.github/ISSUE_TEMPLATE/bug_report.yml"
-test -f "$repo_root/.github/ISSUE_TEMPLATE/config.yml"
-test -f "$repo_root/CONTRIBUTING.md"
-test -f "$repo_root/CODE_OF_CONDUCT.md"
-test -f "$repo_root/SECURITY.md"
-test -f "$repo_root/SUPPORT.md"
-test -f "$repo_root/LICENSE"
-
-grep -q '^name: oldhand$' "$skill"
-grep -q 'Fable is the orchestrator and final verifier' "$skill"
-grep -q 'Haiku' "$skill"
-grep -q 'Sonnet' "$skill"
-grep -q 'promote Opus to orchestrator \*\*and final verifier\*\*' "$skill"
-grep -q 'GPT-5.6 Sol is the orchestrator and final verifier' "$skill"
-grep -q 'GPT-5.6 Terra' "$skill"
-grep -q 'GPT-5.6 Luna' "$skill"
-grep -q 'Jira, Asana, monday.com, Linear, GitHub Issues' "$skill"
-grep -q 'context-rich plain prompts' "$skill"
-grep -q 'If there is no ticket' "$skill"
-grep -q 'assumptions, changed requirements' "$skill"
-grep -q 'ticket is optional' "$skill"
-grep -Eqi 'browser.*computer-use|computer-use.*browser' "$skill"
-grep -q '"name": "oldhand"' "$repo_root/.claude-plugin/marketplace.json"
-grep -q '"name": "oldhand"' "$repo_root/.codex-plugin/plugin.json"
-grep -q '"version": "1.1.1"' "$repo_root/.claude-plugin/plugin.json"
-grep -q '"version": "1.1.1"' "$repo_root/.codex-plugin/plugin.json"
-grep -q '"composerIcon": "./assets/logo.png"' "$repo_root/.codex-plugin/plugin.json"
-grep -q '"logo": "./assets/logo.png"' "$repo_root/.codex-plugin/plugin.json"
-grep -q '"name": "oldhand"' "$repo_root/.agents/plugins/marketplace.json"
-grep -q 'G-75YW6HE9FT' "$repo_root/site/src/App.jsx"
-grep -q 'analytics_storage: "denied"' "$repo_root/site/src/App.jsx"
-grep -q 'Analytics preferences' "$repo_root/site/src/App.jsx"
-
-if grep -R -q '/Users/' \
-  "$repo_root/skills" \
-  "$repo_root/.claude-plugin" \
-  "$repo_root/.codex-plugin" \
-  "$repo_root/.agents"; then
-  echo "error: plugin contains a machine-specific path" >&2
-  exit 1
+# The python3 on PATH can be a shim that refuses to run; fall back to the system one.
+py=python3
+if ! python3 -c 'import sys' >/dev/null 2>&1; then
+  py=/usr/bin/python3
 fi
 
-python3 -m json.tool "$repo_root/.claude-plugin/marketplace.json" >/dev/null
-python3 -m json.tool "$repo_root/.claude-plugin/plugin.json" >/dev/null
-python3 -m json.tool "$repo_root/.codex-plugin/plugin.json" >/dev/null
-python3 -m json.tool "$repo_root/.agents/plugins/marketplace.json" >/dev/null
+for f in \
+  LICENSE CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md SUPPORT.md assets/logo.png \
+  skills/oldhand/agents/openai.yaml \
+  .github/PULL_REQUEST_TEMPLATE.md .github/ISSUE_TEMPLATE/bug_report.yml .github/ISSUE_TEMPLATE/config.yml; do
+  test -f "$f" || { echo "error: $f is missing" >&2; exit 1; }
+done
 
-echo "PASS: Oldhand contains both plugin marketplaces and the portable workflow skill."
+for f in \
+  .claude-plugin/plugin.json .claude-plugin/marketplace.json .codex-plugin/plugin.json \
+  .agents/plugins/marketplace.json plugin.json gemini-extension.json; do
+  "$py" -m json.tool "$f" >/dev/null || { echo "error: $f is not valid JSON" >&2; exit 1; }
+done
+
+"$py" -m unittest discover -s tests
+
+echo "PASS: Oldhand manifests parse and the skill pack tests pass."

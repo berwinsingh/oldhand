@@ -1,4 +1,4 @@
 interface:
   display_name: "Oldhand"
-  short_description: "From request to proof"
-  default_prompt: "Use $oldhand to deliver this ticket or prompt end to end while honoring my assumptions, changed requirements, constraints, and requested proof."
+  short_description: "Ticket or prompt to verified change, stage by stage"
+  default_prompt: "Use $oldhand to take this ticket or prompt through contract, trace, plan, build, review and QA with my assumptions, constraints and requested proof. Spawn sub-agents for the review lenses and QA scenarios, and give me the ledger verdict at the end."

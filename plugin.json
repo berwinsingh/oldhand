@@ -1,0 +1,5 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "oldhand",
+  "description": "A pack of 11 Agent Skills that take a ticket, doc or prompt to a verified change: a conductor plus contract, trace, rca, research, plan, build, review, qa, ship and learn. Small scripts compute the verdict, not the model."
+}

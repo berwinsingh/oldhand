@@ -1,0 +1,402 @@
+{
+ "title": "Fix duplicate batches on CSV import retry",
+ "mode": "implement",
+ "created": "2026-10-10T19:04:56+00:00",
+ "criteria": [
+  {
+   "id": "AC1",
+   "text": "With a transient \"database is locked\" failure injected right after a batch's rows are written (`IMPORTER_FAULTS=progress:1`) and `--retries 3`, `python -m importer import samples/products.csv --batch-size 2` exits 0 and the database holds each batch exactly once: 5 records, batch_no counts 2/2/1, and `importer list` shows batches=3 rows=5 stored=5",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T19:05:17+00:00"
+  },
+  {
+   "id": "AC2",
+   "text": "A sloppy real-world file (UTF-8 BOM, CRLF line endings, padded cells; and the `.tsv` variant) imported under the same transient failure also stores each row exactly once",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T19:05:17+00:00"
+  },
+  {
+   "id": "R1",
+   "text": "An import with no failures behaves as before: exit 0, prints `import <id>: 5 rows in 3 batches`, 5 records stored, `list` counters match",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T19:05:17+00:00"
+  },
+  {
+   "id": "R2",
+   "text": "`import FILE --dry-run` still prints `dry run: <n> rows in <m> batches, nothing written` and creates no database file",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T19:05:17+00:00"
+  },
+  {
+   "id": "R3",
+   "text": "The CLI keeps its flags: `import FILE [--db] [--retries N] [--batch-size N] [--dry-run]` and `list [--db]` are accepted exactly as before",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T19:05:17+00:00"
+  },
+  {
+   "id": "R4",
+   "text": "A file with a bad row still stops with exit 2 and `error: line <n>: bad row ...`, marks the import `failed`, and keeps the batches before the bad row stored once (added by trace: same error path in cmd_import)",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T19:06:03+00:00"
+  }
+ ],
+ "checks": [
+  {
+   "id": "C1",
+   "criterion": "AC1",
+   "kind": "mutation",
+   "status": "pass",
+   "evidence": "KILLED: importer/batches.py: '        conn.rollback()' -> '        pass' (exit 1)",
+   "by": "mutate.py",
+   "cmd": "/usr/bin/python3 -m unittest tests.test_importer.WriteBatchTest.test_retry_after_failure_after_insert_stores_batch_once -v",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:05+00:00"
+  },
+  {
+   "id": "C2",
+   "criterion": "AC1",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-unit.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 -m unittest discover -s tests -v",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:30+00:00"
+  },
+  {
+   "id": "C3",
+   "criterion": "R1",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-unit.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 -m unittest discover -s tests -v",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:30+00:00"
+  },
+  {
+   "id": "C4",
+   "criterion": "R2",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-unit.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 -m unittest discover -s tests -v",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:30+00:00"
+  },
+  {
+   "id": "C5",
+   "criterion": "AC1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:30+00:00"
+  },
+  {
+   "id": "C6",
+   "criterion": "AC2",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:31+00:00"
+  },
+  {
+   "id": "C7",
+   "criterion": "R1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:31+00:00"
+  },
+  {
+   "id": "C8",
+   "criterion": "R2",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:31+00:00"
+  },
+  {
+   "id": "C9",
+   "criterion": "R4",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:b511070471dde0c4:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:11:31+00:00"
+  },
+  {
+   "id": "C10",
+   "criterion": "AC1",
+   "kind": "mutation",
+   "status": "pass",
+   "evidence": "KILLED: importer/batches.py: '        conn.rollback()' -> '        pass' (exit 1)",
+   "by": "mutate.py",
+   "cmd": "/usr/bin/python3 -m unittest tests.test_importer.WriteBatchTest.test_retry_after_commit_lock_stores_batch_once -v",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:09+00:00"
+  },
+  {
+   "id": "C11",
+   "criterion": "AC1",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-unit.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 -m unittest discover -s tests -v",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:35+00:00"
+  },
+  {
+   "id": "C12",
+   "criterion": "R1",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-unit.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 -m unittest discover -s tests -v",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:35+00:00"
+  },
+  {
+   "id": "C13",
+   "criterion": "R2",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-unit.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 -m unittest discover -s tests -v",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:36+00:00"
+  },
+  {
+   "id": "C14",
+   "criterion": "AC1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:36+00:00"
+  },
+  {
+   "id": "C15",
+   "criterion": "AC2",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:36+00:00"
+  },
+  {
+   "id": "C16",
+   "criterion": "R1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:36+00:00"
+  },
+  {
+   "id": "C17",
+   "criterion": "R2",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:36+00:00"
+  },
+  {
+   "id": "C18",
+   "criterion": "R4",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": ".oldhand/csv-import-dupes/build/after-replay.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "/usr/bin/python3 .oldhand/csv-import-dupes/rca/replay.py",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:14:37+00:00"
+  },
+  {
+   "id": "C19",
+   "criterion": "AC1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S1.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S1",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:03+00:00"
+  },
+  {
+   "id": "C20",
+   "criterion": "AC1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S2.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S2",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:03+00:00"
+  },
+  {
+   "id": "C21",
+   "criterion": "AC1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S3.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S3",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:03+00:00"
+  },
+  {
+   "id": "C22",
+   "criterion": "AC2",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S4.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S4",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:03+00:00"
+  },
+  {
+   "id": "C23",
+   "criterion": "AC2",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S5.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S5",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:04+00:00"
+  },
+  {
+   "id": "C24",
+   "criterion": "R1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S6.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S6",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:04+00:00"
+  },
+  {
+   "id": "C25",
+   "criterion": "R2",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S7.json",
+   "by": "qa:scout",
+   "cmd": "qa.py scenario S7",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:04+00:00"
+  },
+  {
+   "id": "C26",
+   "criterion": "R3",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S8.json",
+   "by": "qa:scout",
+   "cmd": "qa.py scenario S8",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:04+00:00"
+  },
+  {
+   "id": "C27",
+   "criterion": "R4",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S9.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S9",
+   "lead": false,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:04+00:00"
+  },
+  {
+   "id": "C28",
+   "criterion": "AC1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/evidence/S2/lead-1.txt",
+   "by": "lead:opus-5.5",
+   "cmd": "qa.py scenario S2",
+   "lead": true,
+   "fingerprint": "4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee:4a2697fb15d9c583:e3b0c44298fc1c14",
+   "time": "2026-10-10T19:17:41+00:00"
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1",
+   "sev": "medium",
+   "lens": "correctness",
+   "where": "tests/test_importer.py:85",
+   "text": "regression check does not guard root cause 2 (failed COMMIT leaves the transaction open); write_batch refactored to 'with conn:' -> test still OK, real reader lock during commit -> 4 records, counters (2, 4) for a 2-row batch on Python 3.9.6",
+   "status": "fixed",
+   "note": "added WriteBatchTest.test_retry_after_commit_lock_stores_batch_once (real SHARED lock during COMMIT); mutate conn.rollback()->pass KILLED (C10); catches the 'with conn:' refactor (review/variantA-after-fix.txt: 4 != 2); unit rerun C11-C13, replay rerun C14-C18",
+   "accepted_by": "",
+   "time": "2026-10-10T19:13:46+00:00",
+   "resolved": "2026-10-10T19:14:53+00:00"
+  }
+ ],
+ "restamps": []
+}
