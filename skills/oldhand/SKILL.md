@@ -15,7 +15,7 @@ description: >-
   fixes, lookups or explaining code.
 license: MIT
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
   homepage: "https://berwinsingh.github.io/oldhand/"
 ---
 
