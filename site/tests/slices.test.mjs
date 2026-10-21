@@ -50,5 +50,5 @@ test("a moved heading is reported, not silently empty", () => {
     orchestration: "## Models\n",
     plugin: { version: "2.0.0" },
   });
-  assert.deepEqual(missing(data).sort(), ["hardStops", "hardStopsIntro", "models", "modelsDate", "notVerified", "rootCause", "substitutionRule"]);
+  assert.deepEqual(missing(data).sort(), ["hardStops", "hardStopsIntro", "models", "modelsDate", "notVerified", "rootCause"]);
 });

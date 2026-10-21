@@ -255,7 +255,7 @@ the newest one in the same role and records which model actually ran.
   the prompt assumed. Its review caught a test that did not guard the second
   cause, and its verdict waited for the lead's own end-to-end run.
 - [examples/site-rebuild](examples/site-rebuild): a run with real sub-agents
-  that shipped an earlier version of the website. Review found eight problems,
+  that shipped the current website. Review found eight problems,
   and QA caught two phone-layout bugs, one of which the lead's own check had
   missed.
 
@@ -347,8 +347,6 @@ GitHub's [private reporting form](https://github.com/berwinsingh/oldhand/securit
   follows Jake Schincariol's [founder-skill](https://github.com/Jakeschincariol/founder-skill) (MIT).
 - [Ponytail](https://github.com/DietrichGebert/ponytail) for the
   smallest-change ladder.
-- The [website](https://berwinsingh.github.io/oldhand/) was designed with
-  Anthropic's [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) skill (Apache-2.0).
 
 ## License
 
