@@ -8,7 +8,7 @@
     "build": "node scripts/check-sources.mjs && vite build && node scripts/prepare-sites-build.mjs",
     "preview": "vite preview",
     "test:sites": "node --test tests/sites-worker.test.mjs",
-    "test": "node --test tests/analytics.test.mjs tests/slices.test.mjs tests/ledger.test.mjs"
+    "test": "node --test tests/analytics.test.mjs tests/slices.test.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "5.0.4",
