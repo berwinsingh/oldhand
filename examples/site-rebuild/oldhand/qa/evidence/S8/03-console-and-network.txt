@@ -1,0 +1,30 @@
+CONSOLE:
+console.debug: [vite] connecting...
+console.debug: [vite] connected.
+console.info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+
+NETWORK (status url):
+200 GET http://localhost:4180/?social-preview=1
+200 GET http://localhost:4180/@vite/client
+200 GET http://localhost:4180/src/main.jsx?t=1791699116014
+200 GET http://localhost:4180/node_modules/vite/dist/client/env.mjs
+200 GET http://localhost:4180/@react-refresh
+200 GET https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap
+200 GET http://localhost:4180/node_modules/.vite/deps/react.js?v=4b066acf
+200 GET http://localhost:4180/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=4b066acf
+200 GET http://localhost:4180/src/App.jsx?t=1791699116014
+200 GET http://localhost:4180/src/styles.css?t=1791699113694
+200 GET http://localhost:4180/node_modules/.vite/deps/chunk-H5I4P4DR.js?v=4b066acf
+200 GET http://localhost:4180/@fs/Users/berwinsingh/Documents/oldhand/skills/oldhand/SKILL.md?import&raw
+200 GET http://localhost:4180/@fs/Users/berwinsingh/Documents/oldhand/examples/csv-import-dupes/oldhand/report.md?import&raw
+200 GET http://localhost:4180/@fs/Users/berwinsingh/Documents/oldhand/.claude-plugin/plugin.json?import
+200 GET http://localhost:4180/@fs/Users/berwinsingh/Documents/oldhand/skills/oldhand/references/orchestration.md?import&raw
+200 GET http://localhost:4180/src/slices.js
+200 GET http://localhost:4180/src/analytics.js?t=1791699116014
+200 GET http://localhost:4180/node_modules/.vite/deps/react-dom_client.js?v=4b066acf
+200 GET http://localhost:4180/node_modules/.vite/deps/chunk-5SC5K45T.js?v=4b066acf
+200 GET http://localhost:4180/favicon.png
+200 GET https://fonts.gstatic.com/s/ibmplexmono/v20/-F63fjptAgt5VM-kVkqdyU8n1i8q131nj-o.woff2
+200 GET https://fonts.gstatic.com/s/ibmplexsans/v23/zYXzKVElMYYaJe8bpLHnCwDKr932-G7dytD-Dmu1syxeKYbSB4Zh.woff2
+
+VIEWPORT AFTER RESET: {"innerWidth":756,"innerHeight":469}

@@ -1,0 +1,15 @@
+# skills/oldhand/references/orchestration.md: the models heading, the table header and the substitution rule (lines 16, 21, 54-56)
+line 16: ## Current models per host (as of October 2026)
+line 21: | host | lead | worker | scout | vision |
+line 54: Substitution rule: use the host's tier alias over pinned ids; if a named model
+line 55: is missing use the newest in the same role; never block on a model name; never
+line 56: put the lead below worker tier; record the model that actually ran.
+
+# table rows (lines 23-29 of the file):
+line 23: | Claude Code | Fable 5.1 (`fable`, or the `best` alias); if unavailable, Opus 5.5 (`opus`) | Sonnet 5.5 (`sonnet`); Opus 5.5 for hard slices | Haiku 5.5 (`haiku`) | the lead model |
+line 24: | OpenAI Codex | GPT-6 Astra (`gpt-6-astra`) | GPT-6.1 Sol (`gpt-6.1-sol`) | GPT-6 Luna (`gpt-6-luna`) | GPT-6 Astra |
+line 25: | GitHub Copilot | Fable 5.1 or GPT-6 Astra | Sonnet 5.5 or GPT-6.1 Sol | Haiku 5.5 or GPT-6 Luna | the lead model |
+line 26: | Cursor | the strongest frontier model enabled (Fable 5.1, Opus 5.5 or the top GPT listed) | Composer 2.5 | Composer 2.5 (standard; the Fast variant is the expensive one) | the lead model |
+line 27: | Gemini CLI / Antigravity | Gemini 3.1 Pro (`pro`) | Gemini 3.8 Flash (`flash`) | Gemini 3.8 Flash or Gemini 3.5 Flash-Lite | `pro` |
+line 28: | OpenCode | the strongest model configured (`provider/model#variant`) | the provider's standard model | the provider's fast model | the lead model |
+line 29: | Devin Desktop (was Windsurf) | Fable 5.1, Opus 5.5 or GPT-6 Astra | Sonnet 5.5 or GPT-6 Sol | GPT-6 Luna | the lead model |

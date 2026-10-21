@@ -1,0 +1,25 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && npm test
+
+
+> site@0.0.0 test
+> node --test tests/analytics.test.mjs tests/slices.test.mjs
+
+✔ no choice loads nothing (0.405959ms)
+✔ denied without a loaded gtag loads nothing (0.072166ms)
+✔ granted sets consent default denied before granting, then injects one script (0.472083ms)
+✔ denied after a load updates consent to denied (0.0915ms)
+✔ stored choice round-trips and junk or a throwing store reads as null (0.468834ms)
+✔ section matches a heading by prefix and stops at the next heading of the same level (0.486375ms)
+✔ list keeps the intro and joins continuation lines (0.436042ms)
+✔ table reads the first matching pipe table, also when it ends the file (0.185667ms)
+✔ the committed sources slice completely (1.070792ms)
+✔ a moved heading is reported, not silently empty (0.098166ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 42.127666
+EXIT_CODE=0

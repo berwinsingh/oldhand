@@ -1,0 +1,20 @@
+S4 steps 1 and 2 - fresh load of http://localhost:4180/ in Browser pane tab-1 (re-run, 11 Oct 2026)
+Starting state: tab-1 held a leftover 'denied' value from an earlier run, so localStorage.clear() + sessionStorage.clear() was run on the origin, then the entry URL was loaded again.
+Page load: performance navigation type = "navigate", page uptime 6.3 s at check time.
+
+localStorage.getItem('oldhand-analytics-consent') === null   -> true   (localStorage keys: [])
+!!document.querySelector('script[data-oldhand-analytics]')    -> false
+document.scripts with src containing googletagmanager         -> [] (none)
+performance resource entries containing googletagmanager      -> [] (none)
+performance resource entries containing google-analytics      -> [] (none)
+read_network_requests urlPattern "googletagmanager"           -> "No requests matching googletagmanager."
+window.dataLayer / window.gtag / window.google_tag_manager    -> undefined / undefined / undefined
+position:fixed elements in body                               -> [] (none)
+position:sticky elements                                      -> [HEADER.top]  (the sticky header only)
+text 'Allow analytics' in page text                           -> false
+text 'No thanks' in page text                                 -> false
+role=dialog / alertdialog / <dialog> count                    -> 0
+
+Footer innerText as rendered (before any click):
+  "oldhand v2.0.0 · MIT · Berwin Singh / GitHub / Issues / Discussions / Security
+   Google Analytics is off; nothing is sent. Turn on Google Analytics · How Google uses data"

@@ -1,0 +1,35 @@
+S3 - why scrollWidth === innerWidth at 375 does not mean "no horizontal scroll"
+==============================================================================
+
+1. Mobile emulation (Browser pane, preset mobile 375x812, build A, page http://localhost:4180/)
+   innerWidth 910, innerHeight 1972, document.documentElement.scrollWidth 910, clientWidth 375,
+   visualViewport.width 375 (scale 1), outerWidth 375, viewport meta "width=device-width, initial-scale=1.0".
+   The literal comparison scrollWidth === innerWidth is true (910 === 910), but only because the mobile
+   emulation widens the layout viewport (innerWidth) to the overflowing content. Against the real 375px
+   screen the page is 910px wide: 535px of horizontal overflow.
+   Build B (after the 11:37 source edits): innerWidth 473, scrollWidth 473, clientWidth 375, visualViewport 375
+   = 98px of overflow.
+
+   Widest elements and what clips them (build A):
+     pre[overflow-x:auto, right=910] < div.command[overflow:visible, right=342] < div.panel < div.install < section.hero < main < body
+     code right=896 (inside that pre)
+     button.is-active right=477 < div.tabs[overflow-x:auto]   (scrolls inside its own box, does not widen the page)
+     nav a right=427 < nav[overflow-x:auto]                   (same)
+     thead/tr right=415 < table[overflow-x:auto]              (same)
+   Only the pre inside div.command is not clipped by an ancestor, so it is what widens the page.
+   The mobile screenshots show it: the git clone line runs out of its bordered box and off the right edge of the screen.
+
+2. Plain 375px-wide viewport with no mobile emulation (hidden same-origin iframe 375x812 inside a desktop tab, build B, after document.fonts.ready):
+   iframe innerWidth 375, documentElement.clientWidth 375, scrollWidth 473 (98px overflow).
+   Unclipped offender: pre L=34 R=474 inside div.command (parent right edge 342).
+   iframe.contentWindow.scrollTo(400, 0) moved scrollX from 0 to 98.5, so the page really scrolls sideways.
+   Computed style: div.command { display:flex; flex-direction:column; align-items:flex-start; width:309px; overflow-x:visible }
+                   pre { flex:1 1 0%; width:439.6px; min-width:auto; overflow-x:auto; white-space:pre }
+   (the iframe was removed from the DOM afterwards; nothing was left behind.)
+
+3. Source (read-only look, not edited): site/src/styles.css
+   .command { display:flex; align-items:flex-start; ... }            (around line 221)
+   .command pre { overflow-x:auto; flex:1; ... }                     (around line 231)
+   @media (max-width ...) { .command { flex-direction:column; gap:0 } }   (around line 436)
+   align-items:flex-start stays when the box becomes a column, so the pre takes its max-content width instead of the box width
+   and overflow-x:auto on it never engages.

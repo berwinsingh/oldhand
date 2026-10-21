@@ -1,0 +1,29 @@
+# Step 4: the models table in skills/oldhand/references/orchestration.md (the file App.jsx imports; table read at build time)
+# command: sed -n '16,30p' skills/oldhand/references/orchestration.md
+     1	## Current models per host (as of October 2026)
+     2	
+     3	Lineups change every few weeks. At the start of a task, check what the host
+     4	actually offers (its model picker or `/model`) and apply the substitution rule.
+     5	
+     6	| host | lead | worker | scout | vision |
+     7	| --- | --- | --- | --- | --- |
+     8	| Claude Code | Fable 5.1 (`fable`, or the `best` alias); if unavailable, Opus 5.5 (`opus`) | Sonnet 5.5 (`sonnet`); Opus 5.5 for hard slices | Haiku 5.5 (`haiku`) | the lead model |
+     9	| OpenAI Codex | GPT-6 Astra (`gpt-6-astra`) | GPT-6.1 Sol (`gpt-6.1-sol`) | GPT-6 Luna (`gpt-6-luna`) | GPT-6 Astra |
+    10	| GitHub Copilot | Fable 5.1 or GPT-6 Astra | Sonnet 5.5 or GPT-6.1 Sol | Haiku 5.5 or GPT-6 Luna | the lead model |
+    11	| Cursor | the strongest frontier model enabled (Fable 5.1, Opus 5.5 or the top GPT listed) | Composer 2.5 | Composer 2.5 (standard; the Fast variant is the expensive one) | the lead model |
+    12	| Gemini CLI / Antigravity | Gemini 3.1 Pro (`pro`) | Gemini 3.8 Flash (`flash`) | Gemini 3.8 Flash or Gemini 3.5 Flash-Lite | `pro` |
+    13	| OpenCode | the strongest model configured (`provider/model#variant`) | the provider's standard model | the provider's fast model | the lead model |
+    14	| Devin Desktop (was Windsurf) | Fable 5.1, Opus 5.5 or GPT-6 Astra | Sonnet 5.5 or GPT-6 Sol | GPT-6 Luna | the lead model |
+    15	
+
+# host rows (pipe lines after the separator), count and column names:
+header: ['host', 'lead', 'worker', 'scout', 'vision']
+host rows: 7
+  - Claude Code
+  - OpenAI Codex
+  - GitHub Copilot
+  - Cursor
+  - Gemini CLI / Antigravity
+  - OpenCode
+  - Devin Desktop (was Windsurf)
+page keeps columns host/lead/worker/scout: True

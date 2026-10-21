@@ -1,0 +1,65 @@
+S2 / expectation 2: every tab shows a command block, a "Tested 2026-10-11 ..." line naming a tool version, and at least one "Then, in ..." line.
+Page: http://localhost:4180/ at 1440x900. Text read from the DOM of the open [role=tabpanel] after clicking each tab.
+
+=== TAB 1: Any agent (panel-any) ===
+Command block 1:
+  npx skills add berwinsingh/oldhand --skill '*' -g
+Note:
+  Installs all eleven skills under ~/.agents/skills and links them for the agents it finds. Add -a cursor (or codex, github-copilot, gemini-cli, opencode, claude-code) to skip the picker.
+Then lines:
+  dt: Then, in Claude Code, Cursor, Copilot, Kiro, Antigravity
+  dd: /oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+  dt: Then, in Codex
+  dd: $oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+  dt: Then, in Gemini CLI, OpenCode, Amp, Goose
+  dd: Use the oldhand skill: fix DOCQ-123 and prove it end to end.
+Tested line:
+  Tested 2026-10-11 on macOS with skills 1.7.2 for claude-code, codex, cursor, github-copilot, gemini-cli and opencode.
+Checks: >=1 command block yes (1); Tested 2026-10-11 yes; tool version named yes (skills 1.7.2); Then-line starting /oldhand yes, $oldhand yes, "Use the oldhand skill" yes.
+
+=== TAB 2: Claude Code plugin (panel-claude) ===
+Command block 1:
+  /plugin marketplace add berwinsingh/oldhand
+Command block 2:
+  /plugin install oldhand@oldhand
+Note:
+  Two separate prompts inside Claude Code, then a new session.
+Then lines:
+  dt: Then, in Claude Code
+  dd: /oldhand:oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Tested line:
+  Tested 2026-10-11 with Claude Code 2.1.274.
+Checks: >=1 command block yes (2); Tested 2026-10-11 yes; tool version named yes (Claude Code 2.1.274); Then-line starting /oldhand:oldhand yes.
+
+=== TAB 3: Codex plugin (panel-codex) ===
+Command block 1 (two lines, newline between them):
+  codex plugin marketplace add berwinsingh/oldhand
+  codex plugin add oldhand@oldhand
+Note:
+  Then restart Codex or start a new task.
+Then lines:
+  dt: Then, in Codex
+  dd: $oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Tested line:
+  Tested 2026-10-11 with Codex CLI 0.146.0.
+Checks: >=1 command block yes (1, multi-line); Tested 2026-10-11 yes; tool version named yes (Codex CLI 0.146.0); Then-line starting $oldhand yes.
+
+=== TAB 4: Git clone (panel-git) ===
+Command block 1 (three lines):
+  git clone https://github.com/berwinsingh/oldhand ~/.oldhand
+  mkdir -p ~/.agents/skills ~/.claude/skills
+  for s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/.claude/skills/; done
+  (the third line is wider than the block; the block shows it cut off at the right edge in the screenshot, full text is in the DOM and in the copy label)
+Note:
+  ~/.agents/skills is read by Codex, Cursor, Copilot, Gemini CLI, OpenCode, Amp, Roo, Goose, Droid and Junie; ~/.claude/skills by Claude Code. Update with git -C ~/.oldhand pull.
+Then lines:
+  dt: Then, in Claude Code, Cursor, Copilot
+  dd: /oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+  dt: Then, in Codex
+  dd: $oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Tested line:
+  Tested 2026-10-11 on macOS with git 2.x and zsh.
+Checks: >=1 command block yes (1, three lines); Tested 2026-10-11 yes; Then-lines starting /oldhand and $oldhand yes.
+  OBSERVATION: the version named here is "git 2.x", a version family and not an exact version. The other three tabs name exact versions (1.7.2, 2.1.274, 0.146.0). The local git is 2.55.0 (git --version on this machine). Counted as naming a tool version, flagged in the result notes.
+
+Screenshots: 01-any-agent-tab-initial.jpg, 03-claude-code-plugin-after-copy-click.jpg, 04-codex-plugin-tab.jpg, 05-git-clone-after-copy-click.jpg

@@ -1,0 +1,33 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && find dist -print | sort && ls -la dist/client dist/server dist/.openai
+
+dist
+dist/.openai
+dist/.openai/hosting.json
+dist/client
+dist/client/assets
+dist/client/assets/index-Bm6OPz8X.js
+dist/client/assets/index-COS68Bkw.css
+dist/client/favicon.png
+dist/client/index.html
+dist/server
+dist/server/index.js
+
+--- ls -la dist/client (recursive) ---
+total 32
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 11:42 .
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 01:10 ..
+drwxr-xr-x@ 4 berwinsingh  staff   128 Oct 11 11:42 assets
+-rw-r--r--@ 1 berwinsingh  staff  8464 Oct 11 11:42 favicon.png
+-rw-r--r--@ 1 berwinsingh  staff  3309 Oct 11 11:42 index.html
+
+dist/client/assets:
+total 496
+drwxr-xr-x@ 4 berwinsingh  staff     128 Oct 11 11:42 .
+drwxr-xr-x@ 5 berwinsingh  staff     160 Oct 11 11:42 ..
+-rw-r--r--@ 1 berwinsingh  staff  245428 Oct 11 11:42 index-Bm6OPz8X.js
+-rw-r--r--@ 1 berwinsingh  staff    4988 Oct 11 11:42 index-COS68Bkw.css
+
+--- dist/server/index.js ---
+-rw-r--r--@ 1 berwinsingh  staff  483 Oct 11 11:42 dist/server/index.js
+--- dist/.openai/hosting.json ---
+-rw-r--r--@ 1 berwinsingh  staff  31 Oct 11 11:42 dist/.openai/hosting.json

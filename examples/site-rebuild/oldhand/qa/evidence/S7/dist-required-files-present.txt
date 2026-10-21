@@ -1,0 +1,29 @@
+$ test -f dist/client/index.html && test -f dist/server/index.js && test -f dist/.openai/hosting.json
+PRESENT 3309 bytes  dist/client/index.html
+PRESENT 483 bytes  dist/server/index.js
+PRESENT 31 bytes  dist/.openai/hosting.json
+
+--- contents of dist/.openai/hosting.json ---
+{
+  "d1": null,
+  "r2": null
+}
+
+
+--- head of dist/server/index.js ---
+export default {
+  async fetch(request, env) {
+    const response = await env.ASSETS.fetch(request);
+    const acceptsHtml = request.headers.get("accept")?.includes("text/html");
+
+    if (response.status !== 404 || !acceptsHtml || !["GET", "HEAD"].includes(request.method)) {
+      return response;
+    }
+
+    const indexUrl = new URL(request.url);
+    indexUrl.pathname = "/index.html";
+    indexUrl.search = "";
+    return env.ASSETS.fetch(new Request(indexUrl, request));
+  },
+};
+

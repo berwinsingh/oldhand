@@ -1,0 +1,13 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && grep -nE "^\s*test\(" tests/analytics.test.mjs tests/slices.test.mjs
+tests/analytics.test.mjs:26:test("no choice loads nothing", () => {
+tests/analytics.test.mjs:33:test("denied without a loaded gtag loads nothing", () => {
+tests/analytics.test.mjs:39:test("granted sets consent default denied before granting, then injects one script", () => {
+tests/analytics.test.mjs:53:test("denied after a load updates consent to denied", () => {
+tests/analytics.test.mjs:61:test("stored choice round-trips and junk or a throwing store reads as null", () => {
+tests/slices.test.mjs:9:test("section matches a heading by prefix and stops at the next heading of the same level", () => {
+tests/slices.test.mjs:17:test("list keeps the intro and joins continuation lines", () => {
+tests/slices.test.mjs:23:test("table reads the first matching pipe table, also when it ends the file", () => {
+tests/slices.test.mjs:32:test("the committed sources slice completely", () => {
+tests/slices.test.mjs:46:test("a moved heading is reported, not silently empty", () => {
+analytics.test.mjs test() count: 5
+slices.test.mjs test() count: 5

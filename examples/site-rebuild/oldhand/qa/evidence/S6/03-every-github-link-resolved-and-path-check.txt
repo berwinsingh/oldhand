@@ -1,0 +1,88 @@
+== STEP 1: literal github.com/berwinsingh/oldhand strings in site/src/App.jsx ==
+line 9: https://github.com/berwinsingh/oldhand
+line 50: https://github.com/berwinsingh/oldhand
+
+== STEP 3: stages array, in source order ==
+ 1. oldhand
+ 2. oldhand-contract
+ 3. oldhand-trace
+ 4. oldhand-rca
+ 5. oldhand-research
+ 6. oldhand-plan
+ 7. oldhand-build
+ 8. oldhand-review
+ 9. oldhand-qa
+10. oldhand-ship
+11. oldhand-learn
+count = 11
+
+== STEP 1: every github.com/berwinsingh/oldhand link the page renders (resolved from App.jsx) ==
+line 10: https://github.com/berwinsingh/oldhand/blob/main/    [from ${REPO}/blob/main/]
+line 193: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/references/hosts.md    [from ${BLOB}skills/oldhand/references/hosts.md]
+line 234: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/scripts/ledger.py    [from ${BLOB}skills/oldhand/scripts/ledger.py]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-contract/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-trace/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-rca/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-research/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-plan/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-build/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-review/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-qa/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-ship/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 252: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-learn/SKILL.md    [from ${BLOB}skills/${name}/SKILL.md]
+line 261: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-qa/scripts/qa.py    [from ${BLOB}skills/oldhand-qa/scripts/qa.py]
+line 263: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-build/scripts/mutate.py    [from ${BLOB}skills/oldhand-build/scripts/mutate.py]
+line 282: https://github.com/berwinsingh/oldhand/blob/main/examples/README.md    [from ${BLOB}examples/README.md]
+line 284: https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes    [from ${REPO}/tree/main/examples/csv-import-dupes]
+line 315: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/references/orchestration.md    [from ${BLOB}skills/oldhand/references/orchestration.md]
+line 355: https://github.com/berwinsingh/oldhand/issues    [from ${REPO}/issues]
+line 356: https://github.com/berwinsingh/oldhand/discussions    [from ${REPO}/discussions]
+line 357: https://github.com/berwinsingh/oldhand/blob/main/SECURITY.md    [from ${BLOB}SECURITY.md]
+unique resolved URLs = 22
+
+== STEP 2: blob/tree paths checked in the working tree (read-only git checks alongside) ==
+[blob] line 193: skills/oldhand/references/hosts.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 234: skills/oldhand/scripts/ledger.py
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand/SKILL.md
+      working tree: found (file) | on main: yes | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-contract/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-trace/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-rca/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-research/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-plan/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-build/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-review/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-qa/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-ship/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 252: skills/oldhand-learn/SKILL.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 261: skills/oldhand-qa/scripts/qa.py
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 263: skills/oldhand-build/scripts/mutate.py
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 282: examples/README.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[tree] line 284: examples/csv-import-dupes
+      working tree: found (dir) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 315: skills/oldhand/references/orchestration.md
+      working tree: found (file) | on main: no | in index of enhance/oldhand-2: yes
+[blob] line 357: SECURITY.md
+      working tree: found (file) | on main: yes | in index of enhance/oldhand-2: yes
+
+blob/tree paths checked = 19; found in working tree = 19; MISSING = 0
+
+== Non-path repository links (no blob/tree; not path-checked) ==
+line 355: https://github.com/berwinsingh/oldhand/issues
+line 356: https://github.com/berwinsingh/oldhand/discussions

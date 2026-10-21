@@ -1,0 +1,18 @@
+{
+  "id": "S7",
+  "status": "pass",
+  "observed": "1. Confirmed site/node_modules is installed (40 entries). 2. Ran npm run build in the site folder: the check-sources step printed ok, vite transformed 36 modules, the build printed 'Prepared Sites build: dist/server/index.js and dist/.openai/hosting.json', and the exit code was 0. 3. Ran npm run test:sites: node --test ran 4 tests, 4 pass, 0 fail, exit code 0. 4. Listed dist: dist/client/index.html (3309 bytes), dist/server/index.js (483 bytes) and dist/.openai/hosting.json (31 bytes) all exist. 5. dist/client holds 4 files totalling 262129 bytes (about 0.26 MB, under 1 MB); the only .png in it is dist/client/favicon.png.",
+  "expected": "npm run build exits 0 and prints 'Prepared Sites build'. npm run test:sites reports 4 passing tests and 0 failing. dist/client/index.html, dist/server/index.js and dist/.openai/hosting.json exist. dist/client is under 1 MB and contains no .png other than favicon.png.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/npm-run-build-full-output.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/npm-run-test-sites-full-output.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/dist-output-listing-and-existence-checks.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/dist-client-server-openai-ls-laR.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/dist-client-total-size-measurement.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/dist-client-png-check.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "This is a CLI surface, so there is no browser console or network traffic to log. Neither run wrote anything to stderr (both were captured with 2>&1 and no error lines appeared). Build and test:sites were run as two separate commands rather than chained with &&; both exited 0, so the result matches the chained entry point. The build overwrote dist/ as the scenario requires. favicon.png is not named in the vite log because vite copies the public/ folder silently; it is public/favicon.png (8464 bytes). Context: five files already in the evidence/S7 folder dated 01:37 (not created by this run, left untouched) show an earlier build whose script lacked the check-sources step: 34 modules, JS 230089 bytes, dist/client 246879 bytes apparent. This run has 36 modules, JS 245428 bytes and dist/client 262129 bytes, so the change added about 15 KB of JS and stays well under 1 MB. A results/round-1 folder also exists that I did not create and did not touch. I corrected the header line of one of my own evidence files so it matches its contents."
+}

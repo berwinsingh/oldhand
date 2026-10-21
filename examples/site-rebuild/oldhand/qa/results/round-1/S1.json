@@ -1,0 +1,20 @@
+{
+  "id": "S1",
+  "status": "pass",
+  "observed": "Opened http://localhost:4180/ in a fresh tab at 1440x900 (localStorage and sessionStorage empty). Step 2: the section 'What it will not do' has a numbered list of 10 items. I extracted them from the DOM and compared them to the '## Hard stops' items of /Users/berwinsingh/Documents/oldhand/skills/oldhand/SKILL.md with a script (continuation lines joined, backticks removed because the page renders .git/info/exclude as code): all 10 equal, same order. Step 3: the section 'The skill' has a large text block that starts with '---' / 'name: oldhand' (first 12 lines recorded) and ends with the file's last line ('contract -> trace -> rca -> research -> plan -> build -> review -> qa -> ship -> learn'). 'View on GitHub' links to https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md. Step 4: the SHA-256 of the block text equals the SHA-256 of SKILL.md (fcaf1122...ff55), so the block is byte-identical to the whole file. The Copy button sits next to the link; after a real click its label read 'Copied' (accessibility tree and DOM), and it returned to 'Copy' after about 1.6 s.",
+  "expected": "The numbered list under 'What it will not do' equals the '## Hard stops' items of SKILL.md in order; the block under 'The skill' starts with the frontmatter and ends with the file's last line and equals the whole file; 'View on GitHub' links to https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md; the Copy control exists and reads 'Copied' after a click.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/01-what-it-will-not-do-section.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/02-page-what-it-will-not-do-items.json",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/03-list-vs-file-comparison.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/04-the-skill-section-top.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/05-the-skill-block-end.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/06-the-skill-block-first-lines-and-copy-before-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/07-skill-block-and-link-checks.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/08-console-and-network.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "1) The 'Copied' state lasts 1.6 s and every screenshot arrived after it had reverted, so there is no screenshot of 'Copied'; the evidence is the accessibility tree ('Copied') and DOM/MutationObserver text. 2) The clipboard contents could not be read back (readText: permission denied), so the label is verified but what the button puts on the clipboard is not. 3) One early click in a second tab read 'Copy' straight afterwards (the label waits on the async clipboard write); the next click in the same tab showed 'Copied' at once. 4) My first tab (tab-2) was later found at http://127.0.0.1:4193/, which I did not do; another process sharing the Browser pane probably navigated it. All list, block and link checks were taken on localhost:4180 before that. I finished the Copy check in a new tab on localhost:4180. 5) The app is a Vite dev server; SKILL.md is imported with ?raw, so 'imported when this page was built' is read live from the file here. 6) Console had only Vite debug and React DevTools info lines. Every request returned 200."
+}

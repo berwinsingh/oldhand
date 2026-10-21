@@ -1,0 +1,16 @@
+# Built bundle: dist/client/assets/index-Bm6OPz8X.js. Count of each fixed string, then the context of the date and the substitution sentence
+as of October 2026                       count=1
+this table is read from it               count=1
+If a named model is missing              count=1
+never puts the lead below worker tier    count=1
+Current models per host                  count=2
+Substitution rule                        count=1
+Devin Desktop (was Windsurf)             count=1
+
+# context of 'as of October 2026' (from the orchestration.md text carried in the bundle):
+## Current models per host (as of October 2026)
+# the sentence after the table, as rendered by App.jsx:
+If a named model is missing, the agent uses the newest one the host offers in the same role, never puts the lead below worker tier, and records the model that actually ran.
+# the sentence before the table, with its date variable (the rendered text is the date interpolated into it):
+this table is read from it
+maps the roles to current models

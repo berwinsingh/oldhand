@@ -1,0 +1,119 @@
+{
+ "innerWidth": 375,
+ "innerHeight": 812,
+ "documentElement_clientWidth": 375,
+ "documentElement_scrollWidth": 375,
+ "body_scrollWidth": 375,
+ "scrollWidth_minus_innerWidth": 0,
+ "scrollWidth_minus_clientWidth": 0,
+ "html_fontSize_inline": "(none)",
+ "body_zoom_inline": "(none)",
+ "html_computed_fontSize": "16px",
+ "html_overflowX": "visible",
+ "body_overflowX": "visible",
+ "visualViewport": {
+  "width": 375,
+  "height": 812,
+  "scale": 1,
+  "offsetLeft": 0,
+  "pageLeft": 0
+ },
+ "scrollX_after_scrollTo_2000": 0,
+ "element_boxes_past_visible_width_by_class": {
+  "inside-own-scroll-container": 40
+ },
+ "element_boxes_UNCONTAINED": [],
+ "elements_left_of_viewport_not_in_scroller": [],
+ "horizontally_clipped_not_scrollable": [],
+ "text_past_visible_width_by_class": {
+  "inside-own-scroll-container": 11
+ },
+ "text_UNCONTAINED": [],
+ "h1": {
+  "boxLeft": 16,
+  "boxRight": 359,
+  "computedFontSize": "32px",
+  "overflowWrap": "normal"
+ },
+ "vw_unit_px": 375,
+ "scroll_containers": [
+  {
+   "el": "nav",
+   "left": 16,
+   "right": 359,
+   "fitsViewport": true,
+   "scrollWidth": 411,
+   "clientWidth": 343,
+   "overflows": true,
+   "maxScrollLeft": 68,
+   "contentEndRightWhenScrolledToEnd": 358.64,
+   "containerRight": 359,
+   "endReachable": true
+  },
+  {
+   "el": "div.tabs",
+   "left": 17,
+   "right": 358,
+   "fitsViewport": true,
+   "scrollWidth": 468,
+   "clientWidth": 341,
+   "overflows": true,
+   "maxScrollLeft": 127,
+   "contentEndRightWhenScrolledToEnd": 349.88,
+   "containerRight": 358,
+   "endReachable": true
+  },
+  {
+   "el": "pre",
+   "left": 34,
+   "right": 341,
+   "fitsViewport": true,
+   "scrollWidth": 440,
+   "clientWidth": 307,
+   "overflows": true,
+   "maxScrollLeft": 133,
+   "contentEndRightWhenScrolledToEnd": 326.61,
+   "containerRight": 341,
+   "endReachable": true
+  },
+  {
+   "el": "div.scroll",
+   "left": 16,
+   "right": 359,
+   "fitsViewport": true,
+   "scrollWidth": 399,
+   "clientWidth": 343,
+   "overflows": true,
+   "maxScrollLeft": 56,
+   "contentEndRightWhenScrolledToEnd": 358.8,
+   "containerRight": 359,
+   "endReachable": true
+  },
+  {
+   "el": "pre.skill",
+   "left": 16,
+   "right": 359,
+   "fitsViewport": true,
+   "scrollWidth": 341,
+   "clientWidth": 341,
+   "overflows": false,
+   "maxScrollLeft": 0,
+   "contentEndRightWhenScrolledToEnd": 343.83,
+   "containerRight": 359,
+   "endReachable": true
+  },
+  {
+   "el": "div.scroll",
+   "left": 16,
+   "right": 359,
+   "fitsViewport": true,
+   "scrollWidth": 371,
+   "clientWidth": 343,
+   "overflows": true,
+   "maxScrollLeft": 28,
+   "contentEndRightWhenScrolledToEnd": 359.3,
+   "containerRight": 359,
+   "endReachable": true
+  }
+ ]
+}

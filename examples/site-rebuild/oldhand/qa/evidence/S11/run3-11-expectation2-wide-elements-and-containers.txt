@@ -1,0 +1,23 @@
+S11 run3 - Expectation 2: anything wider than the viewport is a command/table container that scrolls inside itself
+Same state as run3-10 (mobile 375, hack applied). Rule used: element with getBoundingClientRect().right > innerWidth + 1.
+
+Elements with right edge past 375: 89 total (all scroll containers' descendants).
+Of those, with NO overflow-x auto/scroll ancestor: 0   (wideWithNoScrollContainerAncestor = [])
+
+The 89 split by the scroll container they sit in:
+  header > nav               4   (page section nav)
+  #install > div.tabs        3   (install tab strip: Any agent / Claude Code plugin / Codex plugin / Git clone)
+  #install > pre             1   (install command)
+  #example > div.scroll      39  (criteria table: criterion / outcome / proof / status / by)
+  #models > div.scroll       42  (models table: host / lead / worker / scout)
+
+Each container itself fits the screen and really scrolls (clientWidth / scrollWidth in zoom units, rect in screen px):
+  nav          overflow-x auto  rect 32..343   clientW 156  scrollW 411  scrollable
+  div.tabs     overflow-x auto  rect 34..341   clientW 154  scrollW 468  scrollable
+  pre (install)overflow-x auto  rect 68..307   clientW 120  scrollW 440  scrollable
+  criteria div.scroll overflow-x auto rect 32..343 clientW 156 scrollW 399 scrollable
+  models   div.scroll overflow-x auto rect 32..343 clientW 156 scrollW 371 scrollable
+All five rects end at or before 343 (< 375): none is itself wider than the viewport.
+
+Text nodes (Range client rects): 269 non-empty text nodes; 69 reach past 375, all inside the containers above; 0 outside any scroller.
+RESULT: held.

@@ -1,0 +1,55 @@
+S5 - Example run section vs examples/csv-import-dupes/oldhand/report.md
+Run 2026-10-11, tab-1 of the Browser pane, http://localhost:4180/#example (vite dev server, section id="example").
+
+HOW THE COMPARISON WAS DONE
+- Read report.md with the file tool (6966 bytes, 88 lines).
+- In the browser, imported the same file through the dev server (/@fs/.../report.md?raw) and checked it is the file on disk:
+    browser sha256 = 462cea622a744e53acb9b663cb9dcdacffd2a29000ee3107bda715999a7c3530 (6966 bytes)
+    shasum -a 256 of the file on disk = 462cea622a744e53acb9b663cb9dcdacffd2a29000ee3107bda715999a7c3530 (6966 bytes)  -> identical
+- A script in the page parsed that markdown (first table, Root cause, Not verified, Computed line) and compared it to the rendered DOM of
+  <section id="example">. Comparison rule: backticks removed from the markdown, runs of whitespace collapsed on both sides, then strict string equality.
+  The root cause was ALSO compared raw (newlines and spacing kept, only backticks removed): identical.
+
+EXPECTATION 1 - verdict line
+  report.md : "Verdict: VERIFIED"   (line 3: "### Verdict: VERIFIED")
+  page      : <p class="verdict">Verdict: VERIFIED</p>
+  equal     : true
+
+EXPECTATION 2 - criteria table
+  report.md first table header : criterion,outcome,proof,counted checks,status,by,evidence,flags (8 columns)
+  page table header            : criterion,outcome,proof,status,by (5 columns; counted checks, evidence and flags are not shown)
+  rows md / dom                : 6 / 6      tables in the section: 1
+  row ids md                   : AC1,AC2,R1,R2,R3,R4
+  row ids dom                  : AC1,AC2,R1,R2,R3,R4   (same order)
+  cell comparison (criterion, outcome, proof, status, by for each of the 6 rows = 30 cells): 30 of 30 equal, 0 differences
+    AC1 criterion/outcome/proof/status/by : true true true true true   (by = lead:opus-5.5, proof e2e, status pass)
+    AC2                                   : true true true true true   (by = qa:worker)
+    R1                                    : true true true true true   (by = qa:worker)
+    R2                                    : true true true true true   (by = qa:scout)
+    R3                                    : true true true true true   (by = qa:scout)
+    R4                                    : true true true true true   (by = qa:worker)
+  review-findings table leak test on the section text:
+    contains "F1": false | contains "medium": false | contains "correctness": false | contains "Review findings": false | contains "counted checks": false
+  h3 headings in the section: "Root cause", "Not verified" only (no "Review findings", no "Notes").
+
+EXPECTATION 3 - Root cause paragraph and Not verified bullets
+  Root cause: <p> directly after <h3>Root cause</h3>; equal to report.md "## Root cause" body (normalised) = true;
+              equal raw (newlines kept, backticks removed) = true
+  Not verified: <ul> directly after <h3>Not verified</h3>; 4 bullets in report.md, 4 <li> on the page
+    bullet 1 (Independence: every review lens ...)       equal: true
+    bullet 2 (CPython 3.12+ behaviour ...)               equal: true
+    bullet 3 (A real lock end to end through the CLI ...) equal: true
+    bullet 4 (Per-batch counts are checked ...)          equal: true
+  Computed line:
+    report.md : Computed by ledger.py from ledger.json at 2026-10-10T19:17:57+00:00 on tree 4c043ed41b:4a2697fb:e3b0c442. Not written by hand.
+    page      : <p class="computed"> same text, equal (strict, no normalisation): true
+
+EXPECTATION 4 - link
+  link text "examples/csv-import-dupes"
+  href attribute and resolved href : https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes
+  expected                          : https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes  -> identical
+  target="" rel="" (opens in the same tab)
+  Clicked it: the tab went to that exact URL (see link-click-landed-on-github-404.jpg). GitHub answers "404 - page not found"
+  ("The main branch of oldhand does not contain the path examples/csv-import-dupes"). Reason seen locally: the examples folder is
+  in commit 00747f3 on branch enhance/oldhand-2; origin/main is still 56029eb. The scenario only requires the href, so this is a note, not a failure.
+  The other link in the intro paragraph: examples/README.md -> https://github.com/berwinsingh/oldhand/blob/main/examples/README.md (same reason, not clicked).

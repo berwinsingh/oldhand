@@ -1,0 +1,20 @@
+# grep -n of github.com/berwinsingh/oldhand and every ${BLOB}/${REPO} link in site/src/App.jsx
+9:const REPO = "https://github.com/berwinsingh/oldhand";
+10:const BLOB = `${REPO}/blob/main/`;
+50:      'git clone https://github.com/berwinsingh/oldhand ~/.oldhand\nmkdir -p ~/.agents/skills ~/.claude/skills\nfor s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/.claude/skills/; done',
+193:          <a href={`${BLOB}skills/oldhand/references/hosts.md`}>hosts.md</a>.
+234:            <a href={`${BLOB}skills/oldhand/scripts/ledger.py`}>a small script</a>, not the model,
+252:                <a href={`${BLOB}skills/${name}/SKILL.md`}>{name}</a>
+259:            <a href={`${BLOB}skills/oldhand/scripts/ledger.py`}>ledger.py</a> records every check
+261:            <a href={`${BLOB}skills/oldhand-qa/scripts/qa.py`}>qa.py</a> deals the scenario briefs
+263:            <a href={`${BLOB}skills/oldhand-build/scripts/mutate.py`}>mutate.py</a> proves a test
+272:            <a href={`${BLOB}skills/oldhand/SKILL.md`}>the conductor skill</a>. {data.hardStopsIntro}
+282:            <a href={`${BLOB}examples/README.md`}>examples/README.md</a>; the project and the task
+284:            <a href={`${REPO}/tree/main/examples/csv-import-dupes`}>examples/csv-import-dupes</a>.
+304:            <a href={`${BLOB}skills/oldhand/SKILL.md`}>View on GitHub</a>
+315:            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a>,
+334:              <a href={`${BLOB}skills/oldhand/SKILL.md`}>conductor</a> tells you the count before
+339:              <a href={`${BLOB}skills/oldhand-qa/SKILL.md`}>oldhand-qa</a> reports UI scenarios as
+355:          <a href={`${REPO}/issues`}>Issues</a>
+356:          <a href={`${REPO}/discussions`}>Discussions</a>
+357:          <a href={`${BLOB}SECURITY.md`}>Security</a>

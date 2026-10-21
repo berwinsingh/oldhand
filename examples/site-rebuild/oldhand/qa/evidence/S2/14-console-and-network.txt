@@ -1,0 +1,15 @@
+S2: console messages and network requests for tab-4 (http://localhost:4180/) over the whole run.
+
+Console (read_console_messages):
+  [debug] [vite] connecting...
+  [debug] [vite] connected.
+  [info] Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+  Errors: none. Warnings: none.
+  (The page itself caught the NotAllowedError from navigator.clipboard.writeText and used its fallback, so that denial does not appear in the console.
+   The two NotAllowedError strings in 12-copy-control-exact-text-per-tab.txt came from my own readText call and from my logging wrapper.)
+
+Network (read_network_requests), all 200 OK, none failed:
+  GET / ; /@vite/client ; /src/main.jsx ; /@react-refresh ; /node_modules/.vite/deps/react_jsx-dev-runtime.js ; react.js ; react-dom_client.js ;
+  /src/App.jsx ; /src/styles.css ; /node_modules/vite/dist/client/env.mjs ; chunk-H5I4P4DR.js ; chunk-5SC5K45T.js ;
+  /@fs/.../skills/oldhand/SKILL.md?import&raw ; /@fs/.../examples/csv-import-dupes/oldhand/report.md?import&raw ; /@fs/.../.claude-plugin/plugin.json?import ; /src/analytics.js
+Note: the page is served by the Vite dev server (http://localhost:4180 with /@vite/client), not a production build.

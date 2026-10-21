@@ -1,0 +1,18 @@
+{
+ "console": [
+  "[debug] [vite] connecting... (http://localhost:4180/@vite/client)",
+  "[debug] [vite] connected. (http://localhost:4180/@vite/client)",
+  "[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold (http://localhost:4180/node_modules/.vite/deps/react-dom_client.js?v=4b066acf)",
+  "[debug] [vite] connecting... (http://localhost:4180/@vite/client)",
+  "[debug] [vite] connected. (http://localhost:4180/@vite/client)",
+  "[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold (http://localhost:4180/node_modules/.vite/deps/react-dom_client.js?v=4b066acf)",
+  "[debug] [vite] connecting... (http://localhost:4180/@vite/client)",
+  "[debug] [vite] connected. (http://localhost:4180/@vite/client)",
+  "[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold (http://localhost:4180/node_modules/.vite/deps/react-dom_client.js?v=4b066acf)",
+  "[debug] [vite] connecting... (http://localhost:4180/@vite/client)",
+  "[debug] [vite] connected. (http://localhost:4180/@vite/client)",
+  "[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold (http://localhost:4180/node_modules/.vite/deps/react-dom_client.js?v=4b066acf)"
+ ],
+ "requestfailed": [],
+ "http_errors": []
+}

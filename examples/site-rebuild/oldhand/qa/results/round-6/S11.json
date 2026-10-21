@@ -1,0 +1,27 @@
+{
+  "id": "S11",
+  "status": "fail",
+  "observed": "Step 1: mobile preset 375x812, fresh load of http://localhost:4180/. Before the hack innerWidth 375, scrollWidth 375, clientWidth 375. Step 2: ran the exact hack (html font-size 200%, body zoom 2). Result: window.innerWidth 589, documentElement.scrollWidth 589, documentElement.clientWidth 375, visualViewport.width 375. The literal comparison scrollWidth <= innerWidth is equal only because mobile emulation widened innerWidth from 375 to 589 once content overflowed; the real screen is 375 wide and the page is 214 px wider than it. A mouse-wheel scroll to the right really moved the page: visualViewport.pageLeft went 0 -> 214.5, and the screenshot shows the end of the heading word after the pan. So there IS horizontal page scroll under the hack. Cause (single element): the h1 'A definition of done for coding agents.' - at the compounded size (64px computed in zoom units, 128 px on screen) the word 'definition' has no break opportunity (overflow-wrap normal, hyphens manual) and runs to x=589; the h1 is not inside any scroll container, so the page grows sideways. Element list: 89 element boxes extend past 375; every one sits inside one of four overflow-x:auto containers that fit the screen (header nav, install tab strip, install command pre, criteria/models table wrappers); 0 boxes outside a scroller. Text scan: 70 text nodes past 375, 69 inside those scrollers, only the h1 is not. Nothing uses overflow hidden/clip or text-overflow ellipsis, so no text is cut off without any way to reach it, but the h1 word is reachable only by panning the whole page sideways (which is the failure above). Step 3: the install command pre (clientWidth 120, scrollWidth 440) scrolled inside itself with the mouse wheel to its end (shows -skill '*' -g) and the page did not move; the criteria table wrapper (156/399) scrolled inside itself to the last columns (status, by) and the page did not move. Step 4: reset to desktop, reloaded: innerWidth 1024, scrollWidth 1024, no inline zoom or font-size. Supplementary (not a step): with the same mobile preset, body zoom 2 alone gives scrollWidth 375 (no overflow), html font-size 200% alone gives 375 (no overflow); only the combination used in step 2 overflows, and only through the h1. The footer nav and p.computed overflows seen in earlier evidence in this folder are no longer present (footer nav right edge 343, p.computed wraps).",
+  "expected": "scrollWidth does not exceed innerWidth (no horizontal page scroll); any element wider than the viewport is a command or table container that scrolls inside itself, not the page; no text is clipped without a way to scroll to it.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/01-baseline-375-no-zoom-top.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/02-zoomed-200pct-top-h1-word-clipped-at-right-edge.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/03-zoomed-200pct-page-panned-right-214px-shows-rest-of-h1-word.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/04-install-command-block-start-clipped-inside-own-block.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/05-install-command-block-scrolled-to-end-inside-own-block.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/06-criteria-table-start-scroll-container.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/07-criteria-table-scrolled-to-end-inside-own-block.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/08-run2-measurements-step2-hack-mobile375.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/09-run2-step4-desktop-reset.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S11/10-run2-console-and-network.txt"
+  ],
+  "console_errors": [
+    "[vite] SyntaxError: Unexpected token 'else'",
+    "[vite] Failed to reload /src/App.jsx. This could be due to syntax errors or importing non-existent modules.",
+    "WebSocket connection to 'ws://localhost:4180/' failed:",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "The four console errors sit in the pane's cumulative console buffer for this tab and were already there before my last reload (a reload added none); the first three look like Vite hot-reload noise from an earlier edit of App.jsx and a dev-server restart, the 404 has no URL in its message and no 4xx/5xx appears in the network log (all 200/304). Result of the literal metric: scrollWidth 589 vs innerWidth 589 reads equal in mobile emulation, so a check that only compares those two numbers would pass falsely; documentElement.clientWidth (375) shows the real overflow of 214 px. The evidence folder already held files from an earlier S11 run (names 00-summary, 01-A.. through 18-D, 99-console, timestamps 12:25-12:27, before the app's styles.css/App.jsx hot update at 12:28:46); I did not touch them and did not list them as evidence. The overflow now comes from the h1 alone and only when html font-size 200% and body zoom 2 are both applied (rem-sized text becomes 4x); either setting alone is clean. A fix is likely a break opportunity for the h1 word (overflow-wrap:anywhere or hyphens) or a smaller heading size; I did not change anything."
+}

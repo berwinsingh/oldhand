@@ -1,0 +1,79 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && ls -laR dist/client dist/server dist/.openai
+dist/.openai:
+total 8
+drwxr-xr-x@ 3 berwinsingh  staff   96 Oct 11 01:10 .
+drwxr-xr-x@ 5 berwinsingh  staff  160 Oct 11 01:10 ..
+-rw-r--r--@ 1 berwinsingh  staff   31 Oct 11 12:29 hosting.json
+
+dist/client:
+total 32
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 12:29 .
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 01:10 ..
+drwxr-xr-x@ 4 berwinsingh  staff   128 Oct 11 12:29 assets
+-rw-r--r--@ 1 berwinsingh  staff  8464 Oct 11 12:29 favicon.png
+-rw-r--r--@ 1 berwinsingh  staff  3309 Oct 11 12:29 index.html
+
+dist/client/assets:
+total 496
+drwxr-xr-x@ 4 berwinsingh  staff     128 Oct 11 12:29 .
+drwxr-xr-x@ 5 berwinsingh  staff     160 Oct 11 12:29 ..
+-rw-r--r--@ 1 berwinsingh  staff  245428 Oct 11 12:29 index-BwbMMN0x.js
+-rw-r--r--@ 1 berwinsingh  staff    5030 Oct 11 12:29 index-CZXhnbve.css
+
+dist/server:
+total 8
+drwxr-xr-x@ 3 berwinsingh  staff   96 Oct 11 01:10 .
+drwxr-xr-x@ 5 berwinsingh  staff  160 Oct 11 01:10 ..
+-rw-r--r--@ 1 berwinsingh  staff  483 Oct 11 12:29 index.js
+
+$ find dist/client -type f -exec ls -l {} + (all files)
+-rw-r--r--@ 1 berwinsingh  staff  245428 Oct 11 12:29 dist/client/assets/index-BwbMMN0x.js
+-rw-r--r--@ 1 berwinsingh  staff    5030 Oct 11 12:29 dist/client/assets/index-CZXhnbve.css
+-rw-r--r--@ 1 berwinsingh  staff    8464 Oct 11 12:29 dist/client/favicon.png
+-rw-r--r--@ 1 berwinsingh  staff    3309 Oct 11 12:29 dist/client/index.html
+
+$ find dist/client -type f -print0 | xargs -0 stat -f '%z %N' | awk sum
+total_bytes=262231 total_kib=256.085 total_mib=0.250083
+
+$ du -sk dist/client  (disk usage)
+264	dist/client
+264K	dist/client
+
+$ find dist/client -iname '*.png' (all png files)
+dist/client/favicon.png
+png_count=1
+
+$ find dist/client -type f -not -name '*.png' | wc -l
+   1 css
+   1 html
+   1 js
+   1 png
+
+$ test -f checks
+EXISTS dist/client/index.html (    3309 bytes)
+EXISTS dist/server/index.js (     483 bytes)
+EXISTS dist/.openai/hosting.json (      31 bytes)
+
+$ dist/.openai/hosting.json
+{
+  "d1": null,
+  "r2": null
+}
+
+
+$ dist/server/index.js head -40
+export default {
+  async fetch(request, env) {
+    const response = await env.ASSETS.fetch(request);
+    const acceptsHtml = request.headers.get("accept")?.includes("text/html");
+
+    if (response.status !== 404 || !acceptsHtml || !["GET", "HEAD"].includes(request.method)) {
+      return response;
+    }
+
+    const indexUrl = new URL(request.url);
+    indexUrl.pathname = "/index.html";
+    indexUrl.search = "";
+    return env.ASSETS.fetch(new Request(indexUrl, request));
+  },
+};

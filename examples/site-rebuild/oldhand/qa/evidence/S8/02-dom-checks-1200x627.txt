@@ -1,0 +1,67 @@
+{
+  "url": "http://localhost:4180/?social-preview=1",
+  "viewport": {
+    "innerWidth": 1200,
+    "innerHeight": 627,
+    "devicePixelRatio": 1,
+    "prefersLight": true,
+    "prefersDark": false
+  },
+  "htmlHasSocialPreview": true,
+  "htmlClassName": "social-preview",
+  "footerExists": true,
+  "footerDisplay": "none",
+  "topNavExists": true,
+  "topNavDisplay": "none",
+  "firstCommandBottom": 470.828125,
+  "firstCommandText": "npx skills add berwinsingh/oldhand --skill '*' -g\nCopy",
+  "commandCount": 1,
+  "allCommandRects": [
+    {
+      "text": "npx skills add berwinsingh/oldhand --skill '*' -g\nCopy",
+      "top": 423.140625,
+      "bottom": 470.828125,
+      "left": 137,
+      "right": 1063,
+      "height": 47.6875
+    }
+  ],
+  "h1": {
+    "text": "A definition of done for coding agents.",
+    "top": 104,
+    "bottom": 159.1875,
+    "left": 120,
+    "right": 1080,
+    "height": 55.1875
+  },
+  "lede": {
+    "text": "Oldhand is a pack of eleven agent skills. Your agent reads t...",
+    "top": 175.1875,
+    "bottom": 327.140625,
+    "left": 120,
+    "right": 895.1875,
+    "height": 151.953125
+  },
+  "install": {
+    "top": 355.140625,
+    "bottom": 499.828125,
+    "left": 120,
+    "right": 1080,
+    "height": 144.6875
+  },
+  "note": {
+    "display": "none"
+  },
+  "then": {
+    "display": "none"
+  },
+  "tested": {
+    "display": "none"
+  },
+  "scroll": {
+    "docScrollH": 627,
+    "bodyScrollH": 5634,
+    "htmlOverflow": "hidden",
+    "htmlH": "627px"
+  }
+}

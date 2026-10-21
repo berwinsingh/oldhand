@@ -34,4 +34,17 @@ sub-agent tool, so every reviewer, refuter and QA scenario was run by the lead
 in turn. The ledger labels (`qa:worker`, `qa:scout`) are the planned tiers, not
 who ran them. The binary SQLite evidence files were left out of the repo.
 
+## site-rebuild
+
+The task folder of the run that rebuilt the project website with the pack
+itself: the contract (`oldhand/contract.md`), trace and plan, the four review
+memos and the chair's `review.md`, eleven QA scenarios with their briefs,
+results and text evidence (`oldhand/qa/`), the ledger, and the computed
+verdict in `oldhand/report.md`. Read `oldhand/qa/results.md` for what each
+scenario observed, and `oldhand/learned.md` for what the run taught.
+
+The QA screenshots (109 files, about 20 MB) are left out to keep the
+repository small; the evidence paths in the results still name them. The text
+evidence, the per-scenario transcripts and the ledger are complete.
+
 Pack version at the time: 2.0.0, before the review fixes of 2026-10-11.

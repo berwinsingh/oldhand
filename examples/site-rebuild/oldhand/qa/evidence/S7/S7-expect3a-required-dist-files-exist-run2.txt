@@ -1,0 +1,14 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && test -f and ls -l for the three required outputs
+EXISTS  dist/client/index.html
+-rw-r--r--@ 1 berwinsingh  staff  3309 Oct 11 12:29 dist/client/index.html
+EXISTS  dist/server/index.js
+-rw-r--r--@ 1 berwinsingh  staff  483 Oct 11 12:29 dist/server/index.js
+EXISTS  dist/.openai/hosting.json
+-rw-r--r--@ 1 berwinsingh  staff  31 Oct 11 12:29 dist/.openai/hosting.json
+
+$ cat dist/.openai/hosting.json
+{
+  "d1": null,
+  "r2": null
+}
+

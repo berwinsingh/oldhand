@@ -1,0 +1,13 @@
+S11 run 2 - console and network (Browser pane tab-1, read after my page loads and after a final reload)
+
+Console errors in the pane's buffer (the buffer is cumulative for this tab and also holds entries from before my run; the same four entries
+were present before and after my final reload, so my loads added none):
+  [error] [vite] SyntaxError: Unexpected token 'else'
+  [error] [vite] Failed to reload /src/App.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+  [error] WebSocket connection to 'ws://localhost:4180/' failed:
+  [error] Failed to load resource: the server responded with a status of 404 ()
+  The first two are Vite hot-reload errors from an earlier edit of App.jsx (followed by successful "hot updated" lines). The third is the
+  hot-reload socket dropping while the dev server restarted. The 404 has no URL in the message; the network log shows no 4xx/5xx in the window I could read.
+
+Network (last 271 requests for localhost:4180 in the buffer, 200 shown): every GET / and every module/style/asset request returned 200 OK or 304 Not Modified.
+  No failed requests, no 4xx/5xx. No requests to other hosts.

@@ -1,0 +1,7 @@
+Lead's own run of S1 (AC1), 2026-10-11 12:57-12:58 local, Browser pane tab-1 at 1440x900, http://localhost:4180/?lead=1 (Vite dev server on the final tree 00747f3a27:91dcb9a6:7d47a232).
+- 'What it will not do': 10 numbered items; first starts "Remote or shared actions (commit, push, PR, tracker write, d", last starts "Never print, copy, store or hand a secret value to a sub-age"; same as the '## Hard stops' items of skills/oldhand/SKILL.md.
+- 'The skill' block: starts "---\nname: oldhan", ends "-> plan -> build -> review -> qa -> ship -> learn", 13192 bytes, SHA-256 fcaf11226feb602fd88f24d4e21f262d7521200ce5f55911070ba5f63f64ff55; shasum of skills/oldhand/SKILL.md on disk: the same hash, 13192 bytes.
+- 'View on GitHub' href: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md.
+- Copy raw: a scripted .click() (no user activation) showed "Copy failed: select the text" (the honest failure state from review finding F7); a real click (computer tool, ref_166) showed "Copied" at 07:28:31Z.
+- Console: no new errors from these loads; the tab's history still holds the four earlier entries (dangling-else HMR error during the first mutation, a failed App.jsx reload, the WebSocket reconnect at the config-triggered server restart, and a 404 from a QA agent's click on a main-branch GitHub link).
+Screenshots: lead-1-example-and-skill-top.jpg, lead-2-skill-block.jpg.

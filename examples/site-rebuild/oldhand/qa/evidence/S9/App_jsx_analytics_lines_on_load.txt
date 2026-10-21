@@ -1,0 +1,26 @@
+$ grep -n -i "analytics" src/App.jsx
+6:import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+201:  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+203:    applyAnalyticsChoice(analytics);
+204:  }, [analytics]);
+206:  function toggleAnalytics() {
+207:    const next = analytics === "granted" ? "denied" : "granted";
+208:    saveAnalyticsChoice(next);
+209:    setAnalytics(next);
+359:        <p className="analytics">
+360:          {analytics === "granted" ? "Google Analytics is on." : "Google Analytics is off; nothing is sent."}{" "}
+361:          <button type="button" className="link" onClick={toggleAnalytics}>
+362:            {analytics === "granted" ? "Turn it off" : "Turn on Google Analytics"}
+
+$ sed -n 200,210p src/App.jsx
+export function App() {
+  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+  useEffect(() => {
+    applyAnalyticsChoice(analytics);
+  }, [analytics]);
+
+  function toggleAnalytics() {
+    const next = analytics === "granted" ? "denied" : "granted";
+    saveAnalyticsChoice(next);
+    setAnalytics(next);
+  }

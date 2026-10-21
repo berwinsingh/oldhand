@@ -1,0 +1,14 @@
+Console (tab-6, whole session, 6 page loads): no errors, no warnings.
+  [debug] [vite] connecting... / connected.   (every load)
+  [info] Download the React DevTools ...      (React dev build notice)
+  [debug] [vite] hot updated: /src/App.jsx    (dev server HMR after the 11:37 source edits)
+  [debug] [vite] hot updated: /src/styles.css
+
+Network (tab-6, same loads): every request returned 200 OK (GET / , @vite/client, src/main.jsx, src/App.jsx,
+src/styles.css, src/analytics.js, src/slices.js, react deps, and the ?import&raw markdown/plugin.json files).
+No failed requests, no 4xx/5xx.
+
+Shared-browser note: the first tab I used (tab-5, fronted) was navigated by another agent to
+http://localhost:4180/?agent=<img src=x onerror=window.__xss=1> in the middle of my mobile run, so I discarded that
+mobile reading, reset tab-5 to desktop, and redid everything on a fresh background tab (tab-6) addressed by id.
+All numbers in the metrics files come from tab-6. The 1440 readings I took earlier on tab-5 matched tab-6 exactly.

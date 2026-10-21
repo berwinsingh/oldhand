@@ -1,0 +1,23 @@
+path | exact-case in working tree (per-component listdir) | git HEAD (enhance/oldhand-2) exact | git main exact
+skills/oldhand/references/hosts.md | found | yes | no
+skills/oldhand/scripts/ledger.py | found | yes | no
+skills/oldhand/SKILL.md | found | yes | yes
+skills/oldhand-contract/SKILL.md | found | yes | no
+skills/oldhand-trace/SKILL.md | found | yes | no
+skills/oldhand-rca/SKILL.md | found | yes | no
+skills/oldhand-research/SKILL.md | found | yes | no
+skills/oldhand-plan/SKILL.md | found | yes | no
+skills/oldhand-build/SKILL.md | found | yes | no
+skills/oldhand-review/SKILL.md | found | yes | no
+skills/oldhand-qa/SKILL.md | found | yes | no
+skills/oldhand-ship/SKILL.md | found | yes | no
+skills/oldhand-learn/SKILL.md | found | yes | no
+skills/oldhand-qa/scripts/qa.py | found | yes | no
+skills/oldhand-build/scripts/mutate.py | found | yes | no
+examples/README.md | found | yes | no
+examples/csv-import-dupes | found | yes | no
+skills/oldhand/references/orchestration.md | found | yes | no
+SECURITY.md | found | yes | yes
+
+working-tree exact-case found = 19 of 19
+on main (local ref) = 2 of 19

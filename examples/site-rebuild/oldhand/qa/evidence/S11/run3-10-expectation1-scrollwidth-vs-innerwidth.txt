@@ -1,0 +1,25 @@
+S11 run3 - Expectation 1: scrollWidth must not exceed innerWidth
+Browser pane tab-6, mobile preset 375x812 (DPR 2, Android Chrome UA), http://localhost:4180/ (Vite dev server).
+Build tested: site/src/styles.css last hot-updated 12:47:38 IST, App.jsx 12:47:41 IST; my loads were after that (about 12:49 and 12:53).
+
+Hack run exactly as given:
+  document.documentElement.style.fontSize = '200%'; document.body.style.zoom = '2';
+
+Measured on a fresh load, then again on a second fresh load (identical):
+  before hack : innerWidth 375, documentElement.clientWidth 375, scrollWidth 375
+  after hack  : innerWidth 375, documentElement.clientWidth 375, scrollWidth 375, bodyScrollWidth 188 (x2 zoom = 376)
+                visualViewport.width 375, scale 1
+                scrollWidth - innerWidth = 0   -> no horizontal page scroll
+  html computed font-size 32px, body zoom "2"
+Page-level sideways scroll attempts (all failed to move the page):
+  - scrollTo(50,y) / scrollTo(100,y): scrollX stayed 0
+  - vertical sweep of the whole page (every 700px): max documentElement.scrollWidth 375, max scrollX 0
+  - real mouse-wheel scroll right x10 over body text: scrollX 0, scrollWidth 375 (screenshot run3-08)
+  - html overflow-x = visible, body overflow-x = visible (so nothing is being hidden by overflow-x:hidden on the root)
+  - elements with right edge < -1 (clipped to the left) with all inner scrollers at 0: none
+  - position:fixed elements: none
+Heading check (the earlier run's failure point): h1 "A definition of done for coding agents." now has
+  overflow-wrap: anywhere, right edge 343, scrollWidth 156 = clientWidth 156, font-size 64px (body-zoom units).
+  The word "definition" breaks across two lines ("defin" / "ition") and stays inside the screen (screenshot run3-09).
+Footer nav: flex-wrap wrap, right edge 343.  p.computed: overflow-wrap anywhere, right edge 343.
+RESULT: held.

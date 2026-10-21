@@ -1,0 +1,52 @@
+S2 run (tab-8, viewport 1440x900, http://localhost:4180/) - values read from the live DOM with javascript after real clicks
+
+TABLIST (aria-label "Install route"): 4 role=tab buttons, exactly one aria-selected=true at any time
+  tab-any    "Any agent"          controls panel-any
+  tab-claude "Claude Code plugin" controls panel-claude
+  tab-codex  "Codex plugin"       controls panel-codex
+  tab-git    "Git clone"          controls panel-git
+(only the selected tab's role=tabpanel is in the DOM; observed 1 tabpanel each time)
+
+--- TAB 1: Any agent (panel-any) ---
+command block 1 (Copy aria-label "Copy command 1"):
+  npx skills add berwinsingh/oldhand --skill '*' -g
+note: Installs all eleven skills under ~/.agents/skills and links them for the agents it finds. Add -a cursor (or codex, github-copilot, gemini-cli, opencode, claude-code) to skip the picker.
+Then, in Claude Code, Cursor, Copilot, Kiro, Antigravity, for example -> /oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Then, in Codex, for example -> $oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Then, in Gemini CLI, OpenCode, Amp, Goose, for example -> Use the oldhand skill: fix DOCQ-123 and prove it end to end.
+Tested line: Tested 2026-10-11 on macOS with skills 1.7.2 for claude-code, codex, cursor, github-copilot, gemini-cli and opencode, from a local checkout of this repository. Invocation per host: hosts.md.
+COPY: window.__copied = "npx skills add berwinsingh/oldhand --skill '*' -g"; block text identical (===true); control text after click = "Copied"
+      navigator.clipboard.readText() = READ-ERR: Read permission denied (so the selection-based copy event path was what ran)
+
+--- TAB 2: Claude Code plugin (panel-claude) ---
+command block 1: /plugin marketplace add berwinsingh/oldhand
+command block 2: /plugin install oldhand@oldhand
+note: Two separate prompts inside Claude Code, then a new session.
+Then, in Claude Code, for example -> /oldhand:oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Tested line: Tested 2026-10-11 with Claude Code 2.1.274 (the claude plugin CLI, from a local checkout of this repository). Invocation per host: hosts.md.
+COPY block 1: window.__copied = "/plugin marketplace add berwinsingh/oldhand"; identical to block text (===true); control = "Copied"
+COPY block 2 (extra): window.__copied = "/plugin install oldhand@oldhand"; identical (===true); control = "Copied"
+
+--- TAB 3: Codex plugin (panel-codex) ---
+command block 1 (two lines, 81 chars):
+  codex plugin marketplace add berwinsingh/oldhand
+  codex plugin add oldhand@oldhand
+note: Then restart Codex or start a new task.
+Then, in Codex, for example -> $oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Tested line: Tested 2026-10-11 with Codex CLI 0.146.0, from a local checkout of this repository. Invocation per host: hosts.md.
+COPY: window.__copied = "codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand" (length 81, contains the \n); block text length 81; identical (===true); control = "Copied"
+
+--- TAB 4: Git clone (panel-git) ---
+command block 1 (three lines):
+  git clone https://github.com/berwinsingh/oldhand ~/.oldhand
+  mkdir -p ~/.agents/skills ~/.claude/skills
+  for s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/.claude/skills/; done
+note: ~/.agents/skills is read by Codex, Cursor, Copilot, Gemini CLI, OpenCode, Amp, Roo, Goose, Droid and Junie; ~/.claude/skills by Claude Code. Update with git -C ~/.oldhand pull.
+Then, in Claude Code, Cursor, Copilot, for example -> /oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Then, in Codex, for example -> $oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists.
+Tested line: Tested 2026-10-11 on macOS with git 2.55.0 and zsh 5.9 against a clone of this branch: eleven links in each folder, and running it twice changes nothing. Invocation per host: hosts.md.
+COPY: window.__copied has 3 lines and is identical to the block text (===true); control = "Copied"
+Visual note: third line is wider than the box at 1440 (pre scrollWidth 876 vs clientWidth 834, overflow-x:auto), so the closing "done" is scrolled off to the right; the copied text still includes it.
+
+--- RIGHT ARROW ---
+see run4-right-arrow-key.txt

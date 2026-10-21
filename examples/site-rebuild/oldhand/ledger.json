@@ -1,0 +1,763 @@
+{
+ "title": "Rebuild the Oldhand website for the 2.0 pack",
+ "mode": "implement",
+ "created": "2026-10-10T20:06:13+00:00",
+ "criteria": [
+  {
+   "id": "AC1",
+   "text": "The page renders the conductor skill's own text (skills/oldhand/SKILL.md imported at build time, not a copy) in a scrollable block with \"Copy raw\" and \"View on GitHub\" controls, and the hard stops section shown above it is sliced from that same import",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "AC2",
+   "text": "An install switcher offers one tab per install route that was tested on this machine (Any agent via npx skills, Claude Code plugin, Codex plugin, git clone), each with the exact commands, a copy control that copies that exact text, the line to type afterwards per host, and the tool version and date it was tested; no untested command is shown",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "AC3",
+   "text": "The page contains no invented artifact: no fake ids, stamps, fake screenshots, decorative checkmarks or status badges, and every factual claim links to its source file in the repository",
+   "proof": "review",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "AC4",
+   "text": "The page is readable in light and dark (prefers-color-scheme) at 1440 and 375 wide with no horizontal page scroll, no text under 13px, and text and the primary control meet WCAG AA contrast",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "AC5",
+   "text": "Google Analytics is not loaded on first visit; the only control is a footer toggle; choosing it loads GA and the choice persists across reload; there is no overlay or banner",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "AC6",
+   "text": "An \"Example run\" section shows the real examples/csv-import-dupes run: its verdict line, criteria table and \"Not verified\" section sliced from the committed report.md, with a link to the files",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "AC7",
+   "text": "The page lists the 11 stages in chain order, one line each, every line linking to that stage's SKILL.md on GitHub, and a model routing table by role (lead, worker, scout) per host with the substitution note, dated",
+   "proof": "e2e",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "R1",
+   "text": "`npm run build` and `npm run test:sites` pass; dist/client/index.html, dist/server/index.js and dist/.openai/hosting.json still exist",
+   "proof": "integration",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "R2",
+   "text": "The GitHub Pages workflow still works unchanged: it builds site/, previews on 127.0.0.1:4173, and screenshots `?social-preview=1` at 1200x627 into dist/client/og-image.png, so the social-preview hook in index.html must survive",
+   "proof": "review",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "R3",
+   "text": "The existing opt-in analytics code path keeps consent default denied and never loads gtag before a stored \"granted\" choice",
+   "proof": "unit",
+   "status": "live",
+   "added": "2026-10-10T20:06:13+00:00"
+  }
+ ],
+ "checks": [
+  {
+   "id": "C1",
+   "criterion": "R3",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": "build/unit.txt",
+   "by": "lead:fable",
+   "cmd": "npm test",
+   "lead": false,
+   "fingerprint": "56029ebf0e3dcb9ee9b7295ed06ea701b62f20b8:01488ad34ac1fc1f:96326f5f8220e744",
+   "time": "2026-10-10T20:06:13+00:00"
+  },
+  {
+   "id": "C2",
+   "criterion": "R1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": "build/build.txt",
+   "by": "lead:fable",
+   "cmd": "npm run build && npm run test:sites",
+   "lead": false,
+   "fingerprint": "56029ebf0e3dcb9ee9b7295ed06ea701b62f20b8:01488ad34ac1fc1f:96326f5f8220e744",
+   "time": "2026-10-10T20:06:14+00:00"
+  },
+  {
+   "id": "C3",
+   "criterion": "R3",
+   "kind": "mutation",
+   "status": "blocked",
+   "evidence": "ERROR: site/src/analytics.js: 'if (choice === \"granted\") loadAnalytics(w, doc);' -> 'loadAnalytics(w, doc);' (exit 1)",
+   "by": "mutate.py",
+   "cmd": "npm --prefix /Users/berwinsingh/Documents/oldhand/site test",
+   "lead": false,
+   "fingerprint": "56029ebf0e3dcb9ee9b7295ed06ea701b62f20b8:01488ad34ac1fc1f:96326f5f8220e744",
+   "time": "2026-10-10T20:06:15+00:00",
+   "void": {
+    "reason": "first mutation did not parse (dangling else); replaced by the if(true) mutation",
+    "time": "2026-10-10T20:06:59+00:00"
+   }
+  },
+  {
+   "id": "C4",
+   "criterion": "R3",
+   "kind": "mutation",
+   "status": "pass",
+   "evidence": "KILLED: site/src/analytics.js: 'if (choice === \"granted\") loadAnalytics(w, doc);' -> 'if (true) loadAnalytics(w, doc);' (exit 1)",
+   "by": "mutate.py",
+   "cmd": "npm --prefix /Users/berwinsingh/Documents/oldhand/site test",
+   "lead": false,
+   "fingerprint": "56029ebf0e3dcb9ee9b7295ed06ea701b62f20b8:01488ad34ac1fc1f:96326f5f8220e744",
+   "time": "2026-10-10T20:06:59+00:00"
+  },
+  {
+   "id": "C5",
+   "criterion": "AC3",
+   "kind": "review",
+   "status": "pass",
+   "evidence": "review.md",
+   "by": "lead:fable",
+   "cmd": "oldhand-review",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:736b85dd643345cf:7d47a2326ef824c7",
+   "time": "2026-10-11T06:09:06+00:00"
+  },
+  {
+   "id": "C6",
+   "criterion": "R2",
+   "kind": "review",
+   "status": "pass",
+   "evidence": "review.md",
+   "by": "lead:fable",
+   "cmd": "oldhand-review",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:736b85dd643345cf:7d47a2326ef824c7",
+   "time": "2026-10-11T06:09:06+00:00"
+  },
+  {
+   "id": "C7",
+   "criterion": "R3",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": "build/unit.txt",
+   "by": "lead:fable",
+   "cmd": "npm test",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:736b85dd643345cf:7d47a2326ef824c7",
+   "time": "2026-10-11T06:09:07+00:00"
+  },
+  {
+   "id": "C8",
+   "criterion": "R1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": "build/build.txt",
+   "by": "lead:fable",
+   "cmd": "npm run build && npm run test:sites",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:736b85dd643345cf:7d47a2326ef824c7",
+   "time": "2026-10-11T06:09:08+00:00"
+  },
+  {
+   "id": "C9",
+   "criterion": "R3",
+   "kind": "mutation",
+   "status": "pass",
+   "evidence": "KILLED: site/src/analytics.js: 'if (choice === \"granted\") loadAnalytics(w, doc);' -> 'if (true) loadAnalytics(w, doc);' (exit 1)",
+   "by": "mutate.py",
+   "cmd": "npm --prefix /Users/berwinsingh/Documents/oldhand/site test",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:736b85dd643345cf:7d47a2326ef824c7",
+   "time": "2026-10-11T06:09:09+00:00"
+  },
+  {
+   "id": "C10",
+   "criterion": "R3",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": "build/unit.txt",
+   "by": "lead:fable",
+   "cmd": "npm test",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:11:54+00:00"
+  },
+  {
+   "id": "C11",
+   "criterion": "R1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": "build/build.txt",
+   "by": "lead:fable",
+   "cmd": "npm run build && npm run test:sites",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:11:55+00:00"
+  },
+  {
+   "id": "C12",
+   "criterion": "R3",
+   "kind": "mutation",
+   "status": "pass",
+   "evidence": "KILLED: site/src/analytics.js: 'if (choice === \"granted\") loadAnalytics(w, doc);' -> 'if (true) loadAnalytics(w, doc);' (exit 1)",
+   "by": "mutate.py",
+   "cmd": "npm --prefix /Users/berwinsingh/Documents/oldhand/site test",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:11:56+00:00"
+  },
+  {
+   "id": "C13",
+   "criterion": "AC3",
+   "kind": "review",
+   "status": "pass",
+   "evidence": "review.md",
+   "by": "lead:fable",
+   "cmd": "oldhand-review",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:11:56+00:00"
+  },
+  {
+   "id": "C14",
+   "criterion": "R2",
+   "kind": "review",
+   "status": "pass",
+   "evidence": "review.md",
+   "by": "lead:fable",
+   "cmd": "oldhand-review",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:11:56+00:00"
+  },
+  {
+   "id": "C15",
+   "criterion": "AC1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S1.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S1",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:13+00:00"
+  },
+  {
+   "id": "C16",
+   "criterion": "AC2",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S2.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S2",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:13+00:00"
+  },
+  {
+   "id": "C17",
+   "criterion": "AC4",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S3.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S3",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:13+00:00"
+  },
+  {
+   "id": "C18",
+   "criterion": "AC5",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S4.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S4",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:13+00:00"
+  },
+  {
+   "id": "C19",
+   "criterion": "AC6",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S5.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S5",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:13+00:00"
+  },
+  {
+   "id": "C20",
+   "criterion": "AC7",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S6.json",
+   "by": "qa:scout",
+   "cmd": "qa.py scenario S6",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:13+00:00"
+  },
+  {
+   "id": "C21",
+   "criterion": "R1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S7.json",
+   "by": "qa:scout",
+   "cmd": "qa.py scenario S7",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:13+00:00"
+  },
+  {
+   "id": "C22",
+   "criterion": "R2",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S8.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S8",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:14+00:00"
+  },
+  {
+   "id": "C23",
+   "criterion": "R3",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S9.json",
+   "by": "qa:scout",
+   "cmd": "qa.py scenario S9",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:14+00:00"
+  },
+  {
+   "id": "C24",
+   "criterion": "AC2",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S10.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S10",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:14+00:00"
+  },
+  {
+   "id": "C25",
+   "criterion": "AC4",
+   "kind": "e2e",
+   "status": "fail",
+   "evidence": "qa/results/S11.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S11",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:14+00:00"
+  },
+  {
+   "id": "C26",
+   "criterion": "R3",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": "build/unit.txt",
+   "by": "lead:fable",
+   "cmd": "npm test",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:46+00:00"
+  },
+  {
+   "id": "C27",
+   "criterion": "R1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": "build/build.txt",
+   "by": "lead:fable",
+   "cmd": "npm run build && npm run test:sites",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:48+00:00"
+  },
+  {
+   "id": "C28",
+   "criterion": "R3",
+   "kind": "mutation",
+   "status": "pass",
+   "evidence": "KILLED: site/src/analytics.js: 'if (choice === \"granted\") loadAnalytics(w, doc);' -> 'if (true) loadAnalytics(w, doc);' (exit 1)",
+   "by": "mutate.py",
+   "cmd": "npm --prefix /Users/berwinsingh/Documents/oldhand/site test",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:49+00:00"
+  },
+  {
+   "id": "C29",
+   "criterion": "AC3",
+   "kind": "review",
+   "status": "pass",
+   "evidence": "review.md",
+   "by": "lead:fable",
+   "cmd": "oldhand-review",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:49+00:00"
+  },
+  {
+   "id": "C30",
+   "criterion": "R2",
+   "kind": "review",
+   "status": "pass",
+   "evidence": "review.md",
+   "by": "lead:fable",
+   "cmd": "oldhand-review",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:49+00:00"
+  },
+  {
+   "id": "C31",
+   "criterion": "R3",
+   "kind": "unit",
+   "status": "pass",
+   "evidence": "build/unit.txt",
+   "by": "lead:fable",
+   "cmd": "npm test",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:39+00:00"
+  },
+  {
+   "id": "C32",
+   "criterion": "R1",
+   "kind": "integration",
+   "status": "pass",
+   "evidence": "build/build.txt",
+   "by": "lead:fable",
+   "cmd": "npm run build && npm run test:sites",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:40+00:00"
+  },
+  {
+   "id": "C33",
+   "criterion": "R3",
+   "kind": "mutation",
+   "status": "pass",
+   "evidence": "KILLED: site/src/analytics.js: 'if (choice === \"granted\") loadAnalytics(w, doc);' -> 'if (true) loadAnalytics(w, doc);' (exit 1)",
+   "by": "mutate.py",
+   "cmd": "npm --prefix /Users/berwinsingh/Documents/oldhand/site test",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:41+00:00"
+  },
+  {
+   "id": "C34",
+   "criterion": "AC3",
+   "kind": "review",
+   "status": "pass",
+   "evidence": "review.md",
+   "by": "lead:fable",
+   "cmd": "oldhand-review",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:41+00:00"
+  },
+  {
+   "id": "C35",
+   "criterion": "R2",
+   "kind": "review",
+   "status": "pass",
+   "evidence": "review.md",
+   "by": "lead:fable",
+   "cmd": "oldhand-review",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:42+00:00"
+  },
+  {
+   "id": "C36",
+   "criterion": "AC4",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S3.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S3",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:27:34+00:00"
+  },
+  {
+   "id": "C37",
+   "criterion": "R1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S7.json",
+   "by": "qa:scout",
+   "cmd": "qa.py scenario S7",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:27:34+00:00"
+  },
+  {
+   "id": "C38",
+   "criterion": "AC4",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/results/S11.json",
+   "by": "qa:worker",
+   "cmd": "qa.py scenario S11",
+   "lead": false,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:27:35+00:00"
+  },
+  {
+   "id": "C39",
+   "criterion": "AC1",
+   "kind": "e2e",
+   "status": "pass",
+   "evidence": "qa/evidence/S1/lead-1.txt",
+   "by": "lead:fable",
+   "cmd": "qa.py scenario S1",
+   "lead": true,
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:29:18+00:00"
+  }
+ ],
+ "findings": [
+  {
+   "id": "F1",
+   "sev": "high",
+   "lens": "contract",
+   "where": "site/src/App.jsx:51",
+   "text": "Git clone tab shown as tested with 'git 2.x' and no recorded run",
+   "status": "fixed",
+   "note": "git clone route run on 2026-10-11 (git 2.55.0, zsh 5.9, clone of this branch, 11 links, idempotent); tested line names the versions; contract tested-routes list updated",
+   "accepted_by": "",
+   "time": "2026-10-11T06:08:22+00:00",
+   "resolved": "2026-10-11T06:08:23+00:00"
+  },
+  {
+   "id": "F2",
+   "sev": "medium",
+   "lens": "contract",
+   "where": "site/src/App.jsx:17-40",
+   "text": "tested lines imply the GitHub-source commands were run; the runs used a local checkout",
+   "status": "fixed",
+   "note": "every tested line says 'from a local checkout of this repository'",
+   "accepted_by": "",
+   "time": "2026-10-11T06:08:22+00:00",
+   "resolved": "2026-10-11T06:08:23+00:00"
+  },
+  {
+   "id": "F3",
+   "sev": "medium",
+   "lens": "contract",
+   "where": "site/src/App.jsx:325-327",
+   "text": "example intro says the prompt and every file are in the example folder; prompt is in examples/README.md and binary evidence was left out",
+   "status": "fixed",
+   "note": "intro links examples/README.md for the prompt and says the binary SQLite evidence is left out",
+   "accepted_by": "",
+   "time": "2026-10-11T06:08:22+00:00",
+   "resolved": "2026-10-11T06:08:23+00:00"
+  },
+  {
+   "id": "F4",
+   "sev": "medium",
+   "lens": "contract",
+   "where": "site/src/App.jsx:21-53,276-281,379-396",
+   "text": "host lists, invocation lines, honest-scope bullets and the hero claim have no link to their source files (AC3)",
+   "status": "fixed",
+   "note": "hosts.md linked from the install panel; scope bullets link the conductor and oldhand-qa; hero links ledger.py",
+   "accepted_by": "",
+   "time": "2026-10-11T06:08:22+00:00",
+   "resolved": "2026-10-11T06:08:23+00:00"
+  },
+  {
+   "id": "F5",
+   "sev": "medium",
+   "lens": "correctness",
+   "where": ".github/workflows/pages.yml:6-8",
+   "text": "Pages deploys only on site/** so changes to the imported SKILL.md, report.md and plugin.json never redeploy the page",
+   "status": "fixed",
+   "note": "paths trigger extended to the imported files (trigger only; steps unchanged); contract scope updated by the chair",
+   "accepted_by": "",
+   "time": "2026-10-11T06:08:22+00:00",
+   "resolved": "2026-10-11T06:08:23+00:00"
+  },
+  {
+   "id": "F6",
+   "sev": "medium",
+   "lens": "correctness",
+   "where": "site/src/App.jsx:82-88,247-255",
+   "text": "a moved heading makes section() return '' and the page ships an empty hard-stops list; nothing fails the build",
+   "status": "fixed",
+   "note": "slicing moved to src/slices.js with prefix heading matches; scripts/check-sources.mjs runs before vite build and fails on any empty slice; tests/slices.test.mjs covers the committed files and a moved heading",
+   "accepted_by": "",
+   "time": "2026-10-11T06:08:22+00:00",
+   "resolved": "2026-10-11T06:08:23+00:00"
+  },
+  {
+   "id": "F7",
+   "sev": "medium",
+   "lens": "correctness",
+   "where": "site/src/App.jsx:131-146",
+   "text": "CopyButton shows Copied when execCommand('copy') returned false, and the fallback drops keyboard focus",
+   "status": "fixed",
+   "note": "execCommand result read; failure shows 'Copy failed: select the text'; focus returned to the button; status span has role=status",
+   "accepted_by": "",
+   "time": "2026-10-11T06:08:22+00:00",
+   "resolved": "2026-10-11T06:08:24+00:00"
+  },
+  {
+   "id": "F8",
+   "sev": "medium",
+   "lens": "simplicity",
+   "where": "site/src/App.jsx:73-80,351-374",
+   "text": "model table hand-copied from orchestration.md with a typed-in date; drifts on the next lineup change",
+   "status": "fixed",
+   "note": "orchestration.md imported; the table and its date are sliced from the 'Current models per host' heading; check-sources asserts it",
+   "accepted_by": "",
+   "time": "2026-10-11T06:08:23+00:00",
+   "resolved": "2026-10-11T06:08:24+00:00"
+  }
+ ],
+ "restamps": [
+  {
+   "check": "C15",
+   "reason": "CSS-only change after the run: footer nav wraps and the computed line breaks long tokens; this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:49+00:00"
+  },
+  {
+   "check": "C16",
+   "reason": "CSS-only change after the run: footer nav wraps and the computed line breaks long tokens; this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:50+00:00"
+  },
+  {
+   "check": "C18",
+   "reason": "CSS-only change after the run: footer nav wraps and the computed line breaks long tokens; this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:50+00:00"
+  },
+  {
+   "check": "C19",
+   "reason": "CSS-only change after the run: footer nav wraps and the computed line breaks long tokens; this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:50+00:00"
+  },
+  {
+   "check": "C20",
+   "reason": "CSS-only change after the run: footer nav wraps and the computed line breaks long tokens; this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:50+00:00"
+  },
+  {
+   "check": "C22",
+   "reason": "CSS-only change after the run: footer nav wraps and the computed line breaks long tokens; this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:51+00:00"
+  },
+  {
+   "check": "C23",
+   "reason": "CSS-only change after the run: footer nav wraps and the computed line breaks long tokens; this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:51+00:00"
+  },
+  {
+   "check": "C24",
+   "reason": "CSS-only change after the run: footer nav wraps and the computed line breaks long tokens; this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:9e089856ed5534df:7d47a2326ef824c7",
+   "time": "2026-10-11T06:58:51+00:00"
+  },
+  {
+   "check": "C15",
+   "reason": "CSS-only change after the run (h1 overflow-wrap); this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:42+00:00"
+  },
+  {
+   "check": "C16",
+   "reason": "CSS-only change after the run (h1 overflow-wrap); this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:42+00:00"
+  },
+  {
+   "check": "C18",
+   "reason": "CSS-only change after the run (h1 overflow-wrap); this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:42+00:00"
+  },
+  {
+   "check": "C19",
+   "reason": "CSS-only change after the run (h1 overflow-wrap); this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:43+00:00"
+  },
+  {
+   "check": "C20",
+   "reason": "CSS-only change after the run (h1 overflow-wrap); this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:43+00:00"
+  },
+  {
+   "check": "C22",
+   "reason": "CSS-only change after the run (h1 overflow-wrap); this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:43+00:00"
+  },
+  {
+   "check": "C23",
+   "reason": "CSS-only change after the run (h1 overflow-wrap); this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:43+00:00"
+  },
+  {
+   "check": "C24",
+   "reason": "CSS-only change after the run (h1 overflow-wrap); this scenario does not observe layout",
+   "from": "00747f3a2739db13a7502c17394275fc1b4f1b1a:0d0803eb7f0bb4c3:7d47a2326ef824c7",
+   "fingerprint": "00747f3a2739db13a7502c17394275fc1b4f1b1a:91dcb9a640976fd1:7d47a2326ef824c7",
+   "time": "2026-10-11T07:17:44+00:00"
+  }
+ ]
+}

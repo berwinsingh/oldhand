@@ -1,0 +1,23 @@
+S1 expectation 4: the Copy control exists; after clicking it reads 'Copied'
+Page: http://localhost:4180/, section #skill, tab-7.
+
+Control: <button class="copy" type="button" aria-label="Copy the whole SKILL.md"><span role="status">Copy raw</span></button>, placed directly above the text block, left of 'View on GitHub'.
+Its visible label before any click is 'Copy raw' (not the bare word 'Copy'); it is the Copy control. Screenshot: the-skill-block-first-lines-and-copy-before-click-screenshot.jpg.
+
+Method: I installed a MutationObserver on the button in the page (read-only logging, no code changed) and clicked it with the real browser click tool (isTrusted=true click events recorded).
+Observed text transitions for each real click (t in ms since the observer was installed):
+  t=9783   'Copy raw' -> 'Copied'
+  t=11386  'Copied'   -> 'Copy raw'      (the label stays 'Copied' for about 1.6 s)
+  t=23173  'Copy raw' -> 'Copied'  (second click)    t=24776 back to 'Copy raw'
+  t=28973  'Copy raw' -> 'Copied'  (third click)     t=30576 back to 'Copy raw'
+  t=31708  'Copy raw' -> 'Copied'  (fourth click)    t=33310 back to 'Copy raw'
+Four trusted clicks, four 'Copied' states, no page error or unhandled rejection captured (window error / unhandledrejection listeners installed, nothing logged).
+A screenshot taken right after a click caught the label as 'Copied': copy-control-reads-Copied-zoom-screenshot.png (a 120x20 crop of the button area: 'Copied' next to 'View on GitHub').
+Other screenshots taken a moment later show 'Copy raw' again, because the label reverts after about 1.6 s.
+
+Side check (not required by the scenario): after the clicks I hashed the system clipboard without printing it:
+  clipboard: 13192 bytes, SHA-256 fcaf11226feb602fd88f24d4e21f262d7521200ce5f55911070ba5f63f64ff55 = the SHA-256 of skills/oldhand/SKILL.md. So the control copies the whole file.
+
+Note: my first two clicks, aimed by screenshot coordinates, missed the button (screenshots are 800x600 and do not map 1:1 to the 1440x900 CSS viewport); no state change happened for those and I redid the click by element reference. Result of those misses is not a defect of the page.
+
+Result: HOLDS (the control exists; after a click it reads 'Copied', briefly, then returns to 'Copy raw').

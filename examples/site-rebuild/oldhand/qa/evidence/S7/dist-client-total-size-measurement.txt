@@ -1,0 +1,9 @@
+$ find dist/client -type f -exec stat ... (byte total) ; du -sk dist/client
+file_count=4
+total_bytes=262129
+total_KiB=255.99
+total_MB_decimal=0.2621
+total_MiB=0.2500
+under_1MB_decimal=YES
+under_1MiB=YES
+du -sk dist/client (disk blocks, KiB): 264

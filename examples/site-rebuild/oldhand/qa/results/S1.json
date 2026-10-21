@@ -1,0 +1,22 @@
+{
+  "id": "S1",
+  "status": "pass",
+  "observed": "Opened http://localhost:4180/ in a new tab at 1440x900 (innerWidth 1440, innerHeight 900). 1) 'What it will not do' has an <ol> with 10 items. I joined the page's item texts and the '## Hard stops' items of skills/oldhand/SKILL.md (both whitespace-collapsed, backticks removed) and hashed them: both give SHA-256 516d6fc4...ae4f, so all 10 items are equal and in the same order. 2) Under 'The skill' the <pre class=skill> block starts with '---' then 'name: oldhand' and ends with 'contract -> trace -> rca -> research -> plan -> build -> review -> qa -> ship -> learn'. Its text is 13192 bytes with SHA-256 fcaf1122...ff55, byte-identical to the 13192-byte SKILL.md (same hash from shasum). 3) The only link in that section, 'View on GitHub', has href https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md, an exact match (not clicked). 4) A control labelled 'Copy raw' (aria-label 'Copy the whole SKILL.md') sits above the block. Four real clicks each changed its text to 'Copied' for about 1.6 s and then back to 'Copy raw' (logged with a MutationObserver; one screenshot caught 'Copied'). After the clicks the system clipboard was 13192 bytes with the same SHA-256 as SKILL.md. Console had only vite and React DevTools debug/info lines; all 18 requests were 200.",
+  "expected": "The numbered list under 'What it will not do' equals the '## Hard stops' items of skills/oldhand/SKILL.md in order; the block under 'The skill' starts with the frontmatter ('---', 'name: oldhand') and ends with the file's last line, i.e. equals the whole file; 'View on GitHub' links to https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md; the Copy control exists and reads 'Copied' after a click.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/hard-stops-list-page-vs-file.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/hard-stops-list-items-1-to-9-screenshot.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/hard-stops-list-items-3-to-10-screenshot.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/the-skill-block-vs-file.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/the-skill-block-first-lines-and-copy-before-click-screenshot.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/the-skill-block-last-line-screenshot.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/view-on-github-link.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/copy-control-behaviour.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/copy-control-reads-Copied-zoom-screenshot.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S1/console-and-network-tab-7.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "The Copy control's visible label is 'Copy raw', not 'Copy'; it is the Copy control and reads 'Copied' after a click, but only for about 1.6 s before reverting, so a slow screenshot misses it (the DOM log and one zoom screenshot caught it). The page imports SKILL.md live via GET /@fs/.../skills/oldhand/SKILL.md?import&raw, so this was the Vite dev server, not a built page. The evidence folder already held files 01-08 from an earlier S1 attempt (01-what-it-will-not-do-section.jpg ... 08-console-and-network.txt); I did not touch or rely on them and list only the files I wrote. The Browser pane is shared: other tabs on localhost:4180 and 127.0.0.1:4193 exist that are not mine; localStorage had a key 'oldhand-install-tab' set by another tab, so the context was not strictly fresh, but it does not affect this scenario. Screenshots from the tool are 800x600 crops and do not map 1:1 to the 1440x900 viewport; my first two coordinate clicks missed the button, and I clicked by element reference instead. I reset the viewport emulation to desktop at the end."
+}

@@ -1,0 +1,47 @@
+backup of site/src/analytics.js: /var/folders/5p/lbs0lbfx2xs2f9w_4rj5zq880000gn/T/oldhand-mutate-g_jlyrl8/analytics.js
+If this run is killed before it says 'restored', copy it back: cp '/var/folders/5p/lbs0lbfx2xs2f9w_4rj5zq880000gn/T/oldhand-mutate-g_jlyrl8/analytics.js' 'site/src/analytics.js'
+--- last 40 lines of the test output ---
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/analytics.test.mjs:53:1
+✖ denied after a load updates consent to denied (0.324083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'consent',
+      'update',
+      {
+  +     analytics_storage: 'granted'
+  -     analytics_storage: 'denied'
+      }
+    ]
+  
+      at TestContext.<anonymous> (file:///Users/berwinsingh/Documents/oldhand/site/tests/analytics.test.mjs:58:10)
+      at Test.runInAsyncScope (node:async_hooks:228:14)
+      at Test.run (node:internal/test_runner/test:1118:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:787:18)
+      at Test.postRun (node:internal/test_runner/test:1247:19)
+      at Test.run (node:internal/test_runner/test:1175:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'consent', 'update', { analytics_storage: 'granted' } ],
+    expected: [ 'consent', 'update', { analytics_storage: 'denied' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+---
+KILLED: the test command failed with the line broken (exit 1): the check guards it
+restored site/src/analytics.js (sha256 matches the original)
+recorded as a mutation check on R3 in .oldhand/site-rebuild

@@ -1,0 +1,51 @@
+# Step 2: every github.com/berwinsingh/oldhand blob/main or tree/main path from App.jsx and the built bundle, checked against the repository working tree at /Users/berwinsingh/Documents/oldhand (branch enhance/oldhand-2).
+# Exact-case check is component by component, since macOS paths are case-insensitive.
+
+blob/main/skills/oldhand/SKILL.md  ->  found (file, 13192 bytes)
+blob/main/skills/oldhand-contract/SKILL.md  ->  found (file, 10140 bytes)
+blob/main/skills/oldhand-trace/SKILL.md  ->  found (file, 8705 bytes)
+blob/main/skills/oldhand-rca/SKILL.md  ->  found (file, 11065 bytes)
+blob/main/skills/oldhand-research/SKILL.md  ->  found (file, 9194 bytes)
+blob/main/skills/oldhand-plan/SKILL.md  ->  found (file, 9819 bytes)
+blob/main/skills/oldhand-build/SKILL.md  ->  found (file, 10473 bytes)
+blob/main/skills/oldhand-review/SKILL.md  ->  found (file, 10566 bytes)
+blob/main/skills/oldhand-qa/SKILL.md  ->  found (file, 11692 bytes)
+blob/main/skills/oldhand-ship/SKILL.md  ->  found (file, 9283 bytes)
+blob/main/skills/oldhand-learn/SKILL.md  ->  found (file, 6973 bytes)
+blob/main/skills/oldhand/scripts/ledger.py  ->  found (file, 42581 bytes)
+blob/main/skills/oldhand-qa/scripts/qa.py  ->  found (file, 34334 bytes)
+blob/main/skills/oldhand-build/scripts/mutate.py  ->  found (file, 16826 bytes)
+blob/main/skills/oldhand/references/orchestration.md  ->  found (file, 14324 bytes)
+blob/main/SECURITY.md  ->  found (file, 704 bytes)
+tree/main/examples/csv-import-dupes  ->  found (dir)
+
+# Non-blob/tree links on the page (not path-checkable, recorded for completeness):
+https://github.com/berwinsingh/oldhand (repo root: GitHub nav link and footer GitHub link)
+https://github.com/berwinsingh/oldhand/issues  (footer)
+https://github.com/berwinsingh/oldhand/discussions  (footer)
+
+# Git remote for the repo the URLs point at:
+origin	https://github.com/berwinsingh/oldhand.git (fetch)
+origin	https://github.com/berwinsingh/oldhand.git (push)
+
+# Working-tree vs main (informational; the brief says the working tree is the source of truth)
+skills/oldhand/SKILL.md  |  on main  |  tracked in index
+skills/oldhand-contract/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-trace/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-rca/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-research/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-plan/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-build/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-review/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-qa/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-ship/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand-learn/SKILL.md  |  NOT on main  |  not tracked in index
+skills/oldhand/scripts/ledger.py  |  NOT on main  |  not tracked in index
+skills/oldhand-qa/scripts/qa.py  |  NOT on main  |  not tracked in index
+skills/oldhand-build/scripts/mutate.py  |  NOT on main  |  not tracked in index
+skills/oldhand/references/orchestration.md  |  NOT on main  |  not tracked in index
+SECURITY.md  |  on main  |  tracked in index
+examples/csv-import-dupes  |  NOT on main
+
+# Model table reference file date line
+16:## Current models per host (as of October 2026)

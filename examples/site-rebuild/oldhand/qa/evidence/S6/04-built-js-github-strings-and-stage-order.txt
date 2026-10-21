@@ -1,0 +1,20 @@
+# Built bundle used for this evidence: dist/client/assets/index-Bm6OPz8X.js (from the second npm run build, file 11)
+# (1) github.com/berwinsingh/oldhand strings and blob/tree fragments in the bundle
+   2 https://github.com/berwinsingh/oldhand
+   1 /blob/main/
+   1 /tree/main/examples/csv-import-dupes
+   1 skills/${r}/SKILL.md
+# (2) stage names in the bundle, in order of appearance
+     1	oldhand
+     2	oldhand-contract
+     3	oldhand-trace
+     4	oldhand-rca
+     5	oldhand-research
+     6	oldhand-plan
+     7	oldhand-build
+     8	oldhand-review
+     9	oldhand-qa
+    10	oldhand-ship
+    11	oldhand-learn
+# (3) stage link template in the stage map: the minified expression that builds skills/<name>/SKILL.md
+skills/${r}/SKILL.md

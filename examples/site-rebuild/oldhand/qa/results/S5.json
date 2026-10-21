@@ -1,0 +1,25 @@
+{
+  "id": "S5",
+  "status": "pass",
+  "observed": "Opened http://localhost:4180/#example in the Browser pane (vite dev server) and read the Example run section. Read examples/csv-import-dupes/oldhand/report.md with the file tool; the dev server serves a byte-identical copy (sha256 462cea62...3530 in the browser equals shasum of the file on disk), so a script in the page compared the report's parsed markdown to the rendered DOM (backticks removed, whitespace collapsed, strict equality). Verdict line: 'Verdict: VERIFIED' on both. Table: exactly 6 body rows AC1, AC2, R1, R2, R3, R4 in the report's order, one table in the section, 30 of 30 cells (criterion, outcome, proof, status, by) equal; the page shows 5 columns, the report's counted checks, evidence and flags columns are not shown; no review-findings content (no F1, medium, correctness, 'Review findings' text or heading). Root cause paragraph equal to the report section, also equal raw with newlines kept; Not verified list has 4 li equal to the 4 report bullets; the 'Computed by ledger.py ...' line equal with no normalisation. The link 'examples/csv-import-dupes' has href https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes (attribute and resolved). I clicked it: the tab went to that URL, which GitHub answers with 404 because the examples folder is not on origin/main yet (it is in local commit 00747f3 on branch enhance/oldhand-2; origin/main is 56029eb).",
+  "expected": "Verdict line 'Verdict: VERIFIED'; table has exactly the six criterion rows of the report's first table with matching criterion, outcome, proof, status and by cells and no row from the review-findings table; root cause paragraph and the four Not verified bullets equal the report word for word; link href is https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S5/compare-page-vs-report.md.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S5/page-text-example-section.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S5/example-verdict-and-six-row-table.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S5/example-root-cause-not-verified-computed-line.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S5/link-click-landed-on-github-404.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S5/console-and-network.txt"
+  ],
+  "console_errors": [
+    "[vite] SyntaxError: Unexpected token 'else' (already in the tab's console history before this run)",
+    "[vite] Failed to reload /src/App.jsx. This could be due to syntax errors or importing non-existent modules. (history, same cause)",
+    "WebSocket connection to 'ws://localhost:4180/' failed: (history, dev server restart)",
+    "Failed to load resource: the server responded with a status of 404 () (appeared after clicking the link; it is the GitHub 404 page, not an app request)"
+  ],
+  "network_failures": [
+    "GET https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes 404 (the link target, after clicking it; no failed request on localhost:4180, all 200 or 304)"
+  ],
+  "blocker": "",
+  "notes": "1) The browser tab was not a clean context: other tabs existed, the tab cap blocked opening a new one, and the console buffer carried earlier vite errors, so I made fresh loads from github.com and example.com instead. 2) A fresh load of /#example does not scroll to the section: scrollY stays 0 after 2 s while #example is at y=2528 (document 6195 px high), so a visitor lands on the hero and has to scroll or use the Example nav link; the first load in the run looked scrolled only because the tab already sat there. Not one of the expectations, but the entry-point anchor does not work on a fresh load (likely React rendering after the browser's fragment scroll attempt). 3) The examples/csv-import-dupes and examples/README.md links 404 on GitHub until the branch is merged to main; the scenario only checks the href. 4) The page table shows 5 of the report's 8 columns, which matches the scenario wording (criterion, outcome, proof, status, by). 5) The Example run section is built from report.md at build time via the vite raw import; the text is the committed report, including 'Verdict: VERIFIED'."
+}

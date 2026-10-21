@@ -1,0 +1,19 @@
+S4 steps 3 and 4 - footer read, then real click on the footer button "Turn on Google Analytics" (tab-1, http://localhost:4180/, re-run 11 Oct 2026)
+Step 3 footer before click: "Google Analytics is off; nothing is sent. Turn on Google Analytics · How Google uses data"
+  footer button: "Turn on Google Analytics" ; footer link: "How Google uses data" -> https://policies.google.com/technologies/partner-sites
+Click: left_click on the button at the rendered footer (screenshot 02-footer-before-click.jpg).
+
+Step 4 after the click:
+Footer text AFTER click: "Google Analytics is on. Turn it off · How Google uses data"   (footer buttons: ["Turn it off"])
+localStorage.getItem('oldhand-analytics-consent')            -> "granted"
+!!document.querySelector('script[data-oldhand-analytics]')   -> true  (data-oldhand-analytics="true", parent <head>, async=true)
+script src                                                   -> https://www.googletagmanager.com/gtag/js?id=G-75YW6HE9FT
+document.scripts matching googletagmanager                   -> ["https://www.googletagmanager.com/gtag/js?id=G-75YW6HE9FT"]
+typeof window.gtag -> "function" ; window.google_tag_manager keys include "G-75YW6HE9FT" (gtag.js loaded and ran)
+Resource Timing (performance.getEntriesByType('resource')) matching googletagmanager|google-analytics:
+  - https://www.googletagmanager.com/gtag/js?id=G-75YW6HE9FT   initiatorType=script  startTime=39701ms duration=3ms
+  - https://www.google-analytics.com/g/collect?v=2&tid=G-75YW6HE9FT&...   initiatorType=fetch  startTime=39763ms duration=146ms
+position:fixed element count                                 -> 0
+NOTE: the Browser pane's read_network_requests tool does NOT list cross-origin requests: urlPattern "googletagmanager" returned
+"No requests matching googletagmanager." even now that the script is present. The request evidence above therefore comes from
+the page's own Resource Timing API (and the script element's src), not from the pane's network log.

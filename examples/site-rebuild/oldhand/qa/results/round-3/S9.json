@@ -1,0 +1,18 @@
+{
+  "id": "S9",
+  "status": "fail",
+  "observed": "Step 1: from the site folder I ran npm test (command and full output saved). Exit code 0. The script is node --test tests/analytics.test.mjs tests/slices.test.mjs. The summary said tests 10, pass 10, fail 0, cancelled 0, skipped 0, todo 0. The 0-failing part held. The 5-passing part did not: 10 tests passed, because tests/analytics.test.mjs has 5 tests and tests/slices.test.mjs has 5 more, and npm test runs both. Step 2: src/analytics.js defines loadAnalytics at line 23 and calls it at line 59 only, inside applyAnalyticsChoice, as: if (choice === 'granted') loadAnalytics(w, doc). A grep across the site folder (excluding node_modules and dist) found no other call to loadAnalytics. index.html and src/main.jsx contain no analytics code. The tests call applyAnalyticsChoice, not loadAnalytics. This held. Step 3: src/App.jsx touches analytics only at the import (line 6), a lazy useState(readAnalyticsChoice) (line 201), a useEffect that calls applyAnalyticsChoice(analytics) with [analytics] as its dependency (lines 202-204), and saveAnalyticsChoice(next) in the footer toggle handler (lines 206-209, runs only on a click). The literal text applyAnalyticsChoice(readAnalyticsChoice()) does not appear, but the stored choice reaches applyAnalyticsChoice on load through the lazy initializer and the effect, which is the same behaviour. With no stored choice, applyAnalyticsChoice(null) does nothing. The on-load expectation held in substance.",
+  "expected": "npm test reports 5 passing tests and 0 failing. loadAnalytics is reachable only through applyAnalyticsChoice with a 'granted' choice, and nothing calls it unconditionally. The page applies the stored choice on load and otherwise does nothing.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/npm_test_command_and_full_output.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/test_declarations_and_npm_test_script.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/analytics_js_source_with_line_numbers.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/loadAnalytics_call_sites_across_site_src.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/App_jsx_source_with_line_numbers.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/App_jsx_analytics_lines_on_load.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "The only failing expectation is the count: the brief says 5 passing, npm test reports 10. Per the brief's rule this is fail. If the scenario meant only the analytics suite, the count expectation is stale, not the behaviour. The analytics suite alone is 5 tests. The evidence folder already held 7 files from earlier runs, dated 01:38 to 02:28 today (for example expectation1-npm-test-5-pass-0-fail.txt). I did not open or rely on them. package.json was modified at 11:37 today, later than those files, so the test script may have changed since. No browser session was run, because the steps are code-level (npm test plus two source reads), so the on-load behaviour is shown by reading App.jsx, not by loading the page. npm test printed no console errors or warnings. The dist/ build was not inspected. No files were edited, and nothing was written outside the S9 evidence folder and this result file."
+}

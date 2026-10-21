@@ -1,0 +1,11 @@
+$ find dist/client -iname '*.png'
+dist/client/favicon.png
+--- all dist/client files, any extension (for context):
+dist/client/assets/index-BRrSHBwy.css
+dist/client/assets/index-CJn-AL1N.js
+dist/client/favicon.png
+dist/client/index.html
+--- non-favicon png count: 0
+--- favicon.png count: 1
+--- file type of favicon.png:
+dist/client/favicon.png: PNG image data, 64 x 64, 8-bit/color RGB, non-interlaced

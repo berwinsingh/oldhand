@@ -1,0 +1,70 @@
+# Context for notes. tests/analytics.test.mjs (the file npm test runs), read-only.
+
+     1	import assert from "node:assert/strict";
+     2	import test from "node:test";
+     3	import {
+     4	  ANALYTICS_CONSENT_KEY,
+     5	  GA_MEASUREMENT_ID,
+     6	  applyAnalyticsChoice,
+     7	  readAnalyticsChoice,
+     8	  saveAnalyticsChoice,
+     9	} from "../src/analytics.js";
+    10	
+    11	function fakeDom() {
+    12	  const head = { children: [], appendChild(node) { this.children.push(node); } };
+    13	  const doc = {
+    14	    head,
+    15	    createElement: () => ({ dataset: {} }),
+    16	    querySelector: () => head.children.find((n) => n.dataset.oldhandAnalytics) || null,
+    17	  };
+    18	  return { win: {}, doc };
+    19	}
+    20	
+    21	function fakeStorage(initial = {}) {
+    22	  const data = { ...initial };
+    23	  return { getItem: (k) => (k in data ? data[k] : null), setItem: (k, v) => { data[k] = v; }, data };
+    24	}
+    25	
+    26	test("no choice loads nothing", () => {
+    27	  const { win, doc } = fakeDom();
+    28	  applyAnalyticsChoice(null, win, doc);
+    29	  assert.equal(doc.head.children.length, 0);
+    30	  assert.equal(win.gtag, undefined);
+    31	});
+    32	
+    33	test("denied without a loaded gtag loads nothing", () => {
+    34	  const { win, doc } = fakeDom();
+    35	  applyAnalyticsChoice("denied", win, doc);
+    36	  assert.equal(doc.head.children.length, 0);
+    37	});
+    38	
+    39	test("granted sets consent default denied before granting, then injects one script", () => {
+    40	  const { win, doc } = fakeDom();
+    41	  applyAnalyticsChoice("granted", win, doc);
+    42	  const calls = win.dataLayer.map((args) => Array.from(args));
+    43	  assert.deepEqual(calls[0], ["consent", "default", {
+    44	    analytics_storage: "denied", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied",
+    45	  }]);
+    46	  assert.deepEqual(calls[1], ["consent", "update", { analytics_storage: "granted" }]);
+    47	  assert.equal(doc.head.children.length, 1);
+    48	  assert.match(doc.head.children[0].src, new RegExp(`id=${GA_MEASUREMENT_ID}$`));
+    49	  applyAnalyticsChoice("granted", win, doc);
+    50	  assert.equal(doc.head.children.length, 1, "a second grant does not inject a second script");
+    51	});
+    52	
+    53	test("denied after a load updates consent to denied", () => {
+    54	  const { win, doc } = fakeDom();
+    55	  applyAnalyticsChoice("granted", win, doc);
+    56	  applyAnalyticsChoice("denied", win, doc);
+    57	  const last = Array.from(win.dataLayer.at(-1));
+    58	  assert.deepEqual(last, ["consent", "update", { analytics_storage: "denied" }]);
+    59	});
+    60	
+    61	test("stored choice round-trips and junk or a throwing store reads as null", () => {
+    62	  const store = fakeStorage();
+    63	  saveAnalyticsChoice("granted", store);
+    64	  assert.equal(store.data[ANALYTICS_CONSENT_KEY], "granted");
+    65	  assert.equal(readAnalyticsChoice(store), "granted");
+    66	  assert.equal(readAnalyticsChoice(fakeStorage({ [ANALYTICS_CONSENT_KEY]: "maybe" })), null);
+    67	  assert.equal(readAnalyticsChoice({ getItem() { throw new Error("blocked"); } }), null);
+    68	});

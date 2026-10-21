@@ -1,0 +1,35 @@
+# Step 3. App.jsx analytics wiring (read-only). Imports, the App() hook block, and the toggle.
+
+## lines 1-5 (imports)
+     1	import { useEffect, useState } from "react";
+     2	import skillText from "../../skills/oldhand/SKILL.md?raw";
+     3	import reportText from "../../examples/csv-import-dupes/oldhand/report.md?raw";
+     4	import plugin from "../../.claude-plugin/plugin.json";
+     5	import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+
+## lines 235-245 (App hook block)
+L1+234	export function App() {
+L2+234	  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+L3+234	  useEffect(() => {
+L4+234	    applyAnalyticsChoice(analytics);
+L5+234	  }, [analytics]);
+L6+234	
+L7+234	  function toggleAnalytics() {
+L8+234	    const next = analytics === "granted" ? "denied" : "granted";
+L9+234	    saveAnalyticsChoice(next);
+L10+234	    setAnalytics(next);
+L11+234	  }
+
+## grep for every analytics symbol in App.jsx
+5:import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+236:  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+238:    applyAnalyticsChoice(analytics);
+239:  }, [analytics]);
+241:  function toggleAnalytics() {
+242:    const next = analytics === "granted" ? "denied" : "granted";
+243:    saveAnalyticsChoice(next);
+244:    setAnalytics(next);
+408:        <p className="analytics">
+409:          {analytics === "granted" ? "Anonymous Google Analytics is on." : "Analytics are off."}{" "}
+410:          <button type="button" className="link" onClick={toggleAnalytics}>
+411:            {analytics === "granted" ? "Turn it off" : "Turn on anonymous Google Analytics"}

@@ -1,0 +1,61 @@
+S11 - zoomed to 200 percent on a phone: no horizontal scroll   (run 2026-10-11, http://localhost:4180/, Vite dev server)
+
+HOW IT WAS RUN
+Isolated Playwright + system Chrome 154 (headless), fresh context per run, nothing signed in, nothing written to the app.
+Browser-pane tabs were shared and tab creation failed, so the pane was not touched.
+  A = mobile preset: 375x812, DPR 2, Android Chrome UA, touch, mobile viewport emulation
+  B = same 375 width, plain (non-mobile) viewport, so innerWidth stays 375
+  C = supplemental, not a scenario step: genuine 200% browser zoom = 188 CSS px wide viewport, no hack
+  D = step 4, reset: fresh 1280x800 desktop context, no zoom/font-size set
+
+Step 2 hack applied exactly as given:
+  document.documentElement.style.fontSize = '200%'; document.body.style.zoom = '2';
+
+EXPECTATION 1 - scrollWidth does not exceed innerWidth ............ FAIL
+  Before the hack (A and B): innerWidth 375, scrollWidth 375.
+  After the hack:
+    B (plain 375):  innerWidth 375, clientWidth 375, scrollWidth 589  -> exceeds by 214 px.
+                    window.scrollTo(2000,0) gives scrollX 214 (page really scrolls sideways).
+    A (mobile preset): innerWidth 589, clientWidth 375, scrollWidth 589.
+                    The literal comparison is equal (589 = 589) ONLY because mobile emulation inflated innerWidth
+                    from 375 to 589 once content overflowed. documentElement.clientWidth stayed 375, so content is
+                    214 px wider than the screen. A touch swipe-left on the page moved visualViewport.pageLeft 0 -> 214.
+    C (true 200% zoom, 188px viewport): innerWidth 188, scrollWidth 291 -> exceeds by 103 px, scrollX reaches 103.
+  Files: 02-A-..., 03-A-..., 12-B-..., 17-C-..., screenshots 03-A, 13-B, 14-B, 09-A.
+  Cause: html font-size 200% alone does not overflow (B: 375/375/375); body zoom 2 alone does (375/375/581) - see 16-B.
+
+EXPECTATION 2 - anything wider than the viewport is a command/table container that scrolls inside itself ... FAIL
+  OK: 89 element boxes (A and B) extend past 375 but sit inside their own overflow-x:auto container, and each of those
+      containers fits the screen: header nav, install tab strip, install command <pre>, criteria table wrapper,
+      models table wrapper. (02-A / 12-B "scroll_containers", all fitsViewport=true, endReachable=true.)
+  NOT OK: 3 element boxes sit directly in the page with overflow visible:
+      footer > nav (GitHub, Issues, Discussions, Security): display flex, flex-wrap nowrap, gap 16px, 549 px wide
+        inside a 311 px footer, right edge 581 (206 px past the screen); links Discussions right=439, Security right=581.
+        It is not a command or table and does not scroll inside itself.  (15-B-footer-nav-computed-styles.json)
+      Text that pokes past the screen outside any scroller: p.computed ("Computed by ledger.py from ledger.json at
+        2026-10-10T19:17:57+00:00 on tree 4c043ed41b:4a2697fb:e3b0c442 ...", unbreakable tokens, right edge 472.7);
+        under the zoom hack also the h1 word "definition" (right edge 589.5; its computed font-size is 64px vs 32px normally,
+        because 200% root font-size and body zoom 2 compound on rem-sized text; the word has no break opportunity).
+      With true 200% zoom (C) the footer nav (right 290.6 vs 188) and p.computed (right 236.3) still overflow; the h1 fits.
+
+EXPECTATION 3 - no text clipped without a way to scroll to it ..... HELD, with the caveat below
+  No element has overflow hidden/clip or text-overflow ellipsis with hidden content (horizontally_clipped_not_scrollable = []),
+  and nothing sits left of x=0 outside a scroller (A, B, C).
+  Step 3 (A, zoom on): every install command block scrolls inside itself and its text end is reachable:
+    Any agent 440/120 px, Claude Code plugin 389/120 and 288/120, Codex plugin 431/120, Git clone 876/120 (scrollWidth/clientWidth).
+    After mouse-wheel scrolling to the end, text end right edge (about 279-281) <= block right edge (307); the page did not move
+    (scrollX 0, visualViewport.pageLeft 0).  (05-A-install-command-blocks.json + 05-A-*.png)
+  Criteria table (Example run, 5 columns, 399/156) and Models table (371/156) scroll inside their wrappers; after scrolling
+    to the end every row's last cell is inside the wrapper (allRowsLastCellVisibleAfterScroll=true).  (06-A-*.json/png, 07-A-*.png)
+  Caveat: the footer links Discussions/Security and the overflowing p.computed text are reachable only by scrolling the whole
+    page sideways, which is the Expectation 1 failure (screenshots 09-A and 14-B show them only after the sideways scroll).
+
+STEP 4 - reset to desktop: the mobile/zoom contexts were closed; a fresh 1280x800 context loads with innerWidth 1280,
+  scrollWidth 1280, no inline zoom and no inline font-size (18-D).
+
+CONSOLE / NETWORK: only Vite debug lines and the React DevTools info line. No console errors, no failed requests, no 4xx/5xx (99-console-and-network-log.json).
+
+OTHER OBSERVATIONS (not expectations)
+  - At 200% the sticky header (brand, version, Install / How it works) takes about 215 of 812 px (about 26%) of the screen and
+    overlaps content while scrolling (visible at the top of every viewport screenshot).
+  - The criteria table container is about 5,850 px tall at 200% because the outcome column wraps in a very narrow cell.

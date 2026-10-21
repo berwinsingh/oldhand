@@ -1,0 +1,17 @@
+$ find dist -print0 | xargs -0 stat -f "%z %N" ; then existence checks for the three required files
+--- find (all files under dist, with sizes in bytes)
+160 dist
+96 dist/.openai
+31 dist/.openai/hosting.json
+160 dist/client
+128 dist/client/assets
+4928 dist/client/assets/index-BPayaSaH.css
+245428 dist/client/assets/index-BvCIC6F3.js
+8464 dist/client/favicon.png
+3309 dist/client/index.html
+96 dist/server
+483 dist/server/index.js
+--- existence checks
+EXISTS  dist/client/index.html  (3309 bytes)
+EXISTS  dist/server/index.js  (483 bytes)
+EXISTS  dist/.openai/hosting.json  (31 bytes)

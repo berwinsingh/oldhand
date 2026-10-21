@@ -1,0 +1,52 @@
+$ git show HEAD:site/src/App.jsx | nl -ba | sed -n '268,296p'   (read-only, pre-change baseline at HEAD 92e7f57)
+   268	
+   269	export function App() {
+   270	  const [selectedSources, setSelectedSources] = useState([0, 6]);
+   271	  const [analyticsChoice, setAnalyticsChoice] = useState(readAnalyticsChoice);
+   272	  const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
+   273	
+   274	  useEffect(() => {
+   275	    if (analyticsChoice === "granted") loadAnalytics();
+   276	  }, [analyticsChoice]);
+   277	
+   278	  function toggleSource(index) {
+   279	    setSelectedSources((current) =>
+   280	      current.includes(index)
+   281	        ? current.filter((item) => item !== index)
+   282	        : [...current, index],
+   283	    );
+   284	  }
+   285	
+   286	  function scrollToInstall() {
+   287	    document.querySelector("#install")?.scrollIntoView({ behavior: "smooth" });
+   288	  }
+   289	
+   290	  function chooseAnalytics(choice) {
+   291	    saveAnalyticsChoice(choice);
+   292	    if (choice === "denied") {
+   293	      window.gtag?.("consent", "update", { analytics_storage: "denied" });
+   294	    }
+   295	    setAnalyticsChoice(choice);
+   296	  }
+
+$ git show HEAD:site/package.json | sed -n '/scripts/,/}/p'
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/prepare-sites-build.mjs",
+    "preview": "vite preview",
+    "test:sites": "node --test tests/sites-worker.test.mjs"
+  },
+
+$ git ls-tree -r HEAD --name-only -- site/tests site/src/analytics.js   (files tracked at HEAD)
+site/tests/sites-worker.test.mjs
+(end of tracked list)
+
+$ git status --short -- site/src/analytics.js site/tests site/src/App.jsx site/package.json
+ M site/package.json
+ M site/src/App.jsx
+?? site/src/analytics.js
+?? site/tests/analytics.test.mjs
+?? site/tests/slices.test.mjs
+
+$ grep -n AnalyticsConsent|Help improve in working tree App.jsx
+no consent banner in working-tree App.jsx

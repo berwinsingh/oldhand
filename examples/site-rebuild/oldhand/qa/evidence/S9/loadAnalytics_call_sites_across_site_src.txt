@@ -1,0 +1,41 @@
+$ grep -rn --exclude-dir=node_modules --exclude-dir=dist -e loadAnalytics -e applyAnalyticsChoice -e readAnalyticsChoice -e saveAnalyticsChoice -e gtag -e googletagmanager .
+tests/analytics.test.mjs:6:  applyAnalyticsChoice,
+tests/analytics.test.mjs:7:  readAnalyticsChoice,
+tests/analytics.test.mjs:8:  saveAnalyticsChoice,
+tests/analytics.test.mjs:28:  applyAnalyticsChoice(null, win, doc);
+tests/analytics.test.mjs:30:  assert.equal(win.gtag, undefined);
+tests/analytics.test.mjs:33:test("denied without a loaded gtag loads nothing", () => {
+tests/analytics.test.mjs:35:  applyAnalyticsChoice("denied", win, doc);
+tests/analytics.test.mjs:41:  applyAnalyticsChoice("granted", win, doc);
+tests/analytics.test.mjs:49:  applyAnalyticsChoice("granted", win, doc);
+tests/analytics.test.mjs:55:  applyAnalyticsChoice("granted", win, doc);
+tests/analytics.test.mjs:56:  applyAnalyticsChoice("denied", win, doc);
+tests/analytics.test.mjs:63:  saveAnalyticsChoice("granted", store);
+tests/analytics.test.mjs:65:  assert.equal(readAnalyticsChoice(store), "granted");
+tests/analytics.test.mjs:66:  assert.equal(readAnalyticsChoice(fakeStorage({ [ANALYTICS_CONSENT_KEY]: "maybe" })), null);
+tests/analytics.test.mjs:67:  assert.equal(readAnalyticsChoice({ getItem() { throw new Error("blocked"); } }), null);
+src/analytics.js:5:export function readAnalyticsChoice(storage) {
+src/analytics.js:15:export function saveAnalyticsChoice(choice, storage) {
+src/analytics.js:23:export function loadAnalytics(win, doc) {
+src/analytics.js:27:  w.gtag =
+src/analytics.js:28:    w.gtag ||
+src/analytics.js:29:    function gtag() {
+src/analytics.js:34:    w.gtag("consent", "update", { analytics_storage: "granted" });
+src/analytics.js:38:  w.gtag("consent", "default", {
+src/analytics.js:44:  w.gtag("consent", "update", { analytics_storage: "granted" });
+src/analytics.js:45:  w.gtag("js", new Date());
+src/analytics.js:46:  w.gtag("config", GA_MEASUREMENT_ID);
+src/analytics.js:51:  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+src/analytics.js:56:// loaded gtag to stop; null (no choice yet) does nothing.
+src/analytics.js:57:export function applyAnalyticsChoice(choice, win, doc) {
+src/analytics.js:59:  if (choice === "granted") loadAnalytics(w, doc);
+src/analytics.js:60:  else if (choice === "denied" && typeof w.gtag === "function") {
+src/analytics.js:61:    w.gtag("consent", "update", { analytics_storage: "denied" });
+src/App.jsx:6:import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+src/App.jsx:201:  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+src/App.jsx:203:    applyAnalyticsChoice(analytics);
+src/App.jsx:208:    saveAnalyticsChoice(next);
+exit=0
+
+$ grep -rn -i analytics src/main.jsx index.html   (entry point and page shell)
+exit=1  (1 = no match)

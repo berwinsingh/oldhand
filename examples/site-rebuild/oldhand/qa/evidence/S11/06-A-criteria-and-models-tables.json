@@ -1,0 +1,67 @@
+[
+ {
+  "table": "criteria table (Example run)",
+  "before": {
+   "scrollLeft": 0,
+   "sw": 399,
+   "cw": 156,
+   "overflowX": "auto",
+   "containerRight": 343,
+   "containerHeight": 5854
+  },
+  "scrolled_by_mouse_wheel": {
+   "scrollLeft": 243.5,
+   "maxScroll": 243
+  },
+  "rows_check_after_scroll": {
+   "headers": [
+    "criterion",
+    "outcome",
+    "proof",
+    "status",
+    "by"
+   ],
+   "allRowsLastCellVisibleAfterScroll": true,
+   "maxLastCellRight": 342.53125,
+   "containerRight": 343
+  },
+  "page_scrollWidth_clientWidth_scrollX_vvPageLeft_after": [
+   589,
+   375,
+   0,
+   0
+  ]
+ },
+ {
+  "table": "models table",
+  "before": {
+   "scrollLeft": 0,
+   "sw": 371,
+   "cw": 156,
+   "overflowX": "auto",
+   "containerRight": 343,
+   "containerHeight": 2240
+  },
+  "scrolled_by_mouse_wheel": {
+   "scrollLeft": 216,
+   "maxScroll": 215
+  },
+  "rows_check_after_scroll": {
+   "headers": [
+    "host",
+    "lead",
+    "worker",
+    "scout"
+   ],
+   "allRowsLastCellVisibleAfterScroll": true,
+   "maxLastCellRight": 342.578125,
+   "containerRight": 343
+  },
+  "page_scrollWidth_clientWidth_scrollX_vvPageLeft_after": [
+   589,
+   375,
+   0,
+   0
+  ]
+ }
+]

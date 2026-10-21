@@ -1,0 +1,26 @@
+# Step 4 (cont.): the sentence before the models table, the date in its heading, and the sentence after it
+# (the page prints the heading date as '(as of ...)' via src/slices.js modelsDate and renders the table from this file)
+# command: sed -n '16,19p' skills/oldhand/references/orchestration.md ; sed -n '309,322p' site/src/App.jsx
+--- orchestration.md heading and intro lines ---
+     1	## Current models per host (as of October 2026)
+     2	
+     3	Lineups change every few weeks. At the start of a task, check what the host
+     4	actually offers (its model picker or `/model`) and apply the substitution rule.
+--- site/src/App.jsx lines 309-322 (models section as the page renders it) ---
+     1	        <section id="models">
+     2	          <h2>Models</h2>
+     3	          <p>
+     4	            The skills name roles, not models: the lead owns the contract, the review chair, the
+     5	            final check and the release decision; workers implement, investigate, review and drive
+     6	            QA; scouts sweep files, read logs and run read-only checks. One dated file,{" "}
+     7	            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a>,
+     8	            maps the roles to current models; this table is read from it ({data.modelsDate}):
+     9	          </p>
+    10	          <Table data={data.models} />
+    11	          <p>
+    12	            If a named model is missing, the agent uses the newest one the host offers in the same
+    13	            role, never puts the lead below worker tier, and records the model that actually ran.
+    14	          </p>
+--- date extraction, as slices.js line 77 does it: /\((as of [^)]+)\)/ on the heading ---
+modelsDate = 'as of October 2026'
+text near table renders as: "... this table is read from it (as of October 2026):"

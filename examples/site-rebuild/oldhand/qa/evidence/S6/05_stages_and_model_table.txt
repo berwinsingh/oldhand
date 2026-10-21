@@ -1,0 +1,79 @@
+# Step 3: stages array in /Users/berwinsingh/Documents/oldhand/site/src/App.jsx (lines 59-71), names in order, each linked as blob/main/skills/<name>/SKILL.md
+const stages = [
+  ["oldhand", "the conductor: routes the request through the stages, keeps one task folder and a ledger, and decides from the verdict"],
+  ["oldhand-contract", "the request, with its assumptions and changed requirements, becomes numbered acceptance and regression criteria, each with the proof it needs"],
+  ["oldhand-trace", "the real path hop by hop, from entry point to rendered result, and every caller of what will change"],
+  ["oldhand-rca", "evidence-first root cause for bugs; read-only refuters try to break it before it is accepted"],
+  ["oldhand-research", "before anything new: the codebase, the standard library, the platform, installed dependencies, then open source behind a licence gate"],
+  ["oldhand-plan", "the smallest complete change, with blast radius, rollback, delegation and a budget for live runs"],
+  ["oldhand-build", "the Ponytail ladder, one focused regression check, proven by mutation: break the fix and the check must fail"],
+  ["oldhand-review", "a board of read-only reviewers, one lens each; the chair refutes every finding before it counts"],
+  ["oldhand-qa", "one sub-agent per scenario drives the real app and brings back evidence; the lead re-runs the key one"],
+  ["oldhand-ship", "the verdict is computed by a script from the ledger; publication only when the request authorized it"],
+  ["oldhand-learn", "the non-obvious lessons go where the project keeps its instructions, so the next session does not relearn them"],
+];
+
+# Stage names in order (extracted):
+ 1. oldhand
+ 2. oldhand-contract
+ 3. oldhand-trace
+ 4. oldhand-rca
+ 5. oldhand-research
+ 6. oldhand-plan
+ 7. oldhand-build
+ 8. oldhand-review
+ 9. oldhand-qa
+10. oldhand-ship
+11. oldhand-learn
+
+# Stage link template at App.jsx line 296:
+296:                <a href={`${BLOB}skills/${name}/SKILL.md`}>{name}</a>
+
+# Step 4: sentence before the models table and the models array (lines 73-80, 351-374)
+        <section id="models">
+          <h2>Models</h2>
+          <p>
+            The skills name roles, not models: the lead owns the contract, the review chair, the
+            final check and the release decision; workers implement, investigate, review and drive
+            QA; scouts sweep files, read logs and run read-only checks. One dated file,{" "}
+            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a>,
+            maps the roles to current models (as of October 2026):
+          </p>
+          <table>
+            <thead>
+              <tr><th>host</th><th>lead</th><th>worker</th><th>scout</th></tr>
+            </thead>
+            <tbody>
+              {models.map((row) => (
+                <tr key={row[0]}>{row.map((cell, i) => <td key={i}>{cell}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+          <p>
+            If a named model is missing, the agent uses the newest one the host offers in the same
+            role, never puts the lead below worker tier, and records the model that actually ran.
+          </p>
+        </section>
+
+# models array rows (lines 73-80):
+const models = [
+  ["Claude Code", "Fable, else Opus", "Sonnet; Opus for hard slices", "Haiku"],
+  ["Codex", "GPT-6 Astra", "GPT-6.1 Sol", "GPT-6 Luna"],
+  ["GitHub Copilot", "Fable or GPT-6 Astra", "Sonnet or GPT-6.1 Sol", "Haiku or GPT-6 Luna"],
+  ["Cursor", "the strongest frontier model enabled", "Composer", "Composer"],
+  ["Gemini CLI, Antigravity", "Gemini Pro", "Gemini Flash", "Gemini Flash or Flash-Lite"],
+  ["OpenCode", "the strongest model configured", "the provider's standard model", "the provider's fast model"],
+];
+
+# Built bundle confirms the same 11 stage names in order:
+ 1. oldhand
+ 2. oldhand-contract
+ 3. oldhand-trace
+ 4. oldhand-rca
+ 5. oldhand-research
+ 6. oldhand-plan
+ 7. oldhand-build
+ 8. oldhand-review
+ 9. oldhand-qa
+10. oldhand-ship
+11. oldhand-learn

@@ -1,0 +1,16 @@
+S4 extra check (not a numbered step) - reload after turning analytics off (tab-1, re-run 11 Oct 2026)
+performance navigation type = "reload", uptime 7.9 s
+localStorage 'oldhand-analytics-consent'                          -> "denied"
+script[data-oldhand-analytics] present                            -> false
+Resource Timing entries for googletagmanager / google-analytics   -> [] (none)
+Footer: "Google Analytics is off; nothing is sent. Turn on Google Analytics · How Google uses data"
+
+Browser pane network log for tab-1 (read_network_requests, 271 entries seen): every request is a GET to http://localhost:4180/... and all returned 200 OK or 304 Not Modified. No failed requests.
+The pane does not list cross-origin requests (googletagmanager, google-analytics), so those are evidenced by Resource Timing in 04/05/06 files.
+
+Console (read_console_messages for tab-1) is cumulative for the tab's whole history, not only this run. Error-level lines in it:
+[error] [vite] SyntaxError: Unexpected token 'else'
+[error] [vite] Failed to reload /src/App.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+[error] WebSocket connection to 'ws://localhost:4180/' failed:
+[error] Failed to load resource: the server responded with a status of 404 ()
+All four sit before the last 7 page loads in the log; this run made 5 loads (clear+load, load, load after click, 2 reloads), and the last 7 loads in the log show only [debug] vite connecting/connected and the [info] React DevTools hint, so none of the four errors came from the S4 steps. The 404 resource was not identified (no 404 in the pane's network log).

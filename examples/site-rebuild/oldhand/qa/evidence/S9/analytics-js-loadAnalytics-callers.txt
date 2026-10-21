@@ -1,0 +1,20 @@
+$ grep -rn loadAnalytics src scripts public worker tests (excluding node_modules, dist)
+src/analytics.js:23:export function loadAnalytics(win, doc) {
+src/analytics.js:59:  if (choice === "granted") loadAnalytics(w, doc);
+grep_exit=0
+
+$ cat -n src/analytics.js (lines 55-63: applyAnalyticsChoice)
+    55	// Apply a choice: only "granted" loads anything; "denied" tells an already
+    56	// loaded gtag to stop; null (no choice yet) does nothing.
+    57	export function applyAnalyticsChoice(choice, win, doc) {
+    58	  const w = win || window;
+    59	  if (choice === "granted") loadAnalytics(w, doc);
+    60	  else if (choice === "denied" && typeof w.gtag === "function") {
+    61	    w.gtag("consent", "update", { analytics_storage: "denied" });
+    62	  }
+    63	}
+
+$ cat -n src/analytics.js (lines 23-25: loadAnalytics head)
+    23	export function loadAnalytics(win, doc) {
+    24	  const w = win || window;
+    25	  const d = doc || document;

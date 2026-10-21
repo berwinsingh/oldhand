@@ -1,0 +1,31 @@
+S11 run3 - Expectation 3: no text clipped without a way to scroll to it; Step 3 scrolling
+Same state (mobile 375, hack applied).
+
+Clipping scan over every element under body:
+  overflow-x hidden/clip with scrollWidth > clientWidth: none
+  text-overflow: ellipsis with hidden content: none
+  html/body overflow-x: visible
+  Text nodes past the screen edge outside any scroller: none (see run3-11)
+
+Install block (every tab, command <pre> is overflow-x:auto, mouse reaches the last character):
+  Any agent         pre scrollW 440 / clientW 120, scrolled to end (max 320), page scrollX 0, docScrollWidth 375
+                    start shows "npx skills ac", end shows "-skill '*' -g"   (screenshots run3-02, run3-03)
+  Claude Code plugin pre 389/120 and 288/120, end reachable
+  Codex plugin      pre 431/120, end reachable
+  Git clone         pre 876/120 (max 756), start "git clone htt..", end "skills/; done"   (screenshots run3-04, run3-05)
+  documentElement.scrollWidth stayed 375 on every tab. The tab strip itself (div.tabs) scrolls inside itself (468/154).
+
+Criteria table (Example run, #example .scroll):
+  scrollW 399 / clientW 156, max scrollLeft 243; scrolled to the end: scrollLeft 243.25, atEnd true, page scrollX 0.
+  Left edge shows the first columns (R1 / outcome text); right end shows the last columns "pass" and "qa:worker"
+  (status and by). (screenshots run3-06, run3-07)
+  Models table: 371/156, scrollable (measured, not screenshotted).
+
+Observations that are not failures:
+  - The h1 now breaks inside the word "definition" (defin / ition) because overflow-wrap is anywhere; nothing is cut off.
+  - At zoom 2 x html 200% the sticky header takes about 215 of 812 px at the top of the screen and overlaps content while scrolling.
+  - The criteria table is very tall at this zoom because the outcome column wraps in a narrow cell.
+RESULT: held.
+
+Step 4: viewport reset with resize_window preset desktop, page reloaded: innerWidth 1024, clientWidth 1024, scrollWidth 1024,
+  inline font-size "" and body zoom "" (hack gone), desktop UA, 0 touch points.

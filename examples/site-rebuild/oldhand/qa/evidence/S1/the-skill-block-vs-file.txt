@@ -1,0 +1,37 @@
+S1 expectation 2: the large text block under 'The skill' equals the whole of skills/oldhand/SKILL.md
+Page: http://localhost:4180/ at 1440x900, tab-7, read from the live DOM: <section id="skill"> -> <pre class="skill"> (a scrollable block, 628px tall, 5478px of content).
+
+First 12 lines of the block (pre.textContent.split('\n').slice(0,12)); also visible in the-skill-block-first-lines-and-copy-before-click-screenshot.jpg:
+ 1: ---
+ 2: name: oldhand
+ 3: description: >-
+ 4:   Conducts non-trivial software work end to end through a chain of stage
+ 5:   skills: reads the ticket or prompt, traces the real code path, reuses proven
+ 6:   code, makes the smallest correct change, has sub-agents review and QA it in
+ 7:   the running app, and lets a computed verdict, not the model, say when it is
+ 8:   done. Use when the user asks to implement, build, fix, debug, root-cause,
+ 9:   investigate, QA or verify a feature or bug; says "pick up this ticket", "work
+10:   on ENG-123", "fix this bug", "why is X broken", "plan this first" or "make
+11:   sure it works end to end"; or pastes a Jira, Linear, Asana, monday.com or
+12:   GitHub issue, a spec, or a prompt with assumptions, constraints or acceptance
+
+Last lines of the block (also visible in the-skill-block-last-line-screenshot.jpg, after scrolling the block to its end):
+  ...
+  Next: NOT YET goes to the stage the reason names (oldhand-build in implement
+  mode only); BLOCKED waits on the user's action for the named blocker; VERIFIED
+  but not yet published waits for the go-ahead, then oldhand-ship publishes. End
+  with oldhand-learn when anything non-obvious came up.
+
+  contract -> trace -> rca -> research -> plan -> build -> review -> qa -> ship -> learn
+Block textContent ends with '...-> ship -> learn\n' (one trailing newline).
+
+Whole-file comparison:
+                     page block (browser)                                               file (shasum -a 256, wc)
+  bytes/chars        13192 (UTF-8 bytes) / 13192 chars                                  13192 bytes, 241 newline-terminated lines
+  SHA-256            fcaf11226feb602fd88f24d4e21f262d7521200ce5f55911070ba5f63f64ff55   fcaf11226feb602fd88f24d4e21f262d7521200ce5f55911070ba5f63f64ff55
+  ends with newline  yes                                                                yes (last bytes 'learn\n')
+Byte-identical. Line 1 of the file is '---' and line 2 is 'name: oldhand' (read with the Read tool).
+
+The page loads the file itself: network log shows GET /@fs/Users/berwinsingh/Documents/oldhand/skills/oldhand/SKILL.md?import&raw -> 200 OK.
+
+Result: HOLDS.

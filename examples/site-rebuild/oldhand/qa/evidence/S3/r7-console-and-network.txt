@@ -1,0 +1,14 @@
+S3 run r7 - console and network observed during the four combinations (tab-1, Browser pane, http://localhost:4180/)
+
+Method: console buffer read with read_console_messages after the run; a marker "S3-QA-MARKER after light-1440 combo" was logged after the first page load. Network read with read_network_requests (last 130 of 316) plus an in-page performance.getEntriesByType('resource') scan for status >= 400 or 0 on the final load (mobile dark).
+
+CONSOLE
+- Errors during this run: none. After the marker the buffer holds only [info] React DevTools hint and [debug] "[vite] connecting..." / "[vite] connected." lines for each of the four reloads.
+- Older errors exist in the same tab buffer from earlier runs, before this run started (not counted): "[vite] SyntaxError: Unexpected token 'else'", "[vite] Failed to reload /src/App.jsx", "WebSocket connection to 'ws://localhost:4180/' failed", "Failed to load resource: the server responded with a status of 404 ()". They sit before the marker and before my first load.
+- No hot updates (HMR) arrived during this run: styles.css?t=1791703058846 and App.jsx?t=1791703061706 were the loaded versions at all four combinations.
+
+NETWORK
+- Every localhost:4180 request in the last 130 listed (covers all four of my page loads) returned 200 OK. No 4xx/5xx and no failed request.
+- performance entries with status >= 400 or 0 on the final load: only https://fonts.googleapis.com/css2?family=IBM+Plex+Mono...&family=IBM+Plex+Sans... with responseStatus 0. That value is what resource timing reports for a cross-origin response without Timing-Allow-Origin; the fonts rendered (IBM Plex look in the screenshots), so it is not counted as a failure. Noted because the page makes an external third-party request.
+
+Tab state note: tab-1 was a leftover tab (Browser pane at its tab cap, new tab refused). Before the run I cleared its localStorage (key oldhand-analytics-consent=denied), sessionStorage and the two _ga cookies for localhost, then loaded the entry URL. I used window.name as a scratch holder for the measuring script and cleared it at the end.

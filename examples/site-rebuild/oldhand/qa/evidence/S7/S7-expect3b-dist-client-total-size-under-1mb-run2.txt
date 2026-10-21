@@ -1,0 +1,12 @@
+$ find dist/client -type f -exec stat -f '%z bytes  %N' {} +
+3309 bytes  dist/client/index.html
+8464 bytes  dist/client/favicon.png
+5030 bytes  dist/client/assets/index-CZXhnbve.css
+245428 bytes  dist/client/assets/index-BwbMMN0x.js
+
+$ awk total
+dist/client total = 262231 bytes = 256.085 KiB (0.262231 MB decimal, 0.250083 MiB)
+RESULT: under 1 MB (decimal)
+
+$ du -sh dist/client
+264K	dist/client

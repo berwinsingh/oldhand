@@ -1,0 +1,23 @@
+# Extra check: other links on the page shell (site/index.html and built dist/client/index.html). Not github.com repository links, recorded so the scope is clear.
+# command: grep -n -o '[^"<> ]*github[^"<> ]*' index.html dist/client/index.html
+--- source index.html ---
+14:https://berwinsingh.github.io/oldhand/
+30:https://berwinsingh.github.io/oldhand/
+31:https://berwinsingh.github.io/oldhand/og-image.png
+32:https://berwinsingh.github.io/oldhand/og-image.png
+44:https://berwinsingh.github.io/oldhand/og-image.png
+--- built dist/client/index.html ---
+14:https://berwinsingh.github.io/oldhand/
+30:https://berwinsingh.github.io/oldhand/
+31:https://berwinsingh.github.io/oldhand/og-image.png
+32:https://berwinsingh.github.io/oldhand/og-image.png
+44:https://berwinsingh.github.io/oldhand/og-image.png
+--- og-image.png referenced by index.html: is the file in the build output or public/? ---
+dist/client contents:
+assets
+favicon.png
+index.html
+public/ contents:
+favicon.png
+og-image.png present in dist/client: no
+og-image.png present in public/: no

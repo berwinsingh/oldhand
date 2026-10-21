@@ -1,0 +1,18 @@
+{
+  "id": "S10",
+  "status": "pass",
+  "observed": "Ran in a fresh, isolated Chrome context (Playwright, channel chrome, new context with empty storage) against http://localhost:4180. Step 1: opened /?agent=%3Cscript%3Ealert(1)%3C/script%3E. The first tab 'Any agent' was selected (aria-selected=true, class is-active), panel-any was shown, no dialog event fired, no <script> containing alert(1) exists in document.scripts or body HTML, localStorage/sessionStorage were empty, console had only vite debug lines and the React DevTools info line. Step 2: /?agent=codex selected 'Codex plugin' (tab-codex, panel-codex shown). Then a plain http://localhost:4180/ load in the same context selected 'Any agent' again; localStorage and sessionStorage were both {} after the codex visit and after the plain visit, so nothing is stored between visits. Step 3: ran Object.defineProperty(window,'localStorage',{get(){throw new Error('blocked')}}); a direct read confirmed it throws 'blocked'. Clicking 'Git clone' switched to the Git clone tab and panel-git; clicking 'Any agent' switched back to Any agent and panel-any. Step 4: the console after each step showed no errors, no warnings and no pageerror events; no dialogs; no failed requests or 4xx/5xx responses.",
+  "expected": "With the bogus value the first tab (Any agent) is selected and no dialog or script ran. ?agent=codex selects the Codex tab; the following plain visit shows the first tab, Any agent (nothing is stored between visits). With localStorage throwing, clicking tabs still switches the panel and the console shows no uncaught error.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S10/step1-bogus-agent-any-agent-selected.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S10/step2a-agent-codex-codex-selected.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S10/step2b-plain-visit-any-agent-selected.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S10/step3a-localstorage-blocked-git-clone-selected.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S10/step3b-localstorage-blocked-any-agent-selected.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S10/console-and-state-log.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "I did not use the Browser pane: tabs_create failed (tab cap reached) and the existing localhost:4180 tabs looked like they belong to other QA runs sharing the same origin storage, so I drove real Google Chrome through Playwright in a brand-new context instead (state read from the DOM, screenshots saved). The only console output was vite debug lines ('[vite] connecting...', '[vite] connected.') and the React DevTools info line, which are dev-server noise, not errors. In step 3 the localStorage block was applied after page load, as the brief says. As a supplementary check (not saved as evidence) I also blocked localStorage before page load via an init script and loaded / and /?agent=codex: the right tab was selected each time (Any agent, Codex plugin), clicking Git clone still switched, and there were no console errors or page errors. The screenshots for step 1, 2b and 3b have identical file sizes, consistent with the same default view rendering each time."
+}

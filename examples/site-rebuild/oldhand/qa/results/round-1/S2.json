@@ -1,0 +1,23 @@
+{
+  "id": "S2",
+  "status": "pass",
+  "observed": "Opened http://localhost:4180/ at 1440x900 in a new browser tab. The install switcher has one tablist with four tabs labelled Any agent, Claude Code plugin, Codex plugin, Git clone; Any agent was selected on load and after each click exactly one tab had aria-selected=true. I clicked each tab and read its panel. Any agent: 1 command block, note, three 'Then, in ...' lines (/oldhand ..., $oldhand ..., 'Use the oldhand skill: ...'), 'Tested 2026-10-11 on macOS with skills 1.7.2 ...'. Claude Code plugin: 2 command blocks, note, 'Then, in Claude Code' with /oldhand:oldhand ..., 'Tested 2026-10-11 with Claude Code 2.1.274.'. Codex plugin: 1 two-line command block, note, 'Then, in Codex' with $oldhand ..., 'Tested 2026-10-11 with Codex CLI 0.146.0.'. Git clone: 1 three-line command block, note, two 'Then' lines (/oldhand ... and $oldhand ...), 'Tested 2026-10-11 on macOS with git 2.x and zsh.'. On each tab I clicked Copy on the first command block; the button changed to 'Copied'. navigator.clipboard.readText() was denied (NotAllowedError, read permission), so I used the aria-label fallback: on all four tabs the label minus the 'Copy: ' prefix equals the block text exactly, including the newline in the Codex block and the two newlines in the Git block. As extra evidence I logged what the page's copy handler sent: writeText was also denied in this pane, the page fell back to textarea+execCommand('copy'), and both the writeText argument and the copy-event selection equalled the block text on every tab. Right arrow: with Any agent focused (activeElement tab-any), ArrowRight moved selection and focus to Claude Code plugin (aria-selected=true, panel-claude shown). No console errors, no failed requests.",
+  "expected": "Four tabs labelled Any agent, Claude Code plugin, Codex plugin, Git clone with exactly one aria-selected=true; every tab shows a command block, a 'Tested 2026-10-11 ...' line naming a tool version, and a 'Then, in ...' line with a command starting /oldhand, /oldhand:oldhand, $oldhand or 'Use the oldhand skill'; copied text (or aria-label after 'Copy: ') equals the command block text exactly including newlines; right arrow moves selection to the next tab.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/01-any-agent-tab-initial.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/02-any-agent-after-copy-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/03-claude-code-plugin-after-copy-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/04-codex-plugin-tab.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/05-git-clone-after-copy-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/06-after-right-arrow-from-any-agent.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/10-tablist-four-tabs-one-selected.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/11-panel-content-all-four-tabs.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/12-copy-control-exact-text-per-tab.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/13-right-arrow-key.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/14-console-and-network.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "Judgement call for the release decision: the Git clone tab's tested line names 'git 2.x', a version family, not an exact version (the other three name 1.7.2, 2.1.274, 0.146.0; local git is 2.55.0). I counted it as naming a tool version and passed; if AC2 means the exact tested version, this tab is short. Real clipboard read and write are both denied in this browser pane (NotAllowedError), so the exact-text proof rests on the aria-label (as the brief allows) plus a logger on the page's own copy handler, not on readText. The page then silently uses its execCommand fallback, which is its designed behavior. The Codex tab's first Copy click did not register because of a transient tool error and was retried once as-is. Only Any agent -> Claude Code plugin was tried with ArrowRight (no wrap-around or ArrowLeft test). The page is served by the Vite dev server, not a production build. The Git block's long third line is wider than the box and scrolls sideways (overflow-x:auto) instead of wrapping. The other browser tabs open at the start (seed, tab-1, tab-2, tab-3) were not touched."
+}

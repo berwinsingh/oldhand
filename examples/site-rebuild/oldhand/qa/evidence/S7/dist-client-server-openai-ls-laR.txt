@@ -1,0 +1,26 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && ls -laR dist/client dist/server && ls -la dist/.openai
+dist/client:
+total 32
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 11:39 .
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 01:10 ..
+drwxr-xr-x@ 4 berwinsingh  staff   128 Oct 11 11:39 assets
+-rw-r--r--@ 1 berwinsingh  staff  8464 Oct 11 11:39 favicon.png
+-rw-r--r--@ 1 berwinsingh  staff  3309 Oct 11 11:39 index.html
+
+dist/client/assets:
+total 496
+drwxr-xr-x@ 4 berwinsingh  staff     128 Oct 11 11:39 .
+drwxr-xr-x@ 5 berwinsingh  staff     160 Oct 11 11:39 ..
+-rw-r--r--@ 1 berwinsingh  staff    4928 Oct 11 11:39 index-BPayaSaH.css
+-rw-r--r--@ 1 berwinsingh  staff  245428 Oct 11 11:39 index-BvCIC6F3.js
+
+dist/server:
+total 8
+drwxr-xr-x@ 3 berwinsingh  staff   96 Oct 11 01:10 .
+drwxr-xr-x@ 5 berwinsingh  staff  160 Oct 11 01:10 ..
+-rw-r--r--@ 1 berwinsingh  staff  483 Oct 11 11:39 index.js
+---
+total 8
+drwxr-xr-x@ 3 berwinsingh  staff   96 Oct 11 01:10 .
+drwxr-xr-x@ 5 berwinsingh  staff  160 Oct 11 01:10 ..
+-rw-r--r--@ 1 berwinsingh  staff   31 Oct 11 11:39 hosting.json

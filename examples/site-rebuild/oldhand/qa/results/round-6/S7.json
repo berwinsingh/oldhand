@@ -1,0 +1,18 @@
+{
+  "id": "S7",
+  "status": "pass",
+  "observed": "Step 1: from /Users/berwinsingh/Documents/oldhand/site I ran npm run build. The script ran check-sources (ok, v2.0.0), then vite build (36 modules transformed; dist/client/index.html 3.31 kB, one CSS and one JS asset), then prepare-sites-build, which printed 'Prepared Sites build: dist/server/index.js and dist/.openai/hosting.json'. Exit code 0. Step 2: npm run test:sites ran node --test on tests/sites-worker.test.mjs. 4 tests, 4 pass, 0 fail, 0 cancelled, 0 skipped. Step 3: dist/client/index.html (3309 bytes), dist/server/index.js (483 bytes) and dist/.openai/hosting.json (31 bytes) all exist. dist/client totals 262231 bytes (about 256 KiB, 0.26 MB decimal) across four files: index.html, favicon.png, assets/index-CZXhnbve.css, assets/index-BwbMMN0x.js. The only .png under dist/client is favicon.png (8464 bytes).",
+  "expected": "npm run build exits 0 and prints 'Prepared Sites build'. npm run test:sites reports 4 passing tests and 0 failing. dist/client/index.html, dist/server/index.js and dist/.openai/hosting.json exist. dist/client is under 1 MB and contains no .png other than favicon.png.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-step1-npm-run-build-full-output-run2.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-step2-npm-run-test-sites-full-output-run2.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-step3-dist-listing-size-and-png-check-run2.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-expect3a-required-dist-files-exist-run2.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-expect3b-dist-client-total-size-under-1mb-run2.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-expect3c-dist-client-png-only-favicon-run2.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "Build and test output had no warnings or errors. The S7 evidence folder already held files from earlier runs (01_ to 05_ prefixed files, dist-*.txt and npm-run-*.txt, stamped 11:39 to 11:43 local time); I left them untouched and saved this run's files with a -run2 suffix. The build rewrote site/dist, which is the step the scenario names. site/AGENTS.md's handoff checklist also lists npm test, which this scenario does not include, so I did not run it."
+}

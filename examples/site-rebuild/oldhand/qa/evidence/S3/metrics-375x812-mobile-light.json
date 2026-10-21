@@ -1,0 +1,33 @@
+{
+ "build": "A: build served at start of run (App.jsx ?t=1791662819435, styles.css ?t=1791661927297; before the 11:37 source edits)",
+ "url": "http://localhost:4180/",
+ "tool": "Browser pane, mobile preset 375x812, colour scheme light, page reloaded after switching",
+ "scheme": "light",
+ "innerWidth": 910,
+ "innerHeight": 1972,
+ "scrollWidth": 910,
+ "bodyScrollWidth": 910,
+ "clientWidth": 375,
+ "visualViewport": {"width": 375, "scale": 1},
+ "outerWidth": 375,
+ "viewportMeta": "width=device-width, initial-scale=1.0",
+ "scrollWidthEqualsInnerWidth": true,
+ "horizontalOverflowVsRealViewport": "scrollWidth 910 vs clientWidth/visualViewport/outerWidth 375 = 535px of overflow. innerWidth reads 910 only because the mobile emulation widens the layout viewport to the overflowing content, so the literal scrollWidth === innerWidth comparison is equal but meaningless here.",
+ "windowScrollToTest": "window.scrollTo(400,0) leaves scrollX 0 in the mobile emulation (visual viewport pans instead); see mobile-horizontal-overflow-diagnosis.txt for the plain-viewport test where scrollX does move",
+ "visibleElementsExtendingPastClientWidth": ["a. right=427", "button. right=389", "button.is-active right=477", "pre. right=910", "code. right=896", "thead. right=415", "tr. right=415", "th. right=415", "tbody. right=415", "td. right=415"],
+ "unclippedOverflowChain": "pre[overflow-x:auto, right=910] < div.command[overflow:visible, right=342] < div.panel < div.install < section.hero < main < body (nothing in the chain clips it; nav, div.tabs and table are overflow:auto so they scroll inside their own box)",
+ "textElementsScanned": 185,
+ "minVisibleFontSizePx": 13.5,
+ "minVisibleElement": "code \"IMPORTER_FAULTS=progress:\"",
+ "elementsBelow13px": [],
+ "pseudoElementsBelow13px": [],
+ "contrast": {
+  "bodyText": {"color": "#1b1b18", "effectiveBackgroundHex": "#fbfaf7", "fontSize": "16px", "ratioAgainstEffectiveBackground": 16.54, "ratioAgainstPageBackground": 16.54},
+  "paragraphText": {"color": "#1b1b18", "effectiveBackgroundHex": "#fbfaf7", "fontSize": "17px", "ratioAgainstEffectiveBackground": 16.54},
+  "linkInContent": {"label": "a 'oldhand' (first link in main)", "color": "#b4441c", "effectiveBackgroundHex": "#fbfaf7", "fontSize": "15px", "ratioAgainstEffectiveBackground": 5.32},
+  "linkInNav": {"label": "Install", "color": "#1b1b18", "effectiveBackgroundHex": "#fbfaf7", "ratioAgainstEffectiveBackground": 16.54},
+  "linkInFooter": {"label": "GitHub", "color": "#b4441c", "effectiveBackgroundHex": "#fbfaf7", "ratioAgainstEffectiveBackground": 5.32},
+  "selectedTab": {"label": "button.is-active 'Git clone'", "color": "#1b1b18", "effectiveBackgroundHex": "#f2f0ea", "pageBackgroundHex": "#fbfaf7", "fontSize": "15px", "ratioAgainstEffectiveBackground": 15.15, "ratioAgainstPageBackground": 16.54}
+ },
+ "visibleTextElementsFailingAA": []
+}

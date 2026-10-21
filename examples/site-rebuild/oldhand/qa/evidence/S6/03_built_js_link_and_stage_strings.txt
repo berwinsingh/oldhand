@@ -1,0 +1,23 @@
+$ grep -oE 'href:[^,]{0,120}' dist/client/assets/*.js   (see below)
+
+$ grep -oE '\["oldhand[a-z-]*","[^"]{0,30}' dist/client/assets/*.js
+["oldhand","the conductor: routes the requ
+["oldhand-contract","the request, with its assumpti
+["oldhand-trace","the real path hop by hop, from
+["oldhand-rca","evidence-first root cause for 
+["oldhand-research","before anything new: the codeb
+["oldhand-plan","the smallest complete change, 
+["oldhand-build","the Ponytail ladder, one focus
+["oldhand-review","a board of read-only reviewers
+["oldhand-qa","one sub-agent per scenario dri
+["oldhand-ship","the verdict is computed by a s
+["oldhand-learn","the non-obvious lessons go whe
+(exit 0)
+
+$ grep -oE '.{0,60}(SECURITY|orchestration)[^"]{0,30}' dist/client/assets/*.js
+| \`references/orchestration
+\`references/orchestration
+ file,"," ",S.jsx("a",{href:`${Se}skills/oldhand/references/orchestration
+.md`,children:"orchestration
+discussions`,children:"Discussions"}),S.jsx("a",{href:`${Se}SECURITY
+(exit 0)

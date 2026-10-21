@@ -1,0 +1,19 @@
+S2 / expectation 1: four tabs exist with the right labels; exactly one is selected at a time.
+Page: http://localhost:4180/ at 1440x900 (viewport emulated, innerWidth=1440 innerHeight=900), tab-4 in the Browser pane.
+Method: JS inspection of [role=tablist] after each real click on a tab.
+
+Initial load (fresh tab, nothing clicked yet):
+  tablists on page: 1  (aria-label="Install route")
+  tab-any    label="Any agent"          aria-selected=true   tabindex=0   aria-controls=panel-any
+  tab-claude label="Claude Code plugin" aria-selected=false  tabindex=-1  aria-controls=panel-claude
+  tab-codex  label="Codex plugin"       aria-selected=false  tabindex=-1  aria-controls=panel-codex
+  tab-git    label="Git clone"          aria-selected=false  tabindex=-1  aria-controls=panel-git
+
+After clicking each tab in turn (aria-selected read from the DOM right after the click):
+  click "Any agent"          -> Any agent=true,  Claude Code plugin=false, Codex plugin=false, Git clone=false
+  click "Claude Code plugin" -> Any agent=false, Claude Code plugin=true,  Codex plugin=false, Git clone=false
+  click "Codex plugin"       -> Any agent=false, Claude Code plugin=false, Codex plugin=true,  Git clone=false
+  click "Git clone"          -> Any agent=false, Claude Code plugin=false, Codex plugin=false, Git clone=true
+
+Result: four tabs, labels exactly as specified, exactly one aria-selected=true at every point observed.
+Screenshots: 01-any-agent-tab-initial.jpg, 03-claude-code-plugin-after-copy-click.jpg, 04-codex-plugin-tab.jpg, 05-git-clone-after-copy-click.jpg

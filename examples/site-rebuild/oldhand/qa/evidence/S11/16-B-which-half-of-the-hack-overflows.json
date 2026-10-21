@@ -1,0 +1,12 @@
+{
+ "fontSize200-only": {
+  "innerWidth": 375,
+  "clientWidth": 375,
+  "scrollWidth": 375
+ },
+ "zoom2-only": {
+  "innerWidth": 375,
+  "clientWidth": 375,
+  "scrollWidth": 581
+ }
+}
