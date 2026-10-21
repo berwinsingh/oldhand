@@ -106,6 +106,15 @@ Pick one install method per host. A plugin plus a skill-folder install shows
 twice in Claude Code, and Codex does not dedupe `~/.codex/skills` against
 `~/.agents/skills`.
 
+## Optional skills the pack uses when present
+
+Neither is required; oldhand-build loads them when the host has them.
+
+| skill | used for | install |
+| --- | --- | --- |
+| Ponytail | the smallest correct change | <https://github.com/DietrichGebert/ponytail> |
+| frontend-design (Anthropic) | user-facing UI with a deliberate visual direction instead of a templated default | `npx skills add anthropics/skills --skill frontend-design -g`, or in Claude Code `frontend-design@claude-plugins-official` |
+
 ## Fallbacks on any host
 
 Say the missing capability in one line, then:

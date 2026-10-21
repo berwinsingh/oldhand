@@ -1,28 +1,32 @@
+/* Oldhand: a bookkeeper's ledger. Green ruled paper, blue-black ink.
+   Black ink means proven; red ink only ever means "not proven yet".
+   The verdict is the bottom line and gets the double rule. */
+
 :root {
-  --bg: #fbfaf7;
-  --surface: #f2f0ea;
-  --text: #1b1b18;
-  --muted: #5c5a53;
-  --border: #dedad0;
-  --accent: #b4441c;
-  --ok: #2f6b3a;
-  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --paper: #e6efda;
+  --panel: #f2f7eb;
+  --rule: #9dbb8f;
+  --ink: #17213a;
+  --faded: #4a5749;
+  --red: #b3261e;
+  --link: #1c4a96;
+  --text: "Literata", Georgia, "Times New Roman", serif;
+  --mono: "Fragment Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --measure: 66ch;
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #141413;
-    --surface: #1d1d1b;
-    --text: #ecebe6;
-    --muted: #a3a097;
-    --border: #2e2d2a;
-    --accent: #f08a5d;
-    --ok: #7fbf8a;
+    --paper: #111a15;
+    --panel: #16231c;
+    --rule: #2e4436;
+    --ink: #e4ece0;
+    --faded: #a3b0a6;
+    --red: #ff8e80;
+    --link: #93b6ff;
   }
 }
-
 
 * {
   box-sizing: border-box;
@@ -34,16 +38,17 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 17px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--text);
+  font-size: 18px;
   line-height: 1.6;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: var(--accent);
+  color: var(--link);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
@@ -53,106 +58,97 @@ a:hover {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--link);
   outline-offset: 3px;
 }
 
 code,
 pre {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: max(0.82em, 13px);
 }
 
-p code,
-li code,
-dd code,
-td code {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1px 5px;
-  font-size: 0.9em;
-  overflow-wrap: anywhere;
+p,
+ul,
+ol {
+  margin: 0 0 1em;
+  max-width: var(--measure);
+}
+
+li {
+  margin-bottom: 0.4em;
 }
 
 h1,
 h2,
 h3 {
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  margin: 0 0 16px;
-}
-
-h1 {
-  font-size: clamp(2rem, 1.2rem + 3vw, 3rem);
+  margin: 0;
   overflow-wrap: anywhere;
 }
 
+h1 {
+  font-size: clamp(2.3rem, 1.3rem + 3.2vw, 3.5rem);
+  line-height: 1.06;
+  letter-spacing: -0.018em;
+  margin-bottom: 0.55em;
+  max-width: 15em;
+}
+
 h2 {
-  font-size: 28px;
-  margin-top: 0;
+  font-size: 2.1rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.6em;
 }
 
 h3 {
-  font-size: 20px;
-  margin-top: 32px;
+  font-size: 1.3rem;
+  line-height: 1.3;
+  margin: 1.8em 0 0.5em;
 }
 
-p,
-ul,
-ol,
-dl {
-  margin: 0 0 16px;
-  max-width: 72ch;
-}
-
-li {
-  margin-bottom: 6px;
-}
+/* Page frame */
 
 .top,
 main,
 footer {
-  width: min(960px, 100% - 32px);
+  width: min(1120px, 100% - 40px);
   margin-inline: auto;
 }
 
 .top {
-  position: sticky;
-  top: 0;
-  z-index: 2;
   display: flex;
-  align-items: center;
-  gap: 16px;
-  min-height: 56px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 20px;
+  padding: 22px 0 18px;
+  border-bottom: 1px solid var(--rule);
 }
 
 .wordmark {
-  color: var(--text);
-  font-weight: 600;
+  color: var(--ink);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  font-size: 18px;
 }
 
 .meta {
-  color: var(--muted);
-  font-size: 14px;
+  color: var(--faded);
+  font-size: 0.85rem;
 }
 
 .top nav {
   margin-left: auto;
   display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  white-space: nowrap;
-  font-size: 15px;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  font-size: 0.95rem;
 }
 
 .top nav a {
-  color: var(--text);
+  color: var(--ink);
   text-decoration: none;
 }
 
@@ -160,240 +156,330 @@ footer {
   text-decoration: underline;
 }
 
-main {
-  padding-bottom: 48px;
-}
-
 section {
-  padding: 56px 0 24px;
-  border-bottom: 1px solid var(--border);
+  padding-top: 88px;
 }
 
-section:last-child {
-  border-bottom: 0;
-}
+/* Hero: the text on the left, the live ledger on the right */
 
 .hero {
-  padding-top: 48px;
+  padding-top: 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 470px);
+  gap: 56px;
+  align-items: start;
 }
 
 .lede {
-  font-size: 19px;
-  max-width: 68ch;
-  margin-bottom: 28px;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  margin-bottom: 1.4em;
 }
 
-.install {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  max-width: 960px;
+.hero-after {
+  color: var(--faded);
+  font-size: 0.95rem;
+  margin-top: 0.9em;
 }
 
-.tabs {
-  display: flex;
-  gap: 4px;
-  padding: 8px 8px 0;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-}
-
-.tabs button {
-  font: inherit;
-  font-size: 15px;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  padding: 8px 12px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.tabs button.is-active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-}
-
-.panel {
-  padding: 16px;
-}
+/* Commands */
 
 .command {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
+  gap: 10px;
+  margin: 0 0 12px;
+  max-width: 100%;
 }
 
 .command pre {
+  flex: 1;
+  min-width: 0;
   margin: 0;
   padding: 12px 14px;
   overflow-x: auto;
-  flex: 1;
-  line-height: 1.55;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  line-height: 1.6;
 }
 
 .copy {
-  font: inherit;
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 12px;
-  margin: 8px 8px 0 0;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
+  padding-top: 7px;
 }
 
-.copy:hover {
-  border-color: var(--accent);
+.copy button,
+.actions button {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--faded);
+  border-radius: 4px;
+  padding: 5px 12px;
+  cursor: pointer;
 }
 
-.note,
-.tested {
-  color: var(--muted);
-  font-size: 15px;
-  max-width: none;
+.copy button:hover,
+.actions button:hover {
+  border-color: var(--ink);
+  background: var(--panel);
 }
 
-.then {
-  margin: 16px 0;
+.copy-status {
+  color: var(--faded);
+  font-size: 0.85rem;
+  min-width: 4.5em;
 }
 
-.then div {
-  display: grid;
-  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
-  gap: 8px 16px;
-  margin-bottom: 8px;
+/* The live ledger */
+
+.ledger {
+  margin: 4px 0 0;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 18px 20px 16px;
 }
 
-.then dt {
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.then dd {
-  margin: 0;
-  min-width: 0;
-}
-
-.then dd code {
-  display: block;
-  padding: 6px 10px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.tested {
-  margin-bottom: 0;
-}
-
-.stages {
-  list-style: decimal;
-  padding-left: 24px;
-  max-width: none;
-}
-
-.stages li {
+.ledger figcaption {
+  font-size: 0.9rem;
+  color: var(--faded);
   margin-bottom: 10px;
 }
 
-.stages a {
-  font-family: var(--mono);
-  font-size: 15px;
-  margin-right: 8px;
-}
-
-.scroll {
-  overflow-x: auto;
-  margin: 0 0 16px;
-}
-
-table {
-  border-collapse: collapse;
+.ledger table {
   width: 100%;
-  font-size: 15px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-th,
-td {
+.ledger th,
+.ledger td {
   text-align: left;
   vertical-align: top;
   padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--rule);
 }
 
-th {
+.ledger th + td,
+.ledger td + td {
+  border-left: 1px solid var(--rule);
+}
+
+.ledger thead th {
   font-weight: 600;
+  color: var(--faded);
+  font-size: 0.85rem;
+  border-bottom: 2px solid var(--rule);
+}
+
+.ledger tbody th {
+  font-weight: 400;
+}
+
+.ledger .id {
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.ledger td:nth-child(2) {
+  color: var(--faded);
   white-space: nowrap;
 }
 
-.verdict {
+.check {
+  font: inherit;
   font-weight: 600;
-  color: var(--ok);
-  font-size: 19px;
+  background: none;
+  border: 0;
+  border-bottom: 1px dotted currentColor;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink);
+  transition: color 180ms ease;
+}
+
+.check.fail,
+.check.stale {
+  color: var(--red);
+}
+
+.ledger tfoot th,
+.ledger tfoot td {
+  font-size: 1.05rem;
+  padding-top: 12px;
+  border-top: 4px double var(--ink);
+  border-bottom: 4px double var(--ink);
+  transition: color 180ms ease, border-color 180ms ease;
+}
+
+.ledger .total.in-red th,
+.ledger .total.in-red td {
+  color: var(--red);
+  border-top-color: var(--red);
+  border-bottom-color: var(--red);
+}
+
+.reasons {
+  font-size: 0.88rem;
+  color: var(--faded);
+  margin: 10px 0 12px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ledger-note {
+  font-size: 0.85rem;
+  color: var(--faded);
+  margin: 14px 0 0;
+}
+
+/* Ruled tables in the body */
+
+.scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0 0 1.2em;
+}
+
+table.ruled {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.95rem;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+table.ruled th,
+table.ruled td {
+  text-align: left;
+  vertical-align: top;
+  padding: 10px 14px 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+table.ruled td + td,
+table.ruled th + td,
+table.ruled th + th {
+  padding-left: 14px;
+  border-left: 1px solid var(--rule);
+}
+
+table.ruled thead th {
+  font-weight: 600;
+  color: var(--faded);
+  border-bottom: 2px solid var(--rule);
+}
+
+table.ruled tbody th {
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+table.stages a {
+  font-family: var(--mono);
+  font-size: 0.88em;
+}
+
+table.stages td:last-child {
+  color: var(--faded);
+  white-space: nowrap;
+}
+
+/* Sections */
+
+.stops li::marker {
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--faded);
+}
+
+.verdict {
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: inline-block;
+  padding: 2px 0;
+  border-bottom: 4px double var(--ink);
 }
 
 .computed {
-  color: var(--muted);
-  font-size: 14px;
+  color: var(--faded);
+  font-size: 0.85rem;
   overflow-wrap: anywhere;
+}
+
+.route {
+  margin-top: 2.2em;
+  padding-top: 1.2em;
+  border-top: 1px solid var(--rule);
+  max-width: 860px;
+}
+
+.route h3 {
+  margin-top: 0;
+}
+
+.route-who,
+.route-step {
+  color: var(--faded);
+  font-size: 0.95rem;
+}
+
+.route-step {
+  margin: 0.6em 0 0.4em;
 }
 
 .skill-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 8px 18px;
   margin-bottom: 12px;
 }
 
 .skill-actions .copy {
-  margin: 0;
+  padding-top: 0;
 }
 
 .skill {
-  margin: 0 0 16px;
-  padding: 16px;
+  margin: 0;
+  padding: 18px 20px;
   max-height: 70vh;
   overflow: auto;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
   line-height: 1.55;
 }
 
 footer {
-  padding: 24px 0 40px;
-  color: var(--muted);
-  font-size: 15px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  align-items: center;
+  margin-top: 96px;
+  padding: 24px 0 48px;
+  border-top: 1px solid var(--rule);
+  color: var(--faded);
+  font-size: 0.92rem;
 }
 
 footer nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
-}
-
-footer .analytics {
-  width: 100%;
-  margin: 0;
-  max-width: none;
+  gap: 6px 18px;
+  margin-bottom: 1em;
 }
 
 button.link {
   font: inherit;
-  color: var(--accent);
+  color: var(--link);
   background: none;
   border: 0;
   padding: 0;
@@ -402,60 +488,92 @@ button.link {
   text-underline-offset: 3px;
 }
 
-@media (max-width: 720px) {
+@media (prefers-reduced-motion: reduce) {
+  .check,
+  .ledger tfoot th,
+  .ledger tfoot td {
+    transition: none;
+  }
+}
+
+/* Narrow screens: one column, the ledger under the install line */
+
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+}
+
+@media (max-width: 600px) {
   body {
-    font-size: 16px;
-  }
-
-  h2 {
-    font-size: 22px;
-  }
-
-  .lede {
     font-size: 17px;
-  }
-
-  .top {
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    padding: 8px 0;
   }
 
   .top nav {
     margin-left: 0;
     width: 100%;
-    gap: 14px;
+  }
+
+  h2 {
+    font-size: 1.65rem;
   }
 
   section {
-    padding-top: 40px;
+    padding-top: 64px;
   }
 
-  .then div {
-    grid-template-columns: 1fr;
-    gap: 4px;
+  .hero {
+    padding-top: 40px;
   }
 
   .command {
     flex-direction: column;
     align-items: stretch;
-    gap: 0;
+    gap: 6px;
   }
 
   .command pre {
-    min-width: 0;
-    max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
   .copy {
-    margin: 0 12px 12px;
+    padding-top: 0;
+  }
+
+  .ledger {
+    padding: 14px 12px;
+  }
+
+  .ledger th,
+  .ledger td {
+    padding: 8px 6px;
+  }
+
+  .ledger td:nth-child(2) {
+    white-space: normal;
   }
 }
 
+/* The Pages workflow screenshots ?social-preview=1 at 1200 x 627 */
+
 html.social-preview .top nav,
-html.social-preview .then,
-html.social-preview .note,
-html.social-preview .tested,
-html.social-preview footer {
+html.social-preview .hero-after,
+html.social-preview .ledger-note,
+html.social-preview .reasons,
+html.social-preview .actions,
+html.social-preview footer,
+html.social-preview .ledger figcaption {
   display: none;
+}
+
+html.social-preview .hero {
+  padding-top: 36px;
+}
+
+html.social-preview .ledger th,
+html.social-preview .ledger td {
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
