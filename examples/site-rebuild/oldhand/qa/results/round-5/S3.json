@@ -1,0 +1,33 @@
+{
+  "id": "S3",
+  "status": "pass",
+  "observed": "Opened http://localhost:4180/ (title 'Oldhand', HTTP 200) in a fresh isolated headless Chrome context for each of the four combinations: 1440x900 light, 1440x900 dark, 375x812 mobile-emulated light, 375x812 mobile-emulated dark (is_mobile, touch, DPR 2, prefers-color-scheme emulated; each context closed afterwards, so nothing to reset). I scrolled the whole page once before measuring. (1) Horizontal scroll: documentElement.scrollWidth equals window.innerWidth in all four (1440/1440 twice, 375/375 twice; body.scrollWidth and visualViewport.width match too). At 375 several parts are wider than the screen (nav 411px, tab strip 468px, code block 440px, two tables 399px and 371px) but every one sits inside its own overflow-x:auto container, so the page itself does not scroll sideways; I also re-ran 375 without mobile emulation, light and dark, and got 375/375 again. (2) Font size: 269 text nodes checked in each combination, 0 with a computed font-size under 13px (also 0 hidden ones, 0 in ::before/::after text). The smallest text is 13.5px (24 inline code snippets); everything else is 14px or larger. (3) Contrast, computed with the WCAG relative-luminance formula from the computed colours, with the background resolved through ancestors. Light (page bg #fbfaf7): body text #1b1b18 = 16.54:1; link #b4441c = 5.32:1 against the page (4.87:1 where it sits on the #f2f0ea install panel, the worst link case); selected tab text #1b1b18 = 16.54:1 against the page, 15.15:1 against the #f2f0ea tab bar. Dark (page bg #141413): body text #ecebe6 = 15.44:1; link #f08a5d = 7.46:1 (6.83:1 on the #1d1d1b panel); selected tab text #ecebe6 = 15.44:1 against the page, 14.14:1 against the tab bar. The mobile values are identical to desktop. A sweep of every rendered text colour/background pair found none under 4.5:1; the lowest is 4.87:1 (light link in the panel) and 6.46:1 in dark (unselected tab text). (4) I saved a viewport and a full-page screenshot for each combination and looked at them: same content in light and dark and at both widths (269 text nodes each), text legible, dark scheme has dark background with light text. Console shows only vite debug lines and the React DevTools info line; no errors, no failed requests.",
+  "expected": "scrollWidth equals innerWidth at all four combinations; no visible text computed under 13px; body text, links and the selected tab text at least 4.5:1 against the page background in both schemes; four screenshots showing the same content with legible text.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-summary-all-four-combinations.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-metrics-1440x900-light.json",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-metrics-1440x900-dark.json",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-metrics-375x812-mobile-light.json",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-metrics-375x812-mobile-dark.json",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-mobile-375-elements-past-viewport-and-who-clips-them.json",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-extra-metrics-375x812-desktopmode-light.json",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-extra-metrics-375x812-desktopmode-dark.json",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-screenshot-1440x900-light-viewport.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-screenshot-1440x900-light-fullpage.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-screenshot-1440x900-dark-viewport.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-screenshot-1440x900-dark-fullpage.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-screenshot-375x812-mobile-light-viewport.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-screenshot-375x812-mobile-light-fullpage.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-screenshot-375x812-mobile-dark-viewport.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-screenshot-375x812-mobile-dark-fullpage.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-extra-screenshot-375x812-desktopmode-light-viewport.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-extra-screenshot-375x812-desktopmode-light-fullpage.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-extra-screenshot-375x812-desktopmode-dark-viewport.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-extra-screenshot-375x812-desktopmode-dark-fullpage.png",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S3/fresh-run-console-and-network.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "The Claude browser pane could not open a new tab (tab cap reached) and its existing tabs are shared with other testers, so I used a separate headless Chrome through Playwright with a new context per combination instead; the mobile preset was emulated with is_mobile, touch and DPR 2 rather than the pane's own preset, which also set a different user agent, so a small difference from the pane preset is possible. Older S3 files already in the evidence folder (no 'fresh-run-' prefix, from earlier rounds) were left untouched and not used. The contrast pairs were computed from computed styles, not sampled from pixels. Not part of the criterion but worth knowing: at 375px the header nav is a horizontally scrollable strip, so 'Models' is cut off and 'GitHub' is off-screen with no visible hint; the tab strip ('Codex plugin' onward) and the install command line are likewise cut off and only reachable by scrolling inside them. The 13.5px floor (inline code) is only 0.5px above the 13px limit. In-content links are the tightest contrast case: 4.87:1 in light on the grey panel."
+}

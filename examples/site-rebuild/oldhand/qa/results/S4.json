@@ -1,0 +1,27 @@
+{
+  "id": "S4",
+  "status": "pass",
+  "observed": "Starting state: the Browser pane tab held a leftover 'denied' consent value from an earlier run, so I ran localStorage.clear() on http://localhost:4180 and loaded the entry URL again; localStorage.getItem('oldhand-analytics-consent') === null was true. Step 1: !!document.querySelector('script[data-oldhand-analytics]') was false, no script src or Resource Timing entry contained googletagmanager (the pane's network log also showed none), window.gtag and window.dataLayer were undefined. Step 2: no position:fixed element existed, the only sticky element was the header (HEADER.top), 'Allow analytics' and 'No thanks' were absent from the page text, and there were 0 dialog elements. Step 3: the footer read 'Google Analytics is off; nothing is sent.' with a 'Turn on Google Analytics' button and a 'How Google uses data' link (to https://policies.google.com/technologies/partner-sites). I clicked the button with a real mouse click. Step 4: the footer read 'Google Analytics is on.' with a 'Turn it off' button; localStorage held 'granted'; script[data-oldhand-analytics] existed in <head> with src https://www.googletagmanager.com/gtag/js?id=G-75YW6HE9FT; Resource Timing listed that gtag/js request plus a www.google-analytics.com/g/collect beacon for tid G-75YW6HE9FT; window.gtag was a function and window.google_tag_manager had the key G-75YW6HE9FT. Step 5: after a fresh navigation and then a literal location.reload() (navigation type 'reload'), with no click, the script element was present again, localStorage was still 'granted', the gtag/js request was in Resource Timing, and the footer still read 'Google Analytics is on.' with 'Turn it off'. Step 6: I clicked 'Turn it off'; localStorage held 'denied' and the footer read 'Google Analytics is off; nothing is sent.' with the 'Turn on Google Analytics' button again. Extra: a reload after turning off showed no script element and no googletagmanager request (consent 'denied').",
+  "expected": "Before the click: no analytics script element, no googletagmanager request, no overlay, footer 'Google Analytics is off; nothing is sent.' with a 'Turn on Google Analytics' button and a 'How Google uses data' link. After the click: script element with data-oldhand-analytics, a request to www.googletagmanager.com/gtag/js?id=G-75YW6HE9FT, localStorage 'granted', footer 'Google Analytics is on.' with a 'Turn it off' button. After reload: script element present again without a click. After turning off: localStorage 'denied' and footer 'Google Analytics is off; nothing is sent.' again.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/01-before-click-checks.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/01-before-click-top-of-page-no-overlay.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/02-footer-before-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/04-after-click-checks.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/04-footer-after-click-analytics-on.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/05-after-reload-checks.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/05-after-reload-footer-analytics-still-on.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/06-after-turn-off-checks.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/06-footer-after-turn-off.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S4/07-extra-reload-after-off-and-console.txt"
+  ],
+  "console_errors": [
+    "[vite] SyntaxError: Unexpected token 'else'  (tab-1 console history, from before this run; HMR noise)",
+    "[vite] Failed to reload /src/App.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above)  (same, from before this run)",
+    "WebSocket connection to 'ws://localhost:4180/' failed:  (same, from before this run)",
+    "Failed to load resource: the server responded with a status of 404 ()  (same; resource not identified, not in the pane's network log, logged before this run's 5 page loads)"
+  ],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "1) The Browser pane's read_network_requests does not list cross-origin requests, so the googletagmanager request is evidenced by the script element's src plus the page's own Resource Timing entries (gtag/js and google-analytics collect), not by the pane's network log; the gtag/js entry showed a 3 ms duration, likely served from cache. 2) After 'Turn it off' the script element stays in the DOM for the rest of that page session (the app sends a gtag consent update with analytics_storage 'denied' instead of removing the tag); it is absent on the next load. The scenario does not ask for removal. 3) The tab-1 console log is cumulative across the tab's history, so the four error lines above predate this run; the last 7 page loads in the log show no errors. 4) The other localhost:4180 tabs share this origin's localStorage; I did not see any interference. 5) The earlier S4 evidence files in this folder (written against a previous brief whose expected strings differed) were overwritten with this run's results. 6) The 'Allow analytics' / 'No thanks' check is covered both by page text and by the zero position:fixed and zero dialog counts."
+}

@@ -1,0 +1,19 @@
+{
+  "id": "S7",
+  "status": "pass",
+  "observed": "Step 1: from /Users/berwinsingh/Documents/oldhand/site, npm run build ran check-sources (ok), vite build (36 modules, built in 422ms: client index.html 3.31 kB, one CSS file, one JS file 245.43 kB) and prepare-sites-build. It printed 'Prepared Sites build: dist/server/index.js and dist/.openai/hosting.json' and exited 0. Step 2: npm run test:sites ran tests/sites-worker.test.mjs: 4 tests, 4 pass, 0 fail, 0 cancelled, 0 skipped, about 94 ms, exit 0. Step 3: dist/client contains index.html (3309 bytes), favicon.png (8464 bytes), assets/index-BRrSHBwy.css (5053 bytes) and assets/index-CJn-AL1N.js (245428 bytes). That is 4 files and 262254 bytes in total (264K on disk), under 1 MB by both decimal and binary definitions. dist/server/index.js (483 bytes) and dist/.openai/hosting.json (31 bytes, with d1 and r2 set to null) exist. The only .png under dist/client is favicon.png (64x64 RGB).",
+  "expected": "npm run build exits 0 and prints 'Prepared Sites build'. npm run test:sites reports 4 passing tests and 0 failing. dist/client/index.html, dist/server/index.js and dist/.openai/hosting.json exist. dist/client is under 1 MB and contains no .png other than favicon.png.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-r3-step1-npm-run-build-full-output.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-r3-step2-npm-run-test-sites-full-output.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-r3-step3-dist-listing.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-r3-step3-dist-client-size.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-r3-expect3a-required-dist-files-exist.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-r3-expect3b-dist-client-under-1mb.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/S7-r3-expect3c-png-only-favicon.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "This is a CLI surface, so there was no browser console or network traffic. Build and test output contained no error or warning lines. npm run build rewrote site/dist, as the entry point does; dist is gitignored. Evidence files from earlier runs in the S7 folder (the unprefixed files and the S7-*-run2 files) were left untouched; my files use the S7-r3 prefix. Surprising: site/ has uncommitted and untracked changes. git status shows site/package.json, site/vite.config.mjs, site/src/App.jsx and others modified, and site/scripts/check-sources.mjs, site/src/analytics.js, site/src/slices.js and site/tests/analytics.test.mjs and slices.test.mjs untracked. The build calls the untracked scripts/check-sources.mjs, so it passes on this working tree only. I did not check whether a clean checkout at HEAD builds. The four test:sites tests cover the worker's static and fallback behaviour and the Sites packaging files. They do not render the built page."
+}

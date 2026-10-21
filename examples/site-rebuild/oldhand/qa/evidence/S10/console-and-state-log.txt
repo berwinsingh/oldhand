@@ -1,0 +1,200 @@
+[step1] CONSOLE debug: [vite] connecting...
+[step1] CONSOLE debug: [vite] connected.
+[step1] CONSOLE info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+STEP1 STATE {
+ "url": "http://localhost:4180/?agent=%3Cscript%3Ealert(1)%3C/script%3E",
+ "tabs": [
+  {
+   "label": "Any agent",
+   "selected": "true",
+   "cls": "is-active"
+  },
+  {
+   "label": "Claude Code plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Codex plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Git clone",
+   "selected": "false",
+   "cls": ""
+  }
+ ],
+ "panels": [
+  {
+   "id": "panel-any",
+   "hidden": false,
+   "display": "block",
+   "text": "npx skills add berwinsingh/oldhand --skill '*' -g\nCopy\n\nInstalls all eleven skills under ~/.agents/skills and links them for the agents it finds. Add -a cursor (or codex, github-copilot, gemini-cli, o"
+  }
+ ],
+ "scripts_with_alert": 0,
+ "injected_script_in_body": false,
+ "ls": "{}",
+ "ss": "{}",
+ "cookie": ""
+}
+[step2a-codex] CONSOLE debug: [vite] connecting...
+[step2a-codex] CONSOLE info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[step2a-codex] CONSOLE debug: [vite] connected.
+STEP2a STATE {
+ "url": "http://localhost:4180/?agent=codex",
+ "tabs": [
+  {
+   "label": "Any agent",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Claude Code plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Codex plugin",
+   "selected": "true",
+   "cls": "is-active"
+  },
+  {
+   "label": "Git clone",
+   "selected": "false",
+   "cls": ""
+  }
+ ],
+ "panels": [
+  {
+   "id": "panel-codex",
+   "hidden": false,
+   "display": "block",
+   "text": "codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand\nCopy\n\nThen restart Codex or start a new task.\n\nThen, in Codex, for example\n$oldhand Fix DOCQ-123. Prove: guest signup,"
+  }
+ ],
+ "scripts_with_alert": 0,
+ "injected_script_in_body": false,
+ "ls": "{}",
+ "ss": "{}",
+ "cookie": ""
+}
+[step2b-plain] CONSOLE debug: [vite] connecting...
+[step2b-plain] CONSOLE debug: [vite] connected.
+[step2b-plain] CONSOLE info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+STEP2b STATE {
+ "url": "http://localhost:4180/",
+ "tabs": [
+  {
+   "label": "Any agent",
+   "selected": "true",
+   "cls": "is-active"
+  },
+  {
+   "label": "Claude Code plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Codex plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Git clone",
+   "selected": "false",
+   "cls": ""
+  }
+ ],
+ "panels": [
+  {
+   "id": "panel-any",
+   "hidden": false,
+   "display": "block",
+   "text": "npx skills add berwinsingh/oldhand --skill '*' -g\nCopy\n\nInstalls all eleven skills under ~/.agents/skills and links them for the agents it finds. Add -a cursor (or codex, github-copilot, gemini-cli, o"
+  }
+ ],
+ "scripts_with_alert": 0,
+ "injected_script_in_body": false,
+ "ls": "{}",
+ "ss": "{}",
+ "cookie": ""
+}
+STEP3 localStorage access check: throws: blocked
+STEP3 after Git clone {
+ "url": "http://localhost:4180/",
+ "tabs": [
+  {
+   "label": "Any agent",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Claude Code plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Codex plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Git clone",
+   "selected": "true",
+   "cls": "is-active"
+  }
+ ],
+ "panels": [
+  {
+   "id": "panel-git",
+   "hidden": false,
+   "display": "block",
+   "text": "git clone https://github.com/berwinsingh/oldhand ~/.oldhand\nmkdir -p ~/.agents/skills ~/.claude/skills\nfor s in ~/.oldhand/skills/*; do ln -sfn \"$s\" ~/.agents/skills/; ln -sfn \"$s\" ~/.claude/skills/; "
+  }
+ ],
+ "scripts_with_alert": 0,
+ "injected_script_in_body": false,
+ "ls": "(skipped, blocked)",
+ "ss": "{}",
+ "cookie": ""
+}
+STEP3 after Any agent {
+ "url": "http://localhost:4180/",
+ "tabs": [
+  {
+   "label": "Any agent",
+   "selected": "true",
+   "cls": "is-active"
+  },
+  {
+   "label": "Claude Code plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Codex plugin",
+   "selected": "false",
+   "cls": ""
+  },
+  {
+   "label": "Git clone",
+   "selected": "false",
+   "cls": ""
+  }
+ ],
+ "panels": [
+  {
+   "id": "panel-any",
+   "hidden": false,
+   "display": "block",
+   "text": "npx skills add berwinsingh/oldhand --skill '*' -g\nCopy\n\nInstalls all eleven skills under ~/.agents/skills and links them for the agents it finds. Add -a cursor (or codex, github-copilot, gemini-cli, o"
+  }
+ ],
+ "scripts_with_alert": 0,
+ "injected_script_in_body": false,
+ "ls": "(skipped, blocked)",
+ "ss": "{}",
+ "cookie": ""
+}

@@ -1,0 +1,22 @@
+# Step 1 + Expectation 1. Command run from /Users/berwinsingh/Documents/oldhand/site:
+# $ npm test
+# (full output below; EXIT CODE line appended after the run)
+
+
+> site@0.0.0 test
+> node --test tests/analytics.test.mjs
+
+✔ no choice loads nothing (0.385583ms)
+✔ denied without a loaded gtag loads nothing (0.06025ms)
+✔ granted sets consent default denied before granting, then injects one script (0.433333ms)
+✔ denied after a load updates consent to denied (0.067167ms)
+✔ stored choice round-trips and junk or a throwing store reads as null (0.472208ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 42.970333
+EXIT CODE: 0

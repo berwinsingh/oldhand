@@ -1,0 +1,13 @@
+{
+ "id": "S3",
+ "status": "pass",
+ "observed": "exit=1; stderr 'retry 1/1' then 'error: storage failed after retries: database is locked'. list: '1 samples/products.csv failed batches=0 rows=0 stored=0'.",
+ "expected": "stderr ends with 'error: storage failed after retries: database is locked' and exit=1 | list shows import 1 'failed' with 'batches=0 rows=0 stored=0' (judgement from the contract: no half-written or doubled batch is left)",
+ "evidence": [
+  "<project>/.oldhand/csv-import-dupes/qa/evidence/S3/run.txt"
+ ],
+ "console_errors": [],
+ "network_failures": [],
+ "blocker": "",
+ "notes": "The first batch never succeeded, so the import stopped at batch 1; no rows remain. Run by the lead in turn (no sub-agent tool on this host)."
+}

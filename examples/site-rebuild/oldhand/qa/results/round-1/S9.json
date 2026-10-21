@@ -1,0 +1,19 @@
+{
+  "id": "S9",
+  "status": "pass",
+  "observed": "1) Ran npm test from /Users/berwinsingh/Documents/oldhand/site (command: node --test tests/analytics.test.mjs). Output: 5 tests, 5 pass, 0 fail, exit code 0. 2) Read src/analytics.js. loadAnalytics (line 23) has exactly one call in the tree, at line 59, inside applyAnalyticsChoice under if (choice === 'granted'). The 'denied' branch only sends a consent update to an already-loaded gtag, and null does nothing. Grep of the whole site tree (excluding node_modules and dist) found no other caller. 3) Read src/App.jsx. On load it runs useState(readAnalyticsChoice) (line 236) and useEffect(() => applyAnalyticsChoice(analytics), [analytics]) (lines 237-239), so the stored choice is applied on load. The literal text applyAnalyticsChoice(readAnalyticsChoice()) does not appear; the stored value reaches applyAnalyticsChoice through state. index.html and main.jsx contain no other analytics call.",
+  "expected": "npm test reports 5 passing tests and 0 failing. loadAnalytics is reachable only through applyAnalyticsChoice with a 'granted' choice; nothing calls it unconditionally. The page applies the stored choice on load and otherwise does nothing.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/expectation1-npm-test-5-pass-0-fail.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/step2-analytics-js-full-read.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/expectation2-loadAnalytics-only-behind-granted-guard.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/step3-App-jsx-analytics-wiring.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/expectation3-page-load-applies-stored-choice-only.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/context-analytics-test-file-coverage.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S9/context-head-vs-working-tree-analytics.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "All three expectations held on read and command evidence. (a) No browser run: the surface is cli and the steps are read-only, so 'the page applies the stored choice on load' is shown by code reading plus the unit test, not by loading the page. Console and network lists are empty because no browser session ran and npm test printed no errors. (b) The step 3 literal form applyAnalyticsChoice(readAnalyticsChoice()) is not in App.jsx; behaviour matches it via useState plus useEffect. (c) loadAnalytics is exported from analytics.js, so the granted guard is a convention, not an enforced barrier. Nothing imports it directly today. (d) npm test covers analytics.js only, not the App.jsx wiring. An unconditional loadAnalytics call added to App.jsx would still pass npm test. (e) The 'worked before' framing: at HEAD (56029eb) there is no analytics.js or analytics.test.mjs, and HEAD site/package.json has no test script (only test:sites). npm test is a new check, so there is no earlier run to compare the 5-test output against. (f) Outside these expectations: HEAD App.jsx renders an AnalyticsConsent banner ('Help improve Oldhand?' with Allow and deny buttons, around line 623) and an 'Analytics preferences' reset button (around line 617). The working-tree App.jsx has neither. Analytics is now a footer toggle that defaults to off. The opt-in gating itself matches HEAD (HEAD: if (analyticsChoice === 'granted') loadAnalytics();). The banner removal is not covered by S9's expectations and is flagged for the release decision. (g) Nothing was edited. Only evidence files were written. Evidence is in the S9 folder: the npm test output, the analytics.js read, the App.jsx wiring, the test-file coverage, and a read-only git comparison of HEAD and the working tree."
+}

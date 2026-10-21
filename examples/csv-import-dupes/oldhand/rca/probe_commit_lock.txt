@@ -1,0 +1,3 @@
+probe 1, write_batch under a real reader lock: retries=['transient error (database is locked), retry 1/3']  records, (batches_done, rows_done) = (4, (1, 2))
+probe 2, python 3.9.6: `with conn:` commit raised 'database is locked'; conn.in_transaction after it = True
+probe 2: rows visible after a later commit on the same connection = 1 (1 means the failed batch was NOT rolled back and a later commit, e.g. finish_import, persists it)

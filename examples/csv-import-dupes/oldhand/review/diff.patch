@@ -1,0 +1,58 @@
+diff --git a/importer/batches.py b/importer/batches.py
+index 9114369..5b3193d 100644
+--- a/importer/batches.py
++++ b/importer/batches.py
+@@ -33,16 +33,23 @@ def read_batches(path, batch_size=100):
+ 
+ 
+ def write_batch(conn, import_id, batch_no, rows):
+-    """Insert one batch and bump the import's progress counters."""
+-    faults.maybe_fail("insert")
+-    conn.executemany(
+-        "INSERT INTO records(import_id, batch_no, sku, name, qty) VALUES (?, ?, ?, ?, ?)",
+-        [(import_id, batch_no) + r for r in rows],
+-    )
+-    conn.commit()
+-    faults.maybe_fail("progress")
+-    conn.execute(
+-        "UPDATE imports SET batches_done = batches_done + 1, rows_done = rows_done + ? WHERE id = ?",
+-        (len(rows), import_id),
+-    )
+-    conn.commit()
++    """Insert one batch and bump the import's progress counters, all or nothing.
++
++    with_retries re-runs this whole function, so a failure must leave nothing behind. Roll back
++    explicitly: on Python 3.9 `with conn:` keeps the transaction open when its COMMIT fails.
++    """
++    try:
++        faults.maybe_fail("insert")
++        conn.executemany(
++            "INSERT INTO records(import_id, batch_no, sku, name, qty) VALUES (?, ?, ?, ?, ?)",
++            [(import_id, batch_no) + r for r in rows],
++        )
++        faults.maybe_fail("progress")
++        conn.execute(
++            "UPDATE imports SET batches_done = batches_done + 1, rows_done = rows_done + ? WHERE id = ?",
++            (len(rows), import_id),
++        )
++        conn.commit()
++    except BaseException:
++        conn.rollback()
++        raise
+diff --git a/tests/test_importer.py b/tests/test_importer.py
+index eed46e9..c831594 100644
+--- a/tests/test_importer.py
++++ b/tests/test_importer.py
+@@ -82,6 +82,12 @@ class WriteBatchTest(unittest.TestCase):
+             with_retries(lambda: write_batch(self.conn, self.import_id, 1, [("A", "a", 1)]), delay=0)
+         self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM records").fetchone()[0], 1)
+ 
++    def test_retry_after_failure_after_insert_stores_batch_once(self):
++        with mock.patch.dict(os.environ, {"IMPORTER_FAULTS": "progress:1"}):
++            with_retries(lambda: write_batch(self.conn, self.import_id, 1, [("A", "a", 1), ("B", "b", 2)]), delay=0)
++        self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM records").fetchone()[0], 2)
++        self.assertEqual(self.conn.execute("SELECT batches_done, rows_done FROM imports").fetchone(), (1, 2))
++
+ 
+ class CliTest(unittest.TestCase):
+     def setUp(self):

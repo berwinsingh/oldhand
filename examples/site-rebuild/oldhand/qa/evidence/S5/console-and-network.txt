@@ -1,0 +1,21 @@
+Console and network observed in tab-1 (Browser pane) while running S5, 2026-10-11.
+
+NOTE: the Browser pane tab was not a clean context. It already held other tabs (seed, tab-2..tab-8) and its console buffer held
+messages from earlier sessions, and a new tab could not be opened ("tab cap reached"). I made fresh top-level loads of
+http://localhost:4180/#example (coming from github.com and from example.com) so the page itself was loaded fresh.
+
+Console errors (read_console_messages onlyErrors, identical before and after my fresh loads, i.e. none came from my loads of the page):
+  [error] [vite] SyntaxError: Unexpected token 'else'
+  [error] [vite] Failed to reload /src/App.jsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+  [error] WebSocket connection to 'ws://localhost:4180/' failed:
+  [error] Failed to load resource: the server responded with a status of 404 ()
+The first three were already in the buffer before I opened anything (vite hot-reload history from earlier edits and a dev-server restart).
+The fourth appeared right after I clicked the examples/csv-import-dupes link: it is the GitHub 404 page for
+https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes, not a request of the app.
+
+Failed network requests on localhost:4180 (read_network_requests, last 80 of 240 listed): none. Every request is 200 OK or 304 Not Modified,
+including GET /@fs/.../examples/csv-import-dupes/oldhand/report.md?import&raw -> 200 OK.
+Failed request caused by following the link: GET https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes -> 404.
+
+Anchor behaviour (not one of the expectations): on a fresh load of http://localhost:4180/#example the page stays at scrollY=0 after 2 s;
+#example sits at y=2528 px (document height 6195 px). The visitor has to scroll or use the "Example" nav link to reach the section.

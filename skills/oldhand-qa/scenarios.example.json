@@ -1,0 +1,110 @@
+[
+ {
+  "id": "S1",
+  "criterion": "AC1",
+  "kind": "acceptance",
+  "title": "A guest signs up from the signup page and lands on the welcome page signed in",
+  "surface": "web",
+  "env": "local",
+  "actor": "guest (not signed in)",
+  "state": "fresh browser context, no cookies; the email below has never been used",
+  "entry": "http://localhost:3000/signup",
+  "steps": [
+   "Open the entry URL",
+   "Type the email and a password from the test data",
+   "Tick the terms box and press Create account"
+  ],
+  "expect": [
+   "The page moves to /welcome and shows the email you used",
+   "The header shows Sign out, so the guest is signed in",
+   "No console errors and no failed requests during signup"
+  ],
+  "data": "email qa.s1.<current unix time>@example.test; password: any 14-character test value you make up",
+  "tier": "worker"
+ },
+ {
+  "id": "S2",
+  "criterion": "AC2",
+  "kind": "acceptance",
+  "title": "POST /api/guests creates a guest and refuses the same email twice",
+  "surface": "api",
+  "actor": "anonymous API client",
+  "state": "local server running; the email below has never been used",
+  "entry": "POST http://localhost:3000/api/guests",
+  "steps": [
+   "POST {\"email\": \"<email>\", \"password\": \"<password>\"} with Content-Type application/json",
+   "POST the same body again"
+  ],
+  "expect": [
+   "The first call returns 201 and a JSON body with a non-empty id",
+   "The second call returns 409 and the body names the email as already registered"
+  ],
+  "data": "email qa.s2.<current unix time>@example.test; password: any 14-character test value you make up",
+  "tier": "scout"
+ },
+ {
+  "id": "S3",
+  "criterion": "R1",
+  "kind": "regression",
+  "title": "An existing member still signs in from /login as before",
+  "surface": "web",
+  "actor": "existing member",
+  "state": "the seeded member from db/seed.example.sql exists; fresh browser context",
+  "entry": "http://localhost:3000/login",
+  "steps": [
+   "Open the entry URL",
+   "Sign in with the seeded member's email and its test password from db/seed.example.sql"
+  ],
+  "expect": [
+   "The page moves to /dashboard and shows the member's name",
+   "The member's existing orders list still loads"
+  ],
+  "data": "the seeded member qa.member@example.test; its test-only password is in db/seed.example.sql",
+  "tier": "scout"
+ },
+ {
+  "id": "S4",
+  "criterion": "AC2",
+  "kind": "negative",
+  "title": "Invalid signup bodies are refused and create nothing",
+  "surface": "api",
+  "actor": "anonymous API client",
+  "state": "local server running",
+  "entry": "POST http://localhost:3000/api/guests",
+  "steps": [
+   "POST {\"email\": \"not-an-email\", \"password\": \"<password>\"}",
+   "POST {\"email\": \"qa.s4@example.test\"} with no password",
+   "POST an empty body",
+   "GET http://localhost:3000/api/guests?email=qa.s4@example.test"
+  ],
+  "expect": [
+   "Each POST returns 400 with a message that names the bad field",
+   "No response is a 500 and no response body contains a stack trace",
+   "The GET finds no guest for qa.s4@example.test"
+  ],
+  "data": "password: any 14-character test value you make up",
+  "tier": "scout"
+ },
+ {
+  "id": "S5",
+  "criterion": "AC1",
+  "kind": "messy",
+  "title": "A pasted email with spaces and capitals signs up once, not twice",
+  "surface": "web",
+  "actor": "guest (not signed in)",
+  "state": "fresh browser context, no cookies",
+  "entry": "http://localhost:3000/signup",
+  "steps": [
+   "Type the email exactly as given, with the leading and trailing spaces and the capitals",
+   "Type the name Zoe O'Brien-Nunez <b>test</b> and a password, then press Create account",
+   "Sign out, open the entry URL again and sign up with the same email in lower case and no spaces"
+  ],
+  "expect": [
+   "The first signup succeeds and the welcome page shows the email in lower case with no spaces",
+   "The name is shown as plain text: the <b> tags appear literally and nothing is bold",
+   "The second signup is refused with an already registered message"
+  ],
+  "data": "email '  QA.S5.<current unix time>@Example.TEST  ' (with the spaces); password: any 14-character test value you make up",
+  "tier": "worker"
+ }
+]

@@ -1,0 +1,10 @@
+$ whoami
+berwinsingh
+$ git rev-parse HEAD; git status --short
+4c043ed41b9e5c23ac31fd1ec6cf2f4b92caf2ee
+$ /usr/bin/python3 -c "import sys,sqlite3;print(sys.executable, sys.version.split()[0], sqlite3.sqlite_version)"
+/Applications/Xcode.app/Contents/Developer/usr/bin/python3 3.9.6 3.54.0
+$ env | grep IMPORTER_ (expect nothing)
+(none)
+$ /usr/bin/python3 -c "import importer;print(importer.__file__)"
+<project>/importer/__init__.py

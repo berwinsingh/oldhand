@@ -1,0 +1,39 @@
+$ test -f dist/client/index.html && test -f dist/server/index.js && test -f dist/.openai/hosting.json
+EXISTS (file): dist/client/index.html  bytes=3309
+EXISTS (file): dist/server/index.js  bytes=483
+EXISTS (file): dist/.openai/hosting.json  bytes=31
+--- hosting.json content:
+{
+  "d1": null,
+  "r2": null
+}
+
+--- server/index.js head:
+export default {
+  async fetch(request, env) {
+    const response = await env.ASSETS.fetch(request);
+    const acceptsHtml = request.headers.get("accept")?.includes("text/html");
+
+    if (response.status !== 404 || !acceptsHtml || !["GET", "HEAD"].includes(request.method)) {
+      return response;
+    }
+
+    const indexUrl = new URL(request.url);
+    indexUrl.pathname = "/index.html";
+    indexUrl.search = "";
+    return env.ASSETS.fetch(new Request(indexUrl, request));
+  },
+};
+--- client/index.html head:
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Oldhand</title>
+    <meta
+      name="description"
+      content="Oldhand is a pack of eleven agent skills that gives a coding agent a definition of done: read the whole request, trace the real path, change the minimum, review and QA with sub-agents, and let a computed verdict say when it is done. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI and any agent that reads SKILL.md."
+    />
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />

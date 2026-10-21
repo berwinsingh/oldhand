@@ -1,0 +1,291 @@
+{
+ "scenarios_file": "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/scenarios.json",
+ "sha256": "65138b2255a75869c64c6c348f852a2fa6bb214dde3a17378fe461d5d3073691",
+ "bug": false,
+ "quick": false,
+ "scenarios": [
+  {
+   "id": "S1",
+   "criterion": "AC1",
+   "kind": "acceptance",
+   "env": "local",
+   "title": "The conductor skill text and its hard stops come from the imported SKILL.md",
+   "surface": "web",
+   "actor": "visitor",
+   "state": "fresh browser context, no stored choices",
+   "entry": "http://localhost:4180/",
+   "steps": [
+    "Open the entry URL at 1440x900.",
+    "Scroll to the section headed 'What it will not do' and read the numbered list.",
+    "Scroll to the section headed 'The skill'; read the first 12 lines of the large text block and note the 'View on GitHub' link target.",
+    "Compare the numbered list and the block's text with the file at /Users/berwinsingh/Documents/oldhand/skills/oldhand/SKILL.md (read it with your file tool): the list items must equal the '## Hard stops' items of that file, and the block must equal the whole file."
+   ],
+   "expect": [
+    "The numbered list under 'What it will not do' has the same items, in the same order, as the '## Hard stops' section of skills/oldhand/SKILL.md.",
+    "The large text block under 'The skill' starts with the file's frontmatter ('---', 'name: oldhand') and ends with the file's last line.",
+    "'View on GitHub' links to https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md.",
+    "The Copy control next to it exists; after clicking it the control reads 'Copied'."
+   ],
+   "data": "none",
+   "tier": "worker"
+  },
+  {
+   "id": "S2",
+   "criterion": "AC2",
+   "kind": "acceptance",
+   "env": "local",
+   "title": "Each install tab shows commands, a tested line and the line to type afterwards, and Copy copies the exact command",
+   "surface": "web",
+   "actor": "visitor",
+   "state": "fresh browser context",
+   "entry": "http://localhost:4180/",
+   "steps": [
+    "Open the entry URL at 1440x900.",
+    "For each tab in the install switcher (Any agent, Claude Code plugin, Codex plugin, Git clone): click it, read every command block, the note, the 'Then, in ...' lines and the 'Tested ...' line.",
+    "On each tab, before clicking Copy, add a listener in the page: document.addEventListener('copy', e => { window.__copied = document.getSelection().toString(); }); then click the Copy control of the first command block and read window.__copied (the page falls back to a selection-based copy when the clipboard API is blocked). If window.__copied is empty, read navigator.clipboard.readText() instead.",
+    "Press the right arrow key while a tab has focus and note which tab becomes selected."
+   ],
+   "expect": [
+    "Four tabs exist with those labels; exactly one is selected at a time (aria-selected=true).",
+    "Every tab shows at least one command block, a 'Tested 2026-10-11 ...' line naming a tool version, and at least one 'Then, in ...' line with a command starting with /oldhand, /oldhand:oldhand, $oldhand or 'Use the oldhand skill'.",
+    "The copied text (window.__copied or the clipboard) equals the command block's text exactly, including newlines for multi-line blocks, and the control reads 'Copied' afterwards.",
+    "The right arrow key moves the selection to the next tab."
+   ],
+   "data": "none",
+   "tier": "worker"
+  },
+  {
+   "id": "S3",
+   "criterion": "AC4",
+   "kind": "acceptance",
+   "env": "local",
+   "title": "Readable in light and dark at 1440 and 375 with no horizontal scroll, no text under 13px, AA contrast",
+   "surface": "web",
+   "actor": "visitor",
+   "state": "fresh browser context",
+   "entry": "http://localhost:4180/",
+   "steps": [
+    "Open the entry URL; set the viewport to 1440x900 with the light colour scheme, then dark; then the mobile preset (375 wide) light, then dark. Reset to desktop at the end.",
+    "At each of the four combinations run in the page: document.documentElement.scrollWidth and window.innerWidth; and collect every element whose own text node has a computed font-size below 13px.",
+    "At each combination read the computed colour and background of body text, of a link, and of the selected tab's text; compute the WCAG contrast ratio (relative luminance formula) for each pair against the page background.",
+    "Take a screenshot at each combination and save it under the evidence folder."
+   ],
+   "expect": [
+    "scrollWidth equals innerWidth at every combination (no horizontal page scroll).",
+    "No element with visible text has a computed font-size below 13px.",
+    "Body text, links and the selected tab text each have a contrast ratio of at least 4.5:1 against the page background in both schemes.",
+    "The four screenshots show the same content with legible text."
+   ],
+   "data": "none",
+   "tier": "worker"
+  },
+  {
+   "id": "S4",
+   "criterion": "AC5",
+   "kind": "acceptance",
+   "env": "local",
+   "title": "Analytics stay off until the footer toggle is used; the choice persists; no overlay",
+   "surface": "web",
+   "actor": "visitor",
+   "state": "fresh browser context (localStorage empty); verify with localStorage.getItem('oldhand-analytics-consent') === null first, clearing it if not",
+   "entry": "http://localhost:4180/",
+   "steps": [
+    "Open the entry URL. Run in the page: !!document.querySelector('script[data-oldhand-analytics]') and list network requests whose URL contains googletagmanager.",
+    "Check that no element overlays the page: no fixed-position element besides the sticky header, and no element with text 'Allow analytics' or 'No thanks'.",
+    "Scroll to the footer; read the analytics sentence and click its button.",
+    "Run the same script and network checks again; read localStorage.getItem('oldhand-analytics-consent').",
+    "Reload the page; run the checks again.",
+    "Click the footer button again (it should now offer to turn analytics off); run the checks and read localStorage again."
+   ],
+   "expect": [
+    "Before the click: no analytics script element, no googletagmanager request, no overlay, and the footer reads 'Google Analytics is off; nothing is sent.' with a 'Turn on Google Analytics' button and a 'How Google uses data' link.",
+    "After the click: a script element with data-oldhand-analytics exists, a request to www.googletagmanager.com/gtag/js?id=G-75YW6HE9FT was made, localStorage holds 'granted', and the footer reads 'Google Analytics is on.' with a 'Turn it off' button.",
+    "After reload the script element is present again without any click (the choice persisted).",
+    "After turning it off: localStorage holds 'denied' and the footer reads 'Google Analytics is off; nothing is sent.' again."
+   ],
+   "data": "none; the GA property id G-75YW6HE9FT is public",
+   "tier": "worker"
+  },
+  {
+   "id": "S5",
+   "criterion": "AC6",
+   "kind": "acceptance",
+   "env": "local",
+   "title": "The Example run section reproduces the committed report.md",
+   "surface": "web",
+   "actor": "visitor",
+   "state": "fresh browser context",
+   "entry": "http://localhost:4180/#example",
+   "steps": [
+    "Open the entry URL and read the 'Example run' section: the verdict line, the criteria table, the 'Root cause' paragraph, the 'Not verified' list and the 'Computed by ledger.py ...' line.",
+    "Read /Users/berwinsingh/Documents/oldhand/examples/csv-import-dupes/oldhand/report.md with your file tool.",
+    "Compare: the verdict line, the six criterion rows (ids AC1, AC2, R1, R2, R3, R4 with their outcome, proof, status and by cells), the root cause text, the four 'Not verified' bullets and the computed line.",
+    "Click the examples/csv-import-dupes link and note its href."
+   ],
+   "expect": [
+    "The verdict line reads 'Verdict: VERIFIED' as in the report.",
+    "The table has exactly the six criterion rows of the report's first table, with matching cell text for criterion, outcome, proof, status and by; no row from the report's review-findings table appears.",
+    "The root cause paragraph and the four 'Not verified' bullets equal the report's sections word for word.",
+    "The link href is https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes."
+   ],
+   "data": "none",
+   "tier": "worker"
+  },
+  {
+   "id": "S6",
+   "criterion": "AC7",
+   "kind": "acceptance",
+   "env": "local",
+   "title": "Eleven stage links in chain order, every GitHub link on the page maps to a real repository path, and the model table is present and dated",
+   "surface": "cli",
+   "actor": "maintainer",
+   "state": "the site is built (dist/client exists) and the repository working tree is the source of truth, since new files are not on main until the merge",
+   "entry": "cd /Users/berwinsingh/Documents/oldhand/site && npm run build, then read dist/client/assets/*.js and /Users/berwinsingh/Documents/oldhand/site/src/App.jsx",
+   "steps": [
+    "Extract every URL that starts with https://github.com/berwinsingh/oldhand/ from site/src/App.jsx (the built JS carries the same strings).",
+    "For each URL of the form .../blob/main/<path> or .../tree/main/<path>, check that <path> exists in the repository working tree.",
+    "Read the stages array in App.jsx: list the eleven names in order.",
+    "Read the models table rows and the sentence before it."
+   ],
+   "expect": [
+    "Every blob/tree path exists in the working tree (a list of the paths checked, each marked found).",
+    "The stage names in order are: oldhand, oldhand-contract, oldhand-trace, oldhand-rca, oldhand-research, oldhand-plan, oldhand-build, oldhand-review, oldhand-qa, oldhand-ship, oldhand-learn, each linking to skills/<name>/SKILL.md.",
+    "The model table has host, lead, worker and scout columns, at least five host rows, and the text near it says 'as of October 2026' and describes the substitution rule."
+   ],
+   "data": "none",
+   "tier": "scout"
+  },
+  {
+   "id": "S7",
+   "criterion": "R1",
+   "kind": "regression",
+   "env": "local",
+   "title": "Build and Sites tests still pass and the output is small",
+   "surface": "cli",
+   "actor": "maintainer",
+   "state": "site/node_modules installed",
+   "entry": "cd /Users/berwinsingh/Documents/oldhand/site && npm run build && npm run test:sites",
+   "steps": [
+    "Run npm run build and capture the output.",
+    "Run npm run test:sites and capture the output.",
+    "List dist/client, dist/server/index.js and dist/.openai/hosting.json; measure the total size of dist/client."
+   ],
+   "expect": [
+    "npm run build exits 0 and prints 'Prepared Sites build'.",
+    "npm run test:sites reports 4 passing tests and 0 failing.",
+    "dist/client/index.html, dist/server/index.js and dist/.openai/hosting.json exist; dist/client is under 1 MB and contains no .png other than favicon.png."
+   ],
+   "data": "none",
+   "tier": "scout"
+  },
+  {
+   "id": "S8",
+   "criterion": "R2",
+   "kind": "regression",
+   "env": "local",
+   "title": "The social-preview hook renders the hero inside 1200x627 with no footer or nav",
+   "surface": "web",
+   "actor": "the Pages workflow's headless Chrome",
+   "state": "fresh browser context",
+   "entry": "http://localhost:4180/?social-preview=1",
+   "steps": [
+    "Set the viewport to exactly 1200x627 with the light colour scheme and open the entry URL.",
+    "Run in the page: document.documentElement.classList.contains('social-preview'), getComputedStyle(document.querySelector('footer')).display, getComputedStyle(document.querySelector('.top nav')).display, and the bottom edge (getBoundingClientRect().bottom) of the first command block.",
+    "Take a screenshot. Reset the viewport to desktop afterwards."
+   ],
+   "expect": [
+    "The html element carries the class social-preview.",
+    "The footer and the header nav are not displayed.",
+    "The first install command block's bottom edge is within 627px, so the H1, the sentence and the first command are inside the frame.",
+    "The screenshot shows the heading, the sentence and the install block with nothing cut mid-line except below the first command."
+   ],
+   "data": "none",
+   "tier": "worker"
+  },
+  {
+   "id": "S9",
+   "criterion": "R3",
+   "kind": "regression",
+   "env": "local",
+   "title": "The analytics regression check passes and guards the opt-in rule",
+   "surface": "cli",
+   "actor": "maintainer",
+   "state": "site/node_modules installed",
+   "entry": "cd /Users/berwinsingh/Documents/oldhand/site && npm test",
+   "steps": [
+    "Run npm test and capture the output (the script runs tests/analytics.test.mjs and tests/slices.test.mjs).",
+    "Read site/src/analytics.js and confirm loadAnalytics is only called from applyAnalyticsChoice when the choice equals 'granted'.",
+    "Read site/src/App.jsx and confirm the only call into analytics on load is applyAnalyticsChoice(readAnalyticsChoice())."
+   ],
+   "expect": [
+    "npm test reports 10 passing tests (5 analytics, 5 slicing) and 0 failing.",
+    "loadAnalytics is reachable only through applyAnalyticsChoice with a 'granted' choice; nothing calls it unconditionally.",
+    "The page applies the stored choice on load and otherwise does nothing."
+   ],
+   "data": "none",
+   "tier": "scout"
+  },
+  {
+   "id": "S10",
+   "criterion": "AC2",
+   "kind": "messy",
+   "env": "local",
+   "title": "A bogus ?agent= value and a blocked localStorage do not break the switcher",
+   "surface": "web",
+   "actor": "visitor arriving from a mangled link",
+   "state": "fresh browser context",
+   "entry": "http://localhost:4180/?agent=%3Cscript%3Ealert(1)%3C/script%3E",
+   "steps": [
+    "Open the entry URL and note which tab is selected and whether any dialog appeared.",
+    "Open http://localhost:4180/?agent=codex and note the selected tab; then open http://localhost:4180/ (no query) and note the selected tab.",
+    "Run in the page: Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked'); } }); then click the 'Git clone' tab and then the 'Any agent' tab.",
+    "Read the console for errors after each step."
+   ],
+   "expect": [
+    "With the bogus value the first tab (Any agent) is selected and no dialog or script ran.",
+    "?agent=codex selects the Codex tab; the following plain visit shows the first tab, Any agent (nothing is stored between visits).",
+    "With localStorage throwing, clicking tabs still switches the panel and the console shows no uncaught error."
+   ],
+   "data": "none",
+   "tier": "worker"
+  },
+  {
+   "id": "S11",
+   "criterion": "AC4",
+   "kind": "messy",
+   "env": "local",
+   "title": "Zoomed to 200 percent on a phone the page still has no horizontal scroll",
+   "surface": "web",
+   "actor": "visitor with large text",
+   "state": "fresh browser context",
+   "entry": "http://localhost:4180/",
+   "steps": [
+    "Set the mobile preset (375 wide) and open the entry URL.",
+    "Run in the page: document.documentElement.style.fontSize = '200%'; document.body.style.zoom = '2'; then read document.documentElement.scrollWidth and window.innerWidth and list elements whose right edge exceeds innerWidth by more than 1px.",
+    "Scroll through the install block and the criteria table; note whether long commands scroll inside their own block.",
+    "Reset the viewport to desktop afterwards."
+   ],
+   "expect": [
+    "scrollWidth does not exceed innerWidth (no horizontal page scroll).",
+    "Any element wider than the viewport is a command or table container that scrolls inside itself, not the page.",
+    "No text is clipped without a way to scroll to it."
+   ],
+   "data": "none",
+   "tier": "worker"
+  }
+ ],
+ "recorded": {
+  "S1": "d691a9ae4438dc7a9fab145b60482864e7116fdec9a5b17c65a493538aeac79f",
+  "S2": "e0873c9b664ac1969d54924e4a074944c2fa7a7aaef4794196d26aef765f3194",
+  "S3": "e1c859f7deb912cae7ba3a9a3608e73396ac8a8cbd643eaffbbb68c4beae908d",
+  "S4": "9aac75bde1a74eda960326ab3960bcc137b195e99986ce41d25a70d1b9580827",
+  "S5": "6dd077bb9b2d9a4efa551e25b99063679f1d9ccf4fe44c9a2201afc8ebbc6ea4",
+  "S6": "f03458967baf1d9d4a2770b3b4aea11781fa1b73977c54ada53952f40f3bdee8",
+  "S7": "62b9a8874c55a8d93ec1e951062212039d5b979bb4d4f8d6025e880c6fb82437",
+  "S8": "919846ca6792e24383a6849dbd5afb1009bfede35a32125576d2e89ba1e371cd",
+  "S9": "d611faabf1280df16ebe92209061121f240ecf48f9663db90f822e9e76edf55f",
+  "S10": "7eda00a8dea51aa0839bd4d6a3db569d5659fa5620d6d815c18f954bf3268f70",
+  "S11": "a0d2ce6b6185301a50334d650543929c2e6151c4873e33fc7ad81d6713dfd4fd"
+ },
+ "created": "2026-10-11T07:17:44+00:00"
+}

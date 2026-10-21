@@ -1,0 +1,24 @@
+{
+ "light": {
+  "total": 40,
+  "unclipped": [],
+  "byClip": {
+   "nav overflow-x:auto scrollW=411 clientW=343": 1,
+   "div.tabs overflow-x:auto scrollW=468 clientW=341": 2,
+   "pre overflow-x:auto scrollW=440 clientW=307": 1,
+   "div.scroll overflow-x:auto scrollW=399 clientW=343": 17,
+   "div.scroll overflow-x:auto scrollW=371 clientW=343": 19
+  }
+ },
+ "dark": {
+  "total": 40,
+  "unclipped": [],
+  "byClip": {
+   "nav overflow-x:auto scrollW=411 clientW=343": 1,
+   "div.tabs overflow-x:auto scrollW=468 clientW=341": 2,
+   "pre overflow-x:auto scrollW=440 clientW=307": 1,
+   "div.scroll overflow-x:auto scrollW=399 clientW=343": 17,
+   "div.scroll overflow-x:auto scrollW=371 clientW=343": 19
+  }
+ }
+}

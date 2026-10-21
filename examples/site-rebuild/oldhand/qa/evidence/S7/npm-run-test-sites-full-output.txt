@@ -1,0 +1,18 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && npm run test:sites
+
+> site@0.0.0 test:sites
+> node --test tests/sites-worker.test.mjs
+
+✔ serves existing static assets without a fallback (10.489041ms)
+✔ falls back to index.html for an unknown app route (0.60425ms)
+✔ does not turn missing API or write requests into the app shell (0.28025ms)
+✔ emits the files required by Sites packaging (1.870042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 89.366042
+EXIT CODE: 0

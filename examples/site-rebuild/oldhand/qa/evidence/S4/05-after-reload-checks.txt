@@ -1,0 +1,13 @@
+S4 step 5 - page reloaded with no click (re-run 11 Oct 2026, tab-1, http://localhost:4180/)
+Two loads were checked, both with no click after the step-4 click:
+ (a) a fresh navigation to the entry URL (new document, uptime 4.6 s): consent "granted"; script[data-oldhand-analytics] present -> true;
+     src https://www.googletagmanager.com/gtag/js?id=G-75YW6HE9FT; Resource Timing lists that gtag/js URL; window.google_tag_manager has key "G-75YW6HE9FT";
+     footer "Google Analytics is on. Turn it off · How Google uses data".
+ (b) a literal location.reload(): performance navigation type = "reload", uptime 8.0 s:
+     localStorage.getItem('oldhand-analytics-consent')            -> "granted"
+     !!document.querySelector('script[data-oldhand-analytics]')   -> true
+     script src                                                   -> https://www.googletagmanager.com/gtag/js?id=G-75YW6HE9FT
+     Resource Timing: gtag/js?id=G-75YW6HE9FT and https://www.google-analytics.com/g/collect?v=2&tid=G-75YW6HE9FT&... (both present, no click made)
+     window.google_tag_manager keys with "G-" prefix              -> ["G-75YW6HE9FT"]
+     position:fixed element count -> 0 ; text 'Allow analytics' -> false ; text 'No thanks' -> false
+     Footer: "Google Analytics is on. Turn it off · How Google uses data"  (button "Turn it off")

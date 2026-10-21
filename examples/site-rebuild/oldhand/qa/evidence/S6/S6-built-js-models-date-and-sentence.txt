@@ -1,0 +1,16 @@
+# Step 4 (cont.): the built bundle carries the same date, sentence, table header and host rows
+# bundle: site/dist/client/assets/index-Bm6OPz8X.js (cwd /Users/berwinsingh/Documents/oldhand/site)
+FOUND   occurrences=1  ## Current models per host (as of October 2026)
+FOUND   occurrences=1  this table is read from it
+FOUND   occurrences=1  as of October 2026
+FOUND   occurrences=1  If a named model is missing, the agent uses the newest one the host offers in the same role
+FOUND   occurrences=1  never puts the lead below worker tier
+FOUND   occurrences=1  ["host","lead","worker","scout"]
+FOUND   occurrences=14  Claude Code
+FOUND   occurrences=1  OpenAI Codex
+FOUND   occurrences=3  GitHub Copilot
+FOUND   occurrences=11  Cursor
+FOUND   occurrences=2  Gemini CLI / Antigravity
+FOUND   occurrences=5  OpenCode
+FOUND   occurrences=1  Devin Desktop (was Windsurf)
+FOUND   occurrences=1  Substitution rule:

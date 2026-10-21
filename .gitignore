@@ -6,3 +6,5 @@ site/implementation-desktop.png
 site/implementation-desktop-tall.png
 site/implementation-desktop-v2.png
 site/implementation-mobile.png
+.oldhand/
+__pycache__/

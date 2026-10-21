@@ -12,6 +12,10 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     allowedHosts: ["terminal.local"],
+    // The page imports the skill, the example report and the plugin manifest
+    // from the repository root at build time, so the dev server must serve
+    // those folders (and only those: the dev server binds all interfaces).
+    fs: { allow: [".", "../skills", "../examples", "../.claude-plugin"] },
     warmup: {
       clientFiles: ["./src/main.jsx"],
     },

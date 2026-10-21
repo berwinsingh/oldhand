@@ -1,0 +1,21 @@
+# Step 1: built JS. The full URL with a trailing slash is not a literal in the bundle: REPO and the blob/tree suffixes are concatenated at runtime, so the grep below is expected to find no full-URL literal. Recording what the bundle does carry.
+
+$ grep -o 'https://github.com/berwinsingh/oldhand/[^ ]*' dist/client/assets/*.js
+(exit 1, no matches above means none)
+
+$ grep -o 'github.com/berwinsingh/oldhand[^"]{0,40}' dist/client/assets/*.js
+)}const Da="https://github.com/berwinsingh/oldhand",Se=`${Da}/blob/main/`,Zu="2026-10-11",Le=[{key:"any",label
+[`git clone https://github.com/berwinsingh/oldhand ~/.oldhand
+(exit 0)
+
+$ grep -oE '/(blob|tree)/main/[^"]{0,80}' dist/client/assets/*.js
+berwinsingh/oldhand",Se=`${Da}/blob/main/`,Zu="2026-10-11",Le=[{key:"any",label:"Any agent",blocks:["npx skills add berwi
+in"," ",S.jsx("a",{href:`${Da}/tree/main/examples/csv-import-dupes`,children:"examples/csv-import-dupes"}),". The blocks 
+(exit 0)
+
+$ grep -oE '.{0,40}(as of October 2026|Fable, else Opus|GPT-6 Astra|substitut|newest one the host offers).{0,40}' dist/client/assets/*.js
+not relearn them"]],zy=[["Claude Code","Fable, else Opus","Sonnet; Opus for hard slices","Haiku"],["Codex","GPT-6 As
+PT-6 Luna"],["GitHub Copilot","Fable or GPT-6 Astra","Sonnet or GPT-6.1 Sol","Haiku or GPT-6 Luna"],["Cursor","
+}),", maps the roles to current models (as of October 2026):"]}),S.jsxs("table",{children:[S.jsx("thead",{children:S.j
+ed model is missing, the agent uses the newest one the host offers in the same role, never puts the lead below worker tier, an
+(exit 0)

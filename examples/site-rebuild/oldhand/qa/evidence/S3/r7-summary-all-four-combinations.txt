@@ -1,0 +1,20 @@
+S3 run r7 - summary of the four combinations (http://localhost:4180/, Browser pane tab-1, loaded styles.css?t=1791703058846 + App.jsx?t=1791703061706 at all four)
+
+Each combination: set viewport + colour scheme, loaded the entry URL fresh, ran the in-page script (document.documentElement.scrollWidth vs window.innerWidth; every visible element whose own text node has computed font-size < 13px; computed colour + effective background -> WCAG 2.x relative-luminance contrast for body text, links, selected tab text), then took a screenshot.
+
+combination        | scrollWidth/innerWidth | visible text <13px | smallest visible text | body text | main link   | nav link  | selected tab (vs page bg) | text under AA (all text)
+1440x900 light     | 1440 / 1440 equal      | 0                  | 13.5px                | 16.54     | 5.32 (#b4441c on #fbfaf7), 4.87 (hosts.md, #b4441c on panel #f2f0ea) | 16.54 | 16.54 (15.15 vs own panel bg #f2f0ea) | 0
+1440x900 dark      | 1440 / 1440 equal      | 0                  | 13.5px                | 15.44     | 7.46 (#f08a5d on #141413), 6.83 (hosts.md on panel #1d1d1b)        | 15.44 | 15.44 (14.14 vs own panel bg #1d1d1b) | 0
+375x812 mobile light | 375 / 375 equal      | 0                  | 13.5px                | 16.54     | 5.32, 4.87 (same pairs as desktop light)                           | 16.54 | 16.54 (15.15 vs own bg)               | 0
+375x812 mobile dark  | 375 / 375 equal      | 0                  | 13.5px                | 15.44     | 7.46, 6.83 (same pairs as desktop dark)                            | 15.44 | 15.44 (14.14 vs own bg)               | 0
+
+Colours: light page bg #fbfaf7, body text #1b1b18; dark page bg #141413, body text #ecebe6. Selected tab = "Any agent" in the install tablist.
+The lowest ratio anywhere in the page text at any combination is 4.87:1 (the hosts.md link inside the tab panel, light scheme), above 4.5:1.
+
+Smallest text on the page: 13.5px (24 code elements in the example run, e.g. IMPORTER_FAULTS=..., --retries 3), then 14px (version label, Copy button, "Computed by ledger" paragraph) and 14.4px (code samples). Nothing under 13px, hidden or visible, and no ::before/::after text under 13px.
+
+Same content: document text length 22859 characters and identical text hash (664107657) at all four combinations; h1 "A definition of done for coding agents." and the same six h2s ("How it works", "What it will not do", "Example run", "The skill", "Models", "Honest scope") and 35 links each time. Document height differs (6288px desktop, 11569px mobile) because the layout reflows.
+
+Mobile 375 detail: the page itself does not scroll sideways. 40 visible elements extend past x=375 but every one sits inside an overflow-x:auto scroller (header nav: "Models"/"GitHub" links reachable only by scrolling the nav; install tablist: "Codex plugin"/"Git clone" tabs; the npx code block; the proof table wrapper div.scroll). html and body overflow-x are both "visible"; no overflowing element lacks a clipping scroller ancestor. So scrollWidth == innerWidth is real, not hidden by overflow:hidden on the page.
+
+Screenshots: the tool returns a viewport capture only. Desktop captures are 800x500 downscaled from 1440x900; mobile captures are 750x1624 (375x812 at 2x), top of the page only (header, h1, intro, start of install panel). Lower page content was not screenshotted; it was covered by the in-page measurements, which scan the whole document.

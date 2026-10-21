@@ -5,8 +5,30 @@ on:
   pull_request:
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # 3.8 has no build for ubuntu-24.04, so it runs on 22.04.
+          - python-version: "3.8"
+            os: ubuntu-22.04
+          - python-version: "3.12"
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
       - run: ./scripts/smoke-test.sh
+
+  # main's branch protection requires a check named "validate". This job
+  # reports the whole matrix under that name; it runs even when a matrix leg
+  # fails, because a skipped required check would count as passing.
+  validate:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.test.result }}" = success

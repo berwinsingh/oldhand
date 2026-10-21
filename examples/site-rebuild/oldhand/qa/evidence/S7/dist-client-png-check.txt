@@ -1,0 +1,8 @@
+$ find dist/client -iname '*.png' -print   (plus every file whose name ends in .png, any case)
+dist/client/favicon.png
+png_count=1
+--- all files in dist/client by extension:
+   1 css
+   1 html
+   1 js
+   1 png

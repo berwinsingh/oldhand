@@ -1,0 +1,24 @@
+{
+  "id": "S2",
+  "status": "pass",
+  "observed": "Opened http://localhost:4180/ in a new tab at 1440x900. The install switcher (tablist 'Install route') has four tabs labelled Any agent, Claude Code plugin, Codex plugin, Git clone; exactly one had aria-selected=true each time I read the DOM (Any agent on load). I clicked each tab and read the panel. Any agent: 1 command block (npx skills add berwinsingh/oldhand --skill '*' -g), a note, three 'Then, in ...' lines (/oldhand ..., $oldhand ..., 'Use the oldhand skill: ...') and 'Tested 2026-10-11 on macOS with skills 1.7.2 ...'. Claude Code plugin: 2 command blocks (/plugin marketplace add berwinsingh/oldhand and /plugin install oldhand@oldhand), a note, 'Then, in Claude Code' with /oldhand:oldhand ..., 'Tested 2026-10-11 with Claude Code 2.1.274 ...'. Codex plugin: 1 two-line block (codex plugin marketplace add berwinsingh/oldhand newline codex plugin add oldhand@oldhand), a note, 'Then, in Codex' with $oldhand ..., 'Tested 2026-10-11 with Codex CLI 0.146.0 ...'. Git clone: 1 three-line block, a note, two 'Then, in ...' lines (/oldhand ... and $oldhand ...), 'Tested 2026-10-11 on macOS with git 2.55.0 and zsh 5.9 ...'. On each tab I added the copy listener, did a real click on the first block's Copy button, and read window.__copied: it was identical (===) to the block's text on all four tabs, including the newline(s) for the 2-line Codex block (81 chars, contains \\n) and the 3-line Git block, and the control text read 'Copied' straight after each click. I also copied Claude Code block 2: identical too. navigator.clipboard.readText() was denied (Read permission denied), so the selection-based copy path is what was verified; window.__copied was non-empty every time. ArrowRight with focus on Any agent moved the selection (and focus) to Claude Code plugin; further presses went Codex plugin, Git clone, then wrapped to Any agent.",
+  "expected": "Four tabs exist with those labels, exactly one aria-selected=true; every tab shows at least one command block, a 'Tested 2026-10-11 ...' line naming a tool version and at least one 'Then, in ...' line whose command starts with /oldhand, /oldhand:oldhand, $oldhand or 'Use the oldhand skill'; the copied text equals the first command block's text exactly (newlines kept) and the control reads 'Copied'; right arrow moves selection to the next tab.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/tab-any-selected-initial.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-any-agent-after-copy-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-claude-code-plugin-tab-before-copy.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-claude-code-plugin-after-copy-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-codex-plugin-tab-before-copy.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-codex-plugin-after-copy-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-git-clone-tab-before-copy.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-git-clone-after-copy-click.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-after-right-arrow-from-any-agent.jpg",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-tabs-panels-and-copy-results.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-right-arrow-key.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S2/run4-console-and-network.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "The evidence folder already held files from earlier S2 runs (01-06 jpgs and 10-14 txts); I did not read or reuse them and wrote new files prefixed run4-, plus tab-any-selected-initial.jpg. The browser had other tabs open (shared browser, not a private context), so I used my own new tab (tab-8); the page state was still a fresh load. The page is served by the Vite dev server (HMR). Only the selected tab's tabpanel is in the DOM. Git clone tab: the third line of the command block is wider than the box at 1440 (scrollWidth 876 vs clientWidth 834, overflow-x auto) so the closing 'done' is scrolled out of view until you scroll the block sideways; the copied text still contains it. Right arrow wraps from Git clone back to Any agent. A screenshot taken immediately after the first ArrowRight showed the old frame while the DOM already showed the new tab; a second screenshot matched (tool lag, not an app bug). Console had only vite/React debug and info lines; all 18 requests were 200."
+}

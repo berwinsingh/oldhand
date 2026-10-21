@@ -1,0 +1,26 @@
+VERDICT: VERIFIED
+Task: Rebuild the Oldhand website for the 2.0 pack (mode implement)  /Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild
+Tree: 00747f3a27:91dcb9a6:7d47a232
+
+criterion  proof        counted  status  by          flags
+AC1        e2e          C39      pass    lead:fable
+AC2        e2e          C16,C24  pass    qa:worker
+AC3        review       C34      pass    lead:fable
+AC4        e2e          C36,C38  pass    qa:worker
+AC5        e2e          C18      pass    qa:worker
+AC6        e2e          C19      pass    qa:worker
+AC7        e2e          C20      pass    qa:scout
+R1         integration  C32,C37  pass    qa:scout
+R2         review       C35      pass    lead:fable
+R3         unit         C23,C31  pass    lead:fable
+
+Reasons:
+  - every live criterion has a passing check of its proof kind on the current tree and the lead recorded an e2e pass; no open high or medium findings
+
+Notes:
+  - C3 (R3 mutation) was voided and does not count: first mutation did not parse (dangling else); replaced by the if(true) mutation
+  - C4 mutation check on R3: KILLED
+  - C9 mutation check on R3: KILLED
+  - C12 mutation check on R3: KILLED
+  - C28 mutation check on R3: KILLED
+  - C33 mutation check on R3: KILLED

@@ -1,0 +1,56 @@
+S11 run 2 (my run, Browser pane tab-1, mobile preset 375x812, DPR 2, Android Chrome 152 UA, viewport meta "width=device-width, initial-scale=1.0")
+App: http://localhost:4180/ (Vite dev server). Last hot update of styles.css/App.jsx before my run: 12:28:46 IST; my first load was about 12:29.
+(Files in this folder named 01-A..18-D, 00-summary and 99-console are NOT mine; they predate the 12:28:46 hot update.)
+
+STEP 1 / BEFORE THE HACK (fresh load)
+  innerWidth 375, documentElement.scrollWidth 375, clientWidth 375, html font-size 16px, body zoom empty.
+  Screenshot: 01-baseline-375-no-zoom-top.jpg
+
+STEP 2 - hack run exactly as given:
+  document.documentElement.style.fontSize = '200%'; document.body.style.zoom = '2';
+RESULT
+  window.innerWidth                         = 589   (was 375 before the hack: mobile emulation widened it once content overflowed)
+  document.documentElement.scrollWidth      = 589
+  document.documentElement.clientWidth      = 375   (the real screen width)
+  visualViewport.width                      = 375, scale 1, window.outerWidth 375
+  scrollWidth - clientWidth                 = 214 px of content past the screen edge
+  The literal test "scrollWidth <= innerWidth" reads 589 <= 589 (true) ONLY because innerWidth itself grew to 589.
+  Real page scroll: a mouse-wheel scroll right moved visualViewport.pageLeft from 0 to 214.5 (= 589 - 375).
+  (window.scrollTo / scrollLeft assignments are ignored in this emulation: scrollX stays 0, so the pan is the visual viewport.)
+  Screenshot 02 = top of page after the hack: heading word "definition" runs off the right edge ("definit" visible).
+  Screenshot 03 = same page after panning right 214 px: "finition" ends at the right edge.
+
+ELEMENTS PAST THE VIEWPORT (step 2 list)
+  Using innerWidth 589 as the brief says: 59 element boxes had right edge > 590. All are inside overflow-x:auto containers
+    (tab strip, install command <pre>, the two tables' wrappers).
+  Using the real screen width 375: 89 element boxes have right edge > 376. Each one sits inside one of four overflow-x:auto containers,
+    and every container fits the screen:
+      nav            left 32  right 343  scrollWidth 411 / clientWidth 156  (scrolls)
+      div.tabs       left 34  right 341  scrollWidth 468 / clientWidth 154  (scrolls)
+      pre            left 68  right 307  scrollWidth 440 / clientWidth 120  (scrolls)  <- install command
+      div.scroll     left 32  right 343  scrollWidth 399 / clientWidth 156  (scrolls)  <- criteria table
+      div.scroll     left 32  right 343  scrollWidth 371 / clientWidth 156  (scrolls)  <- models table
+      pre.skill      left 32  right 343  scrollWidth 154 / clientWidth 154  (wraps, nothing to scroll)
+    Boxes past 375 that are NOT inside a scroll container: 0.
+  Text scan (every text node's rendered rects): 70 text nodes extend past x=376; 69 are inside the containers above.
+    The one that is not:  h1 "A definition of done for coding agents."  right edge 589 px, no scroll container around it.
+    h1 computed font-size 64px (in body-zoom units, 128 css px on screen), overflow-wrap normal, hyphens manual,
+    h1 box 156 units wide, the word "definition" needs 279 units -> overflows its box by 123 units (about 214 css px past the screen).
+  Elements with overflow hidden/clip or text-overflow ellipsis: none (so nothing is cut off with no way to reach it).
+  Footer nav and p.computed (flagged in the earlier run) now stay inside the screen: footer nav right edge 343, p.computed overflow-wrap:anywhere, right edge 343.
+
+STEP 3 - scrolling the install block and criteria table (zoom on)
+  Install command <pre>: clientWidth 120, scrollWidth 440. Mouse wheel over it moved pre.scrollLeft 0 -> 250 -> 320 (max 320).
+    The page did not move (visualViewport.pageLeft stayed 0). End of command visible: -skill '*' -g   (screenshots 04, 05).
+  Criteria table wrapper: clientWidth 156, scrollWidth 399, max scrollLeft 243. Mouse wheel over it moved scrollLeft 0 -> 243.25 (end);
+    page did not move (pageLeft 0). Last columns "status" and "by" visible after scrolling (screenshots 06, 07).
+  Models table wrapper: 371 / 156, measured only (not wheel-scrolled by me).
+
+SUPPLEMENTARY (not a scenario step), fresh load each time, same mobile preset, measured with documentElement.clientWidth = 375
+  no hack                      : scrollWidth 375, overBy 0, unclipped text past screen: none
+  body.style.zoom='2' only     : scrollWidth 375, overBy 0, none
+  html font-size 200% only     : scrollWidth 375, overBy 0, none
+  both (the step 2 hack)       : innerWidth 589, scrollWidth 589, overBy 214, unclipped text past screen: h1 "A definition of done for coding agents." (right 589)
+  So the only remaining overflow comes from the h1 when the two settings compound (rem-sized text becomes 4x).
+
+STEP 4: viewport reset to desktop, see 09-run2-step4-desktop-reset.txt

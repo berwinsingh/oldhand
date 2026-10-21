@@ -1,0 +1,45 @@
+S1 evidence: 'The skill' section at http://localhost:4180/ (1440x900, fresh tab, localStorage and sessionStorage both empty on load)
+
+View on GitHub link (read from the DOM, #skill a):
+  text: View on GitHub
+  href: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+  resolved: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+  expected: https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md  -> EQUAL
+
+Large text block (pre.skill textContent):
+  length: 13192 characters (13192 bytes UTF-8), 242 split segments (241 lines plus final newline)
+  SHA-256 of the block text:                 fcaf11226feb602fd88f24d4e21f262d7521200ce5f55911070ba5f63f64ff55
+  SHA-256 of /Users/berwinsingh/Documents/oldhand/skills/oldhand/SKILL.md (shasum -a 256):
+                                             fcaf11226feb602fd88f24d4e21f262d7521200ce5f55911070ba5f63f64ff55
+  -> byte-identical to the whole file. File has 241 lines (wc -l).
+
+First 12 lines of the block as rendered:
+  ---
+  name: oldhand
+  description: >-
+    Conducts non-trivial software work end to end through a chain of stage
+    skills: reads the ticket or prompt, traces the real code path, reuses proven
+    code, makes the smallest correct change, has sub-agents review and QA it in
+    the running app, and lets a computed verdict, not the model, say when it is
+    done. Use when the user asks to implement, build, fix, debug, root-cause,
+    investigate, QA or verify a feature or bug; says "pick up this ticket", "work
+    on ENG-123", "fix this bug", "why is X broken", "plan this first" or "make
+    sure it works end to end"; or pastes a Jira, Linear, Asana, monday.com or
+    GitHub issue, a spec, or a prompt with assumptions, constraints or acceptance
+
+Last lines of the block as rendered (same as the file's last lines):
+  with oldhand-learn when anything non-obvious came up.
+  (blank)
+  contract -> trace -> rca -> research -> plan -> build -> review -> qa -> ship -> learn
+
+The block scrolls inside itself (max-height 630px, overflow auto). Screenshot 05 shows it scrolled to the end, screenshot 06 shows it at the top.
+
+Copy control:
+  DOM: <button class="copy" type="button" aria-label="Copy the whole SKILL.md"><span aria-live="polite">Copy</span></button>, next to the View on GitHub link.
+  Before click: label "Copy".
+  After a real click (tab-2, localhost:4180): accessibility tree read right after the click returned generic "Copied" under button "Copy the whole SKILL.md"; DOM textContent read "Copied".
+  After a real click (tab-3, localhost:4180, MutationObserver on the button): log [["start","Copy"],[4015,"Copied"]], label still "Copied" 72 ms later.
+  The label returns to "Copy" after about 1.6 s (MutationObserver log in tab-2: "Copied" at 3282 ms, "Copy" at 4886 ms; source site/src/App.jsx CopyButton sets it back after 1600 ms).
+  No screenshot of the 'Copied' state: it lasts 1.6 s and each screenshot arrives later than that, so the shots taken after the click show 'Copy' again. The 'Copied' evidence is the accessibility-tree and DOM text above.
+  One early click in tab-3 read 'Copy' straight afterwards (read_page ran before the async clipboard write resolved; the page hides in a background pane). The next click in the same tab showed 'Copied' at once.
+  Clipboard contents could not be read back (navigator.clipboard.readText: NotAllowedError, read permission denied), so what the clipboard holds is NOT verified. Only the label is.

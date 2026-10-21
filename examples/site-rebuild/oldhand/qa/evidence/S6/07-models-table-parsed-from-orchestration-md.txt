@@ -1,0 +1,11 @@
+# Models table as pageData() parses it from skills/oldhand/references/orchestration.md (same code App.jsx renders), run read-only with node
+modelsDate (interpolated as data.modelsDate in the sentence before the table): "as of October 2026"
+models.header: ["host","lead","worker","scout"]
+models.rows (7):
+  1. ["Claude Code","Fable 5.1 (`fable`, or the `best` alias); if unavailable, Opus 5.5 (`opus`)","Sonnet 5.5 (`sonnet`); Opus 5.5 for hard slices","Haiku 5.5 (`haiku`)"]
+  2. ["OpenAI Codex","GPT-6 Astra (`gpt-6-astra`)","GPT-6.1 Sol (`gpt-6.1-sol`)","GPT-6 Luna (`gpt-6-luna`)"]
+  3. ["GitHub Copilot","Fable 5.1 or GPT-6 Astra","Sonnet 5.5 or GPT-6.1 Sol","Haiku 5.5 or GPT-6 Luna"]
+  4. ["Cursor","the strongest frontier model enabled (Fable 5.1, Opus 5.5 or the top GPT listed)","Composer 2.5","Composer 2.5 (standard; the Fast variant is the expensive one)"]
+  5. ["Gemini CLI / Antigravity","Gemini 3.1 Pro (`pro`)","Gemini 3.8 Flash (`flash`)","Gemini 3.8 Flash or Gemini 3.5 Flash-Lite"]
+  6. ["OpenCode","the strongest model configured (`provider/model#variant`)","the provider's standard model","the provider's fast model"]
+  7. ["Devin Desktop (was Windsurf)","Fable 5.1, Opus 5.5 or GPT-6 Astra","Sonnet 5.5 or GPT-6 Sol","GPT-6 Luna"]

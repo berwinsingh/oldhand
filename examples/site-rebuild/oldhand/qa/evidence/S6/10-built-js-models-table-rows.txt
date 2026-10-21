@@ -1,0 +1,9 @@
+# Built bundle: dist/client/assets/index-Bm6OPz8X.js. Models table markdown and each of its seven host rows, as carried in the bundle (fixed-string counts)
+| host | lead | worker | scout | vision |          count=1
+| Claude Code | Fable 5.1                          count=1
+| OpenAI Codex | GPT-6 Astra                       count=1
+| GitHub Copilot | Fable 5.1                       count=1
+| Cursor | the strongest frontier model enabled    count=1
+| Gemini CLI / Antigravity | Gemini 3.1 Pro        count=1
+| OpenCode | the strongest model configured        count=1
+| Devin Desktop (was Windsurf) | Fable 5.1         count=1

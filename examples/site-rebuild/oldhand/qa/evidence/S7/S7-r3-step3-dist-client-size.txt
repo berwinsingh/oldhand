@@ -1,0 +1,11 @@
+$ find dist/client -type f -print0 | xargs -0 stat -f '%z %N' ; sum bytes
+3309 dist/client/index.html
+8464 dist/client/favicon.png
+5053 dist/client/assets/index-BRrSHBwy.css
+245428 dist/client/assets/index-CJn-AL1N.js
+--- totals
+file_count: 4
+total_bytes: 262254
+du -sk (KB, disk blocks): 264
+du -sh: 264K
+1 MB = 1048576 bytes; 1 MB = 1000000 bytes (both checked below)

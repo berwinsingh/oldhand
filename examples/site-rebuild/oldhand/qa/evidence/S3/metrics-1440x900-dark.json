@@ -1,0 +1,34 @@
+{
+ "build": "A: build served at start of run (App.jsx ?t=1791662819435, styles.css ?t=1791661927297; before the 11:37 source edits)",
+ "url": "http://localhost:4180/",
+ "scheme": "dark",
+ "innerWidth": 1440,
+ "innerHeight": 900,
+ "scrollWidth": 1440,
+ "bodyScrollWidth": 1440,
+ "clientWidth": 1440,
+ "horizontalScroll": false,
+ "dpr": 2,
+ "colorSchemeCss": "light dark",
+ "dataTheme": null,
+ "textElementsScanned": 185,
+ "minVisibleFontSizePx": 13.5,
+ "minVisibleElement": "code. \"IMPORTER_FAULTS=progress:\"",
+ "elementsBelow13px": [],
+ "pseudoElementsBelow13px": [],
+ "contrast": {
+  "bodyText": {"label": "body (computed colour of <body>)", "color": "rgb(236, 235, 230)", "colorHex": "#ecebe6", "effectiveBackgroundHex": "#141413", "pageBackgroundHex": "#141413", "fontSize": "17px", "ratioAgainstEffectiveBackground": 15.44, "ratioAgainstPageBackground": 15.44},
+  "paragraphText": {"label": "first paragraph in main (p.lede)", "colorHex": "#ecebe6", "effectiveBackgroundHex": "#141413", "fontSize": "19px", "ratioAgainstEffectiveBackground": 15.44, "ratioAgainstPageBackground": 15.44},
+  "linkInContent": {"label": "first link in main (a 'oldhand')", "color": "rgb(240, 138, 93)", "colorHex": "#f08a5d", "effectiveBackgroundHex": "#141413", "pageBackgroundHex": "#141413", "fontSize": "15px", "ratioAgainstEffectiveBackground": 7.46, "ratioAgainstPageBackground": 7.46},
+  "linkInNav": {"label": "first nav link ('Install')", "colorHex": "#ecebe6", "effectiveBackgroundHex": "#141413", "fontSize": "15px", "ratioAgainstEffectiveBackground": 15.44, "ratioAgainstPageBackground": 15.44},
+  "linkInFooter": {"label": "first footer link ('GitHub')", "colorHex": "#f08a5d", "effectiveBackgroundHex": "#141413", "fontSize": "15px", "ratioAgainstEffectiveBackground": 7.46, "ratioAgainstPageBackground": 7.46},
+  "selectedTab": {"label": "selected tab (button.is-active 'Git clone')", "color": "rgb(236, 235, 230)", "colorHex": "#ecebe6", "effectiveBackgroundHex": "#1d1d1b", "pageBackgroundHex": "#141413", "fontSize": "15px", "ratioAgainstEffectiveBackground": 14.14, "ratioAgainstPageBackground": 15.44}
+ },
+ "tabs": [
+  {"text": "Any agent", "selected": "false"},
+  {"text": "Claude Code plugin", "selected": "false"},
+  {"text": "Codex plugin", "selected": "false"},
+  {"text": "Git clone", "selected": "true"}
+ ],
+ "visibleTextElementsFailingAA (4.5, or 3 for large text; effective background)": []
+}

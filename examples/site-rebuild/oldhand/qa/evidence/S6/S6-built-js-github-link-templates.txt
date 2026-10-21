@@ -1,0 +1,21 @@
+# Step 1 (cont.): the built bundle carries the same link templates (dist/client/assets/index-Bm6OPz8X.js)
+REPO constant: https://github.com/berwinsingh/oldhand
+BLOB template: True
+  blob link template  ${ct}skills/oldhand/references/hosts.md
+  blob link template  ${ct}skills/oldhand/scripts/ledger.py
+  blob link template  ${ct}skills/${r}/SKILL.md
+  blob link template  ${ct}skills/oldhand/scripts/ledger.py
+  blob link template  ${ct}skills/oldhand-qa/scripts/qa.py
+  blob link template  ${ct}skills/oldhand-build/scripts/mutate.py
+  blob link template  ${ct}skills/oldhand/SKILL.md
+  blob link template  ${ct}examples/README.md
+  blob link template  ${ct}skills/oldhand/SKILL.md
+  blob link template  ${ct}skills/oldhand/references/orchestration.md
+  blob link template  ${ct}skills/oldhand/SKILL.md
+  blob link template  ${ct}skills/oldhand-qa/SKILL.md
+  blob link template  ${ct}SECURITY.md
+  repo link template  ${Da}/blob/main/
+  repo link template  ${Da}/tree/main/examples/csv-import-dupes
+  repo link template  ${Da}/issues
+  repo link template  ${Da}/discussions
+stage link template contains skills/${r}/SKILL.md: True

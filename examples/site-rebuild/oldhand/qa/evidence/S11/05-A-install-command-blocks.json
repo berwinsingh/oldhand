@@ -1,0 +1,127 @@
+[
+ {
+  "tab": "tab-any",
+  "block": 0,
+  "text": "npx skills add berwinsingh/oldhand --skill '*' -g",
+  "sw": 440,
+  "cw": 120,
+  "overflowX": "auto",
+  "whiteSpace": "pre",
+  "scrollLeft": 0,
+  "blockRight": 307,
+  "scrolled_by_mouse_wheel": {
+   "scrollLeft": 320,
+   "maxScroll": 320
+  },
+  "text_end_vs_block_right_after_scroll": {
+   "textEndRight": 279.203125,
+   "blockRight": 307
+  },
+  "page_scrollWidth_clientWidth_scrollX_vvPageLeft_after": [
+   589,
+   375,
+   0,
+   0
+  ]
+ },
+ {
+  "tab": "tab-claude",
+  "block": 0,
+  "text": "/plugin marketplace add berwinsingh/oldhand",
+  "sw": 389,
+  "cw": 120,
+  "overflowX": "auto",
+  "whiteSpace": "pre",
+  "scrollLeft": 0,
+  "blockRight": 307,
+  "scrolled_by_mouse_wheel": {
+   "scrollLeft": 269.5,
+   "maxScroll": 269
+  },
+  "text_end_vs_block_right_after_scroll": {
+   "textEndRight": 279.40625,
+   "blockRight": 307
+  },
+  "page_scrollWidth_clientWidth_scrollX_vvPageLeft_after": [
+   589,
+   375,
+   0,
+   0
+  ]
+ },
+ {
+  "tab": "tab-claude",
+  "block": 1,
+  "text": "/plugin install oldhand@oldhand",
+  "sw": 288,
+  "cw": 120,
+  "overflowX": "auto",
+  "whiteSpace": "pre",
+  "scrollLeft": 0,
+  "blockRight": 307,
+  "scrolled_by_mouse_wheel": {
+   "scrollLeft": 169,
+   "maxScroll": 168
+  },
+  "text_end_vs_block_right_after_scroll": {
+   "textEndRight": 278.8125,
+   "blockRight": 307
+  },
+  "page_scrollWidth_clientWidth_scrollX_vvPageLeft_after": [
+   589,
+   375,
+   0,
+   0
+  ]
+ },
+ {
+  "tab": "tab-codex",
+  "block": 0,
+  "text": "codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand",
+  "sw": 431,
+  "cw": 120,
+  "overflowX": "auto",
+  "whiteSpace": "pre",
+  "scrollLeft": 0,
+  "blockRight": 307,
+  "scrolled_by_mouse_wheel": {
+   "scrollLeft": 311.5,
+   "maxScroll": 311
+  },
+  "text_end_vs_block_right_after_scroll": {
+   "textEndRight": 279.40625,
+   "blockRight": 307
+  },
+  "page_scrollWidth_clientWidth_scrollX_vvPageLeft_after": [
+   589,
+   375,
+   0,
+   0
+  ]
+ },
+ {
+  "tab": "tab-git",
+  "block": 0,
+  "text": "git clone https://github.com/berwinsingh/oldhand ~/.oldhand\nmkdir -p ~/.agents/skills ~/.claude/skills\nfor s in ~/.oldhand/skills/*; do ln -sfn \"$s\" ~/.agents/skills/; ln -sfn \"$s\" ~/.claude/skills/; done",
+  "sw": 876,
+  "cw": 120,
+  "overflowX": "auto",
+  "whiteSpace": "pre",
+  "scrollLeft": 0,
+  "blockRight": 307,
+  "scrolled_by_mouse_wheel": {
+   "scrollLeft": 757,
+   "maxScroll": 756
+  },
+  "text_end_vs_block_right_after_scroll": {
+   "textEndRight": 278.8125,
+   "blockRight": 307
+  },
+  "page_scrollWidth_clientWidth_scrollX_vvPageLeft_after": [
+   589,
+   375,
+   0,
+   0
+  ]
+ }
+]

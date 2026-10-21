@@ -1,0 +1,27 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && find dist/client -type f -exec stat -f '%z %N' {} + && du -sk dist/client
+
+--- every file under dist/client with size in bytes ---
+245428 bytes  dist/client/assets/index-Bm6OPz8X.js
+4988 bytes  dist/client/assets/index-COS68Bkw.css
+8464 bytes  dist/client/favicon.png
+3309 bytes  dist/client/index.html
+
+TOTAL_BYTES=262189
+TOTAL_KiB=256.04
+TOTAL_MB_1000=0.2622
+TOTAL_MiB_1024=0.2500
+THRESHOLD: under 1 MB means < 1000000 bytes (decimal) or < 1048576 bytes (binary)
+
+--- du -sk dist/client (disk blocks) ---
+264	dist/client
+
+--- .png files under dist/client ---
+dist/client/favicon.png
+
+--- non-favicon png check ---
+NON_FAVICON_PNG_COUNT=0
+
+--- required files exist? ---
+PRESENT dist/client/index.html
+PRESENT dist/server/index.js
+PRESENT dist/.openai/hosting.json

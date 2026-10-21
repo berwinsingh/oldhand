@@ -1,0 +1,186 @@
+{
+ "innerWidth": 188,
+ "innerHeight": 406,
+ "documentElement_clientWidth": 188,
+ "documentElement_scrollWidth": 291,
+ "body_scrollWidth": 291,
+ "scrollWidth_minus_innerWidth": 103,
+ "scrollWidth_minus_clientWidth": 103,
+ "html_fontSize_inline": "(none)",
+ "body_zoom_inline": "(none)",
+ "html_computed_fontSize": "16px",
+ "html_overflowX": "visible",
+ "body_overflowX": "visible",
+ "visualViewport": {
+  "width": 188,
+  "height": 406,
+  "scale": 1,
+  "offsetLeft": 0,
+  "pageLeft": 0
+ },
+ "scrollX_after_scrollTo_2000": 103,
+ "element_boxes_past_visible_width_by_class": {
+  "inside-own-scroll-container": 87,
+  "UNCONTAINED (page-level overflow)": 3
+ },
+ "element_boxes_UNCONTAINED": [
+  {
+   "el": "nav",
+   "text": "GitHubIssuesDiscussionsSecurity",
+   "left": 16,
+   "right": 290.58,
+   "width": 274.58,
+   "exceedsBy": 102.58,
+   "ownOverflowX": "visible",
+   "display": "flex",
+   "flexWrap": "nowrap",
+   "containedBy": null,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "el": "a",
+   "text": "Discussions",
+   "left": 139.86,
+   "right": 219.55,
+   "width": 79.69,
+   "exceedsBy": 31.55,
+   "ownOverflowX": "visible",
+   "display": "block",
+   "flexWrap": "nowrap",
+   "containedBy": null,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "el": "a",
+   "text": "Security",
+   "left": 235.55,
+   "right": 290.58,
+   "width": 55.03,
+   "exceedsBy": 102.58,
+   "ownOverflowX": "visible",
+   "display": "block",
+   "flexWrap": "nowrap",
+   "containedBy": null,
+   "class": "UNCONTAINED (page-level overflow)"
+  }
+ ],
+ "elements_left_of_viewport_not_in_scroller": [],
+ "horizontally_clipped_not_scrollable": [],
+ "text_past_visible_width_by_class": {
+  "inside-own-scroll-container": 68,
+  "UNCONTAINED (page-level overflow)": 3
+ },
+ "text_UNCONTAINED": [
+  {
+   "parent": "p.computed",
+   "text": "Computed by ledger.py from ledger.json a",
+   "left": 16,
+   "right": 236.34,
+   "exceedsBy": 48.34,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "parent": "a",
+   "text": "Discussions",
+   "left": 139.86,
+   "right": 219.55,
+   "exceedsBy": 31.55,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "parent": "a",
+   "text": "Security",
+   "left": 235.55,
+   "right": 290.58,
+   "exceedsBy": 102.58,
+   "class": "UNCONTAINED (page-level overflow)"
+  }
+ ],
+ "h1": {
+  "boxLeft": 16,
+  "boxRight": 172,
+  "computedFontSize": "32px",
+  "overflowWrap": "normal"
+ },
+ "vw_unit_px": 188,
+ "scroll_containers": [
+  {
+   "el": "nav",
+   "left": 16,
+   "right": 172,
+   "fitsViewport": true,
+   "scrollWidth": 411,
+   "clientWidth": 156,
+   "overflows": true,
+   "maxScrollLeft": 255,
+   "contentEndRightWhenScrolledToEnd": 171.64,
+   "containerRight": 172,
+   "endReachable": true
+  },
+  {
+   "el": "div.tabs",
+   "left": 17,
+   "right": 171,
+   "fitsViewport": true,
+   "scrollWidth": 468,
+   "clientWidth": 154,
+   "overflows": true,
+   "maxScrollLeft": 314,
+   "contentEndRightWhenScrolledToEnd": 162.88,
+   "containerRight": 171,
+   "endReachable": true
+  },
+  {
+   "el": "pre",
+   "left": 34,
+   "right": 154,
+   "fitsViewport": true,
+   "scrollWidth": 440,
+   "clientWidth": 120,
+   "overflows": true,
+   "maxScrollLeft": 320,
+   "contentEndRightWhenScrolledToEnd": 139.61,
+   "containerRight": 154,
+   "endReachable": true
+  },
+  {
+   "el": "div.scroll",
+   "left": 16,
+   "right": 172,
+   "fitsViewport": true,
+   "scrollWidth": 399,
+   "clientWidth": 156,
+   "overflows": true,
+   "maxScrollLeft": 243,
+   "contentEndRightWhenScrolledToEnd": 171.8,
+   "containerRight": 172,
+   "endReachable": true
+  },
+  {
+   "el": "pre.skill",
+   "left": 16,
+   "right": 172,
+   "fitsViewport": true,
+   "scrollWidth": 154,
+   "clientWidth": 154,
+   "overflows": false,
+   "maxScrollLeft": 0,
+   "contentEndRightWhenScrolledToEnd": 159.03,
+   "containerRight": 172,
+   "endReachable": true
+  },
+  {
+   "el": "div.scroll",
+   "left": 16,
+   "right": 172,
+   "fitsViewport": true,
+   "scrollWidth": 371,
+   "clientWidth": 156,
+   "overflows": true,
+   "maxScrollLeft": 215,
+   "contentEndRightWhenScrolledToEnd": 172.3,
+   "containerRight": 172,
+   "endReachable": true
+  }
+ ]
+}

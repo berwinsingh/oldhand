@@ -1,0 +1,371 @@
+$ cat -n src/App.jsx   (lines 200-210 are the load/toggle logic, 359-367 the footer control)
+     1	import { useEffect, useState } from "react";
+     2	import skillText from "../../skills/oldhand/SKILL.md?raw";
+     3	import reportText from "../../examples/csv-import-dupes/oldhand/report.md?raw";
+     4	import orchestrationText from "../../skills/oldhand/references/orchestration.md?raw";
+     5	import plugin from "../../.claude-plugin/plugin.json";
+     6	import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+     7	import { pageData } from "./slices.js";
+     8	
+     9	const REPO = "https://github.com/berwinsingh/oldhand";
+    10	const BLOB = `${REPO}/blob/main/`;
+    11	const TESTED = "2026-10-11";
+    12	const EXAMPLE = "Fix DOCQ-123. Prove: guest signup, reload, data persists.";
+    13	
+    14	// Every command below was run on this date in a throwaway home folder, from a
+    15	// local checkout of this repository; the GitHub source serves the same files.
+    16	const installs = [
+    17	  {
+    18	    key: "any",
+    19	    label: "Any agent",
+    20	    blocks: ["npx skills add berwinsingh/oldhand --skill '*' -g"],
+    21	    note:
+    22	      "Installs all eleven skills under ~/.agents/skills and links them for the agents it finds. Add -a cursor (or codex, github-copilot, gemini-cli, opencode, claude-code) to skip the picker.",
+    23	    tested: `Tested ${TESTED} on macOS with skills 1.7.2 for claude-code, codex, cursor, github-copilot, gemini-cli and opencode, from a local checkout of this repository.`,
+    24	    then: [
+    25	      ["Claude Code, Cursor, Copilot, Kiro, Antigravity", `/oldhand ${EXAMPLE}`],
+    26	      ["Codex", `$oldhand ${EXAMPLE}`],
+    27	      ["Gemini CLI, OpenCode, Amp, Goose", "Use the oldhand skill: fix DOCQ-123 and prove it end to end."],
+    28	    ],
+    29	  },
+    30	  {
+    31	    key: "claude",
+    32	    label: "Claude Code plugin",
+    33	    blocks: ["/plugin marketplace add berwinsingh/oldhand", "/plugin install oldhand@oldhand"],
+    34	    note: "Two separate prompts inside Claude Code, then a new session.",
+    35	    tested: `Tested ${TESTED} with Claude Code 2.1.274 (the claude plugin CLI, from a local checkout of this repository).`,
+    36	    then: [["Claude Code", `/oldhand:oldhand ${EXAMPLE}`]],
+    37	  },
+    38	  {
+    39	    key: "codex",
+    40	    label: "Codex plugin",
+    41	    blocks: ["codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand"],
+    42	    note: "Then restart Codex or start a new task.",
+    43	    tested: `Tested ${TESTED} with Codex CLI 0.146.0, from a local checkout of this repository.`,
+    44	    then: [["Codex", `$oldhand ${EXAMPLE}`]],
+    45	  },
+    46	  {
+    47	    key: "git",
+    48	    label: "Git clone",
+    49	    blocks: [
+    50	      'git clone https://github.com/berwinsingh/oldhand ~/.oldhand\nmkdir -p ~/.agents/skills ~/.claude/skills\nfor s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/.claude/skills/; done',
+    51	    ],
+    52	    note:
+    53	      "~/.agents/skills is read by Codex, Cursor, Copilot, Gemini CLI, OpenCode, Amp, Roo, Goose, Droid and Junie; ~/.claude/skills by Claude Code. Update with git -C ~/.oldhand pull.",
+    54	    tested: `Tested ${TESTED} on macOS with git 2.55.0 and zsh 5.9 against a clone of this branch: eleven links in each folder, and running it twice changes nothing.`,
+    55	    then: [
+    56	      ["Claude Code, Cursor, Copilot", `/oldhand ${EXAMPLE}`],
+    57	      ["Codex", `$oldhand ${EXAMPLE}`],
+    58	    ],
+    59	  },
+    60	];
+    61	
+    62	const stages = [
+    63	  ["oldhand", "the conductor: routes the request through the stages, keeps one task folder and a ledger, and decides from the verdict"],
+    64	  ["oldhand-contract", "the request, with its assumptions and changed requirements, becomes numbered acceptance and regression criteria, each with the proof it needs"],
+    65	  ["oldhand-trace", "the real path hop by hop, from entry point to rendered result, and every caller of what will change"],
+    66	  ["oldhand-rca", "evidence-first root cause for bugs; read-only refuters try to break it before it is accepted"],
+    67	  ["oldhand-research", "before anything new: the codebase, the standard library, the platform, installed dependencies, then open source behind a licence gate"],
+    68	  ["oldhand-plan", "the smallest complete change, with blast radius, rollback, delegation and a budget for live runs"],
+    69	  ["oldhand-build", "the Ponytail ladder, one focused regression check, proven by mutation: break the fix and the check must fail"],
+    70	  ["oldhand-review", "a board of read-only reviewers, one lens each; the chair refutes every finding before it counts"],
+    71	  ["oldhand-qa", "one sub-agent per scenario drives the real app and brings back evidence; the lead re-runs the key one"],
+    72	  ["oldhand-ship", "the verdict is computed by a script from the ledger; publication only when the request authorized it"],
+    73	  ["oldhand-learn", "the non-obvious lessons go where the project keeps its instructions, so the next session does not relearn them"],
+    74	];
+    75	
+    76	const data = pageData({ skill: skillText, report: reportText, orchestration: orchestrationText, plugin });
+    77	
+    78	function inline(text) {
+    79	  return text.split(/(`[^`]*`)/g).map((part, i) =>
+    80	    part.startsWith("`") ? <code key={i}>{part.slice(1, -1)}</code> : part,
+    81	  );
+    82	}
+    83	
+    84	function Table({ data: tbl }) {
+    85	  if (!tbl) return null;
+    86	  return (
+    87	    <div className="scroll" tabIndex={0}>
+    88	      <table>
+    89	        <thead>
+    90	          <tr>{tbl.header.map((cell) => <th key={cell}>{cell}</th>)}</tr>
+    91	        </thead>
+    92	        <tbody>
+    93	          {tbl.rows.map((row, r) => (
+    94	            <tr key={r}>{row.map((cell, c) => <td key={c}>{inline(cell)}</td>)}</tr>
+    95	          ))}
+    96	        </tbody>
+    97	      </table>
+    98	    </div>
+    99	  );
+   100	}
+   101	
+   102	function CopyButton({ value, label, text = "Copy" }) {
+   103	  const [state, setState] = useState("idle");
+   104	  async function copy(event) {
+   105	    const button = event.currentTarget;
+   106	    let ok = false;
+   107	    try {
+   108	      await navigator.clipboard.writeText(value);
+   109	      ok = true;
+   110	    } catch {
+   111	      const textarea = document.createElement("textarea");
+   112	      textarea.value = value;
+   113	      textarea.style.position = "fixed";
+   114	      textarea.style.opacity = "0";
+   115	      document.body.appendChild(textarea);
+   116	      textarea.select();
+   117	      ok = document.execCommand("copy");
+   118	      textarea.remove();
+   119	      button.focus();
+   120	    }
+   121	    setState(ok ? "copied" : "failed");
+   122	    window.setTimeout(() => setState("idle"), 1600);
+   123	  }
+   124	  const shown = state === "copied" ? "Copied" : state === "failed" ? "Copy failed: select the text" : text;
+   125	  return (
+   126	    <button className="copy" type="button" onClick={copy} aria-label={label}>
+   127	      <span role="status">{shown}</span>
+   128	    </button>
+   129	  );
+   130	}
+   131	
+   132	function Command({ text, index }) {
+   133	  return (
+   134	    <div className="command">
+   135	      <pre><code>{text}</code></pre>
+   136	      <CopyButton value={text} label={`Copy command ${index}`} />
+   137	    </div>
+   138	  );
+   139	}
+   140	
+   141	function tabFromUrl() {
+   142	  const key = new URLSearchParams(window.location.search).get("agent");
+   143	  return installs.some((i) => i.key === key) ? key : installs[0].key;
+   144	}
+   145	
+   146	function InstallSwitcher() {
+   147	  const [tab, setTab] = useState(tabFromUrl);
+   148	  const current = installs.find((i) => i.key === tab);
+   149	
+   150	  function onKeyDown(event) {
+   151	    if (event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) return;
+   152	    const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+   153	    if (!step) return;
+   154	    event.preventDefault();
+   155	    const index = installs.findIndex((i) => i.key === tab);
+   156	    const next = installs[(index + step + installs.length) % installs.length].key;
+   157	    setTab(next);
+   158	    document.getElementById(`tab-${next}`)?.focus();
+   159	  }
+   160	
+   161	  return (
+   162	    <div className="install" id="install">
+   163	      <div className="tabs" role="tablist" aria-label="Install route" onKeyDown={onKeyDown}>
+   164	        {installs.map((i) => (
+   165	          <button
+   166	            key={i.key}
+   167	            id={`tab-${i.key}`}
+   168	            role="tab"
+   169	            type="button"
+   170	            aria-selected={i.key === tab}
+   171	            aria-controls={`panel-${i.key}`}
+   172	            tabIndex={i.key === tab ? 0 : -1}
+   173	            className={i.key === tab ? "is-active" : ""}
+   174	            onClick={() => setTab(i.key)}
+   175	          >
+   176	            {i.label}
+   177	          </button>
+   178	        ))}
+   179	      </div>
+   180	      <div className="panel" role="tabpanel" id={`panel-${current.key}`} aria-labelledby={`tab-${current.key}`}>
+   181	        {current.blocks.map((block, n) => <Command key={block} text={block} index={n + 1} />)}
+   182	        <p className="note">{current.note}</p>
+   183	        <dl className="then">
+   184	          {current.then.map(([hosts, text]) => (
+   185	            <div key={hosts}>
+   186	              <dt>Then, in {hosts}, for example</dt>
+   187	              <dd><code>{text}</code></dd>
+   188	            </div>
+   189	          ))}
+   190	        </dl>
+   191	        <p className="tested">
+   192	          {current.tested} Invocation per host:{" "}
+   193	          <a href={`${BLOB}skills/oldhand/references/hosts.md`}>hosts.md</a>.
+   194	        </p>
+   195	      </div>
+   196	    </div>
+   197	  );
+   198	}
+   199	
+   200	export function App() {
+   201	  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+   202	  useEffect(() => {
+   203	    applyAnalyticsChoice(analytics);
+   204	  }, [analytics]);
+   205	
+   206	  function toggleAnalytics() {
+   207	    const next = analytics === "granted" ? "denied" : "granted";
+   208	    saveAnalyticsChoice(next);
+   209	    setAnalytics(next);
+   210	  }
+   211	
+   212	  return (
+   213	    <>
+   214	      <header className="top">
+   215	        <a className="wordmark" href="#top">oldhand</a>
+   216	        <span className="meta">v{data.version} · MIT</span>
+   217	        <nav aria-label="Sections">
+   218	          <a href="#install">Install</a>
+   219	          <a href="#how">How it works</a>
+   220	          <a href="#example">Example</a>
+   221	          <a href="#skill">The skill</a>
+   222	          <a href="#models">Models</a>
+   223	          <a href={REPO}>GitHub</a>
+   224	        </nav>
+   225	      </header>
+   226	
+   227	      <main id="top">
+   228	        <section className="hero">
+   229	          <h1>A definition of done for coding agents.</h1>
+   230	          <p className="lede">
+   231	            Oldhand is a pack of eleven agent skills. Your agent reads the whole request, traces
+   232	            the real code path, reuses before it writes, changes the minimum, has sub-agents review
+   233	            and QA the result in the running app, and{" "}
+   234	            <a href={`${BLOB}skills/oldhand/scripts/ledger.py`}>a small script</a>, not the model,
+   235	            says when it is done. It works with Claude Code, Codex, Cursor, Copilot, Gemini CLI and
+   236	            any other agent that reads <code>SKILL.md</code>.
+   237	          </p>
+   238	          <InstallSwitcher />
+   239	        </section>
+   240	
+   241	        <section id="how">
+   242	          <h2>How it works</h2>
+   243	          <p>
+   244	            One request runs through the stages below in order; <code>rca</code> only for bugs,{" "}
+   245	            <code>research</code> only when something new is built. Each stage is its own skill,
+   246	            reads what the earlier ones wrote into <code>.oldhand/&lt;task&gt;/</code>, and can run
+   247	            alone.
+   248	          </p>
+   249	          <ol className="stages">
+   250	            {stages.map(([name, text]) => (
+   251	              <li key={name}>
+   252	                <a href={`${BLOB}skills/${name}/SKILL.md`}>{name}</a>
+   253	                <span>{text}</span>
+   254	              </li>
+   255	            ))}
+   256	          </ol>
+   257	          <p>
+   258	            Three standard-library Python tools keep it honest:{" "}
+   259	            <a href={`${BLOB}skills/oldhand/scripts/ledger.py`}>ledger.py</a> records every check
+   260	            against the exact working tree and computes the verdict,{" "}
+   261	            <a href={`${BLOB}skills/oldhand-qa/scripts/qa.py`}>qa.py</a> deals the scenario briefs
+   262	            and tallies the results, and{" "}
+   263	            <a href={`${BLOB}skills/oldhand-build/scripts/mutate.py`}>mutate.py</a> proves a test
+   264	            guards the fix.
+   265	          </p>
+   266	        </section>
+   267	
+   268	        <section id="stops">
+   269	          <h2>What it will not do</h2>
+   270	          <p>
+   271	            The hard stops, as they appear at the top of{" "}
+   272	            <a href={`${BLOB}skills/oldhand/SKILL.md`}>the conductor skill</a>. {data.hardStopsIntro}
+   273	          </p>
+   274	          <ol>{data.hardStops.map((item, i) => <li key={i}>{inline(item)}</li>)}</ol>
+   275	        </section>
+   276	
+   277	        <section id="example">
+   278	          <h2>Example run</h2>
+   279	          <p>
+   280	            A seeded bug in a small Python importer: a transient write failure plus a retry stored a
+   281	            CSV batch twice. The prompt is in{" "}
+   282	            <a href={`${BLOB}examples/README.md`}>examples/README.md</a>; the project and the task
+   283	            folder the pack wrote (without its binary SQLite evidence) are in{" "}
+   284	            <a href={`${REPO}/tree/main/examples/csv-import-dupes`}>examples/csv-import-dupes</a>.
+   285	            The blocks below are read from its <code>report.md</code> at build time.
+   286	          </p>
+   287	          {data.verdict && <p className="verdict">{data.verdict}</p>}
+   288	          <Table data={data.criteria} />
+   289	          <h3>Root cause</h3>
+   290	          <p>{inline(data.rootCause || "")}</p>
+   291	          <h3>Not verified</h3>
+   292	          <ul>{data.notVerified.map((item, i) => <li key={i}>{inline(item)}</li>)}</ul>
+   293	          {data.computed && <p className="computed">{data.computed}</p>}
+   294	        </section>
+   295	
+   296	        <section id="skill">
+   297	          <h2>The skill</h2>
+   298	          <p>
+   299	            The conductor, <code>skills/oldhand/SKILL.md</code>, imported from the repository when
+   300	            this page was built. The ten stage skills are linked above.
+   301	          </p>
+   302	          <div className="skill-actions">
+   303	            <CopyButton value={skillText} label="Copy the whole SKILL.md" text="Copy raw" />
+   304	            <a href={`${BLOB}skills/oldhand/SKILL.md`}>View on GitHub</a>
+   305	          </div>
+   306	          <pre className="skill" tabIndex={0} aria-label="SKILL.md source">{skillText}</pre>
+   307	        </section>
+   308	
+   309	        <section id="models">
+   310	          <h2>Models</h2>
+   311	          <p>
+   312	            The skills name roles, not models: the lead owns the contract, the review chair, the
+   313	            final check and the release decision; workers implement, investigate, review and drive
+   314	            QA; scouts sweep files, read logs and run read-only checks. One dated file,{" "}
+   315	            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a>,
+   316	            maps the roles to current models; this table is read from it ({data.modelsDate}):
+   317	          </p>
+   318	          <Table data={data.models} />
+   319	          <p>
+   320	            If a named model is missing, the agent uses the newest one the host offers in the same
+   321	            role, never puts the lead below worker tier, and records the model that actually ran.
+   322	          </p>
+   323	        </section>
+   324	
+   325	        <section id="limits">
+   326	          <h2>Honest scope</h2>
+   327	          <ul>
+   328	            <li>
+   329	              It is instructions plus three small scripts, not a runtime. An agent can still ignore
+   330	              it; the ledger only refuses to print VERIFIED without evidence on the current tree.
+   331	            </li>
+   332	            <li>
+   333	              It costs turns and tokens. Review lenses and QA scenarios are sub-agents; the{" "}
+   334	              <a href={`${BLOB}skills/oldhand/SKILL.md`}>conductor</a> tells you the count before
+   335	              spawning more than ten.
+   336	            </li>
+   337	            <li>
+   338	              Browser and desktop QA need a browser or computer-use tool on your host. Without one,{" "}
+   339	              <a href={`${BLOB}skills/oldhand-qa/SKILL.md`}>oldhand-qa</a> reports UI scenarios as
+   340	              blocked, never as passed.
+   341	            </li>
+   342	            <li>Skip it for typos, lookups and one-line edits. The skill says so itself.</li>
+   343	            <li>
+   344	              The example above ran in a host with no sub-agent tool, so its reviews and QA were run
+   345	              by one agent in turn. Its report says so.
+   346	            </li>
+   347	          </ul>
+   348	        </section>
+   349	      </main>
+   350	
+   351	      <footer>
+   352	        <span>oldhand v{data.version} · MIT · Berwin Singh</span>
+   353	        <nav aria-label="Project links">
+   354	          <a href={REPO}>GitHub</a>
+   355	          <a href={`${REPO}/issues`}>Issues</a>
+   356	          <a href={`${REPO}/discussions`}>Discussions</a>
+   357	          <a href={`${BLOB}SECURITY.md`}>Security</a>
+   358	        </nav>
+   359	        <p className="analytics">
+   360	          {analytics === "granted" ? "Google Analytics is on." : "Google Analytics is off; nothing is sent."}{" "}
+   361	          <button type="button" className="link" onClick={toggleAnalytics}>
+   362	            {analytics === "granted" ? "Turn it off" : "Turn on Google Analytics"}
+   363	          </button>
+   364	          {" · "}
+   365	          <a href="https://policies.google.com/technologies/partner-sites">How Google uses data</a>
+   366	        </p>
+   367	      </footer>
+   368	    </>
+   369	  );
+   370	}

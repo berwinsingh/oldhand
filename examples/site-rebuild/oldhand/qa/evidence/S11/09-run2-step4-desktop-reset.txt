@@ -1,0 +1,4 @@
+S11 run 2, step 4 - viewport reset to desktop (resize_window preset "desktop"), then the entry URL reloaded.
+Measured after reset: innerWidth 1024, documentElement.clientWidth 1024, scrollWidth 1024 (the pane's own responsive width),
+html inline font-size "" (none), body inline zoom "" (none), desktop Mac user agent, 0 touch points.
+The mobile emulation and the zoom/font-size hack are gone.

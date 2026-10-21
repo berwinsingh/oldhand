@@ -1,0 +1,54 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+import { columns, list, missing, pageData, section, table } from "../src/slices.js";
+
+const root = new URL("../../", import.meta.url);
+const read = (rel) => readFileSync(new URL(rel, root), "utf8");
+
+test("section matches a heading by prefix and stops at the next heading of the same level", () => {
+  const text = "# T\n\n## Hard stops (v2)\n\nintro\n\n1. a\n   more a\n2. b\n\n### sub\n\nstill inside\n\n## Next\n\nno";
+  const s = section(text, "## Hard stops");
+  assert.equal(s.heading, "Hard stops (v2)");
+  assert.match(s.body, /still inside$/);
+  assert.equal(section(text, "## Gone"), null);
+});
+
+test("list keeps the intro and joins continuation lines", () => {
+  const { intro, items } = list("intro line\n\n1. a\n   more a\n2. b\n- c");
+  assert.equal(intro, "intro line");
+  assert.deepEqual(items, ["a more a", "b", "c"]);
+});
+
+test("table reads the first matching pipe table, also when it ends the file", () => {
+  const t = table("x\n| id | n |\n| --- | --- |\n| A | 1 |\n| B | 2 |", "| id");
+  assert.deepEqual(t.header, ["id", "n"]);
+  assert.deepEqual(t.rows, [["A", "1"], ["B", "2"]]);
+  assert.equal(columns(t, ["n", "id"]).rows[0].join(), "1,A");
+  assert.equal(columns(t, ["id", "missing"]), null);
+  assert.equal(table("none", "| id"), null);
+});
+
+test("the committed sources slice completely", () => {
+  const data = pageData({
+    skill: read("skills/oldhand/SKILL.md"),
+    report: read("examples/csv-import-dupes/oldhand/report.md"),
+    orchestration: read("skills/oldhand/references/orchestration.md"),
+    plugin: JSON.parse(read(".claude-plugin/plugin.json")),
+  });
+  assert.deepEqual(missing(data), []);
+  assert.ok(data.hardStops.length >= 8);
+  assert.equal(data.criteria.header.join(), "criterion,outcome,proof,status,by");
+  assert.match(data.modelsDate, /^as of /);
+  assert.ok(data.models.rows.length >= 4);
+});
+
+test("a moved heading is reported, not silently empty", () => {
+  const data = pageData({
+    skill: "# x\n\n## Hard rules\n\n1. a\n",
+    report: "# r\n\n### Verdict: VERIFIED\n\n| criterion | outcome | proof | status | by |\n| - | - | - | - | - |\n| AC1 | ok | e2e | pass | lead |\n\nComputed by ledger.py now.\n",
+    orchestration: "## Models\n",
+    plugin: { version: "2.0.0" },
+  });
+  assert.deepEqual(missing(data).sort(), ["hardStops", "hardStopsIntro", "models", "modelsDate", "notVerified", "rootCause"]);
+});

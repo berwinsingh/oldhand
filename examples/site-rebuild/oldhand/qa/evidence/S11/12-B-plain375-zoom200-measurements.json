@@ -1,0 +1,194 @@
+{
+ "innerWidth": 375,
+ "innerHeight": 812,
+ "documentElement_clientWidth": 375,
+ "documentElement_scrollWidth": 589,
+ "body_scrollWidth": 295,
+ "scrollWidth_minus_innerWidth": 214,
+ "scrollWidth_minus_clientWidth": 214,
+ "html_fontSize_inline": "200%",
+ "body_zoom_inline": "2",
+ "html_computed_fontSize": "32px",
+ "html_overflowX": "visible",
+ "body_overflowX": "visible",
+ "visualViewport": {
+  "width": 375,
+  "height": 812,
+  "scale": 1,
+  "offsetLeft": 0,
+  "pageLeft": 0
+ },
+ "scrollX_after_scrollTo_2000": 214,
+ "element_boxes_past_visible_width_by_class": {
+  "inside-own-scroll-container": 89,
+  "UNCONTAINED (page-level overflow)": 3
+ },
+ "element_boxes_UNCONTAINED": [
+  {
+   "el": "nav",
+   "text": "GitHubIssuesDiscussionsSecurity",
+   "left": 32,
+   "right": 581.13,
+   "width": 549.13,
+   "exceedsBy": 206.13,
+   "ownOverflowX": "visible",
+   "display": "flex",
+   "flexWrap": "nowrap",
+   "containedBy": null,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "el": "a",
+   "text": "Discussions",
+   "left": 279.7,
+   "right": 439.08,
+   "width": 159.38,
+   "exceedsBy": 64.08,
+   "ownOverflowX": "visible",
+   "display": "block",
+   "flexWrap": "nowrap",
+   "containedBy": null,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "el": "a",
+   "text": "Security",
+   "left": 471.08,
+   "right": 581.13,
+   "width": 110.05,
+   "exceedsBy": 206.13,
+   "ownOverflowX": "visible",
+   "display": "block",
+   "flexWrap": "nowrap",
+   "containedBy": null,
+   "class": "UNCONTAINED (page-level overflow)"
+  }
+ ],
+ "elements_left_of_viewport_not_in_scroller": [],
+ "horizontally_clipped_not_scrollable": [],
+ "text_past_visible_width_by_class": {
+  "inside-own-scroll-container": 69,
+  "UNCONTAINED (page-level overflow)": 4
+ },
+ "text_UNCONTAINED": [
+  {
+   "parent": "h1",
+   "text": "A definition of done for coding agents.",
+   "left": 32,
+   "right": 589.47,
+   "exceedsBy": 214.47,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "parent": "p.computed",
+   "text": "Computed by ledger.py from ledger.json a",
+   "left": 32,
+   "right": 472.67,
+   "exceedsBy": 97.67,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "parent": "a",
+   "text": "Discussions",
+   "left": 279.7,
+   "right": 439.08,
+   "exceedsBy": 64.08,
+   "class": "UNCONTAINED (page-level overflow)"
+  },
+  {
+   "parent": "a",
+   "text": "Security",
+   "left": 471.08,
+   "right": 581.13,
+   "exceedsBy": 206.13,
+   "class": "UNCONTAINED (page-level overflow)"
+  }
+ ],
+ "h1": {
+  "boxLeft": 32,
+  "boxRight": 343,
+  "computedFontSize": "64px",
+  "overflowWrap": "normal"
+ },
+ "vw_unit_px": 750,
+ "scroll_containers": [
+  {
+   "el": "nav",
+   "left": 32,
+   "right": 343,
+   "fitsViewport": true,
+   "scrollWidth": 411,
+   "clientWidth": 156,
+   "overflows": true,
+   "maxScrollLeft": 255,
+   "contentEndRightWhenScrolledToEnd": 343.23,
+   "containerRight": 343,
+   "endReachable": true
+  },
+  {
+   "el": "div.tabs",
+   "left": 34,
+   "right": 341,
+   "fitsViewport": true,
+   "scrollWidth": 468,
+   "clientWidth": 154,
+   "overflows": true,
+   "maxScrollLeft": 314.5,
+   "contentEndRightWhenScrolledToEnd": 324.73,
+   "containerRight": 341,
+   "endReachable": true
+  },
+  {
+   "el": "pre",
+   "left": 68,
+   "right": 307,
+   "fitsViewport": true,
+   "scrollWidth": 440,
+   "clientWidth": 120,
+   "overflows": true,
+   "maxScrollLeft": 320,
+   "contentEndRightWhenScrolledToEnd": 279.2,
+   "containerRight": 307,
+   "endReachable": true
+  },
+  {
+   "el": "div.scroll",
+   "left": 32,
+   "right": 343,
+   "fitsViewport": true,
+   "scrollWidth": 399,
+   "clientWidth": 156,
+   "overflows": true,
+   "maxScrollLeft": 243.5,
+   "contentEndRightWhenScrolledToEnd": 342.53,
+   "containerRight": 343,
+   "endReachable": true
+  },
+  {
+   "el": "pre.skill",
+   "left": 32,
+   "right": 343,
+   "fitsViewport": true,
+   "scrollWidth": 154,
+   "clientWidth": 154,
+   "overflows": false,
+   "maxScrollLeft": 0,
+   "contentEndRightWhenScrolledToEnd": 318.03,
+   "containerRight": 343,
+   "endReachable": true
+  },
+  {
+   "el": "div.scroll",
+   "left": 32,
+   "right": 343,
+   "fitsViewport": true,
+   "scrollWidth": 371,
+   "clientWidth": 156,
+   "overflows": true,
+   "maxScrollLeft": 216,
+   "contentEndRightWhenScrolledToEnd": 342.58,
+   "containerRight": 343,
+   "endReachable": true
+  }
+ ]
+}

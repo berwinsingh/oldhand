@@ -1,0 +1,3 @@
+Console messages and network for the 6 measured page loads (4 required combinations + 2 extra 375px non-mobile-emulation cross-checks), each in a fresh isolated browser context.
+Console: only '[vite] connecting...', '[vite] connected.' (debug) and the React DevTools info line. No console errors, no warnings, no page errors.
+Network: every request returned 2xx (page, vite modules, styles.css, App.jsx, favicon.png, Google Fonts css + 2 woff2). No failed requests, nothing >= 400.

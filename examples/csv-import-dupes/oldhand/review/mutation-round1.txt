@@ -1,0 +1,19 @@
+--- last 14 lines of the test output ---
+test_retry_after_commit_lock_stores_batch_once (tests.test_importer.WriteBatchTest) ... FAIL
+
+======================================================================
+FAIL: test_retry_after_commit_lock_stores_batch_once (tests.test_importer.WriteBatchTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<project>/tests/test_importer.py", line 109, in test_retry_after_commit_lock_stores_batch_once
+    self.assertEqual(conn.execute("SELECT COUNT(*) FROM records").fetchone()[0], 2)
+AssertionError: 4 != 2
+
+----------------------------------------------------------------------
+Ran 1 test in 0.574s
+
+FAILED (failures=1)
+---
+KILLED: the test command failed with the line broken (exit 1): the check guards it
+restored importer/batches.py (sha256 matches the original)
+recorded as a mutation check on AC1 in .oldhand/csv-import-dupes

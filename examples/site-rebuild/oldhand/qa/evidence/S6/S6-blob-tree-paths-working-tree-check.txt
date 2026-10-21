@@ -1,0 +1,24 @@
+# Step 2: each blob/tree path from the resolved list, checked in the repository working tree at /Users/berwinsingh/Documents/oldhand
+# FOUND = test -f/-d succeeds; ON_MAIN = local ref main has the path (informational, new files are not on main until merge)
+RESULT   PATH (after blob/main/ or tree/main/)                          ON_MAIN   WORKING TREE KIND
+FOUND    skills/oldhand/SKILL.md                                        yes       file
+FOUND    skills/oldhand-contract/SKILL.md                               no        file
+FOUND    skills/oldhand-trace/SKILL.md                                  no        file
+FOUND    skills/oldhand-rca/SKILL.md                                    no        file
+FOUND    skills/oldhand-research/SKILL.md                               no        file
+FOUND    skills/oldhand-plan/SKILL.md                                   no        file
+FOUND    skills/oldhand-build/SKILL.md                                  no        file
+FOUND    skills/oldhand-review/SKILL.md                                 no        file
+FOUND    skills/oldhand-qa/SKILL.md                                     no        file
+FOUND    skills/oldhand-ship/SKILL.md                                   no        file
+FOUND    skills/oldhand-learn/SKILL.md                                  no        file
+FOUND    skills/oldhand/references/hosts.md                             no        file
+FOUND    skills/oldhand/references/orchestration.md                     no        file
+FOUND    skills/oldhand/scripts/ledger.py                               no        file
+FOUND    skills/oldhand-qa/scripts/qa.py                                no        file
+FOUND    skills/oldhand-build/scripts/mutate.py                         no        file
+FOUND    examples/README.md                                             no        file
+FOUND    examples/csv-import-dupes                                      no        dir
+FOUND    SECURITY.md                                                    yes       file
+non-path links (not blob/tree, so outside the working-tree check): https://github.com/berwinsingh/oldhand (bare), .../issues, .../discussions
+count FOUND: 19 of 19

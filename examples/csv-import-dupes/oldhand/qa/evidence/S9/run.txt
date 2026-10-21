@@ -1,0 +1,6 @@
+$ cd <project>
+$ /usr/bin/python3 -m importer import .oldhand/csv-import-dupes/rca/data/badrow.csv --batch-size 2 --db <project>/.oldhand/csv-import-dupes/qa/evidence/S9/s9.db; echo exit=$?
+[stdout] exit=2
+[stderr] error: line 4: bad row {'sku': 'E-502', 'name': 'Broken', 'qty': 'lots'}
+$ /usr/bin/python3 -m importer list --db <project>/.oldhand/csv-import-dupes/qa/evidence/S9/s9.db
+[stdout] 1	.oldhand/csv-import-dupes/rca/data/badrow.csv	failed	batches=1	rows=2	stored=2

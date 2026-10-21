@@ -1,0 +1,239 @@
+{
+ "layout": {
+  "documentElement.scrollWidth": 1440,
+  "window.innerWidth": 1440,
+  "documentElement.clientWidth": 1440,
+  "body.scrollWidth": 1440,
+  "visualViewport.width": 1440,
+  "devicePixelRatio": 1,
+  "innerHeight": 900,
+  "matchMedia dark": false,
+  "matchMedia max-width:600px": false
+ },
+ "overflowElements": [],
+ "textNodesChecked": 269,
+ "renderedFontSizeCounts": {
+  "14": 8,
+  "15": 136,
+  "17": 71,
+  "18": 1,
+  "19": 5,
+  "20": 2,
+  "28": 6,
+  "48": 1,
+  "17.1": 1,
+  "15.3": 14,
+  "13.5": 24
+ },
+ "smallText": [],
+ "smallTextVisible": [],
+ "smallPseudo": [],
+ "inputs": [],
+ "canvasColor": "#ffffff",
+ "colours": {
+  "bodyElement": {
+   "label": "body (inherited text colour)",
+   "text": "oldhandv2.0.0 \u00b7 MITInstallHow it worksEx",
+   "tag": "body",
+   "color": "rgb(27, 27, 24)",
+   "fontSize": "17px",
+   "fontWeight": "400",
+   "bgBehindElement": "#fbfaf7",
+   "bgLayers": [
+    "body #fbfaf7"
+   ],
+   "bgNotes": [],
+   "pageBackground": "#fbfaf7",
+   "ratioVsPageBackground": 16.54,
+   "ratioVsBackgroundBehindElement": 16.54,
+   "threshold": 4.5
+  },
+  "paragraph": {
+   "label": "first paragraph",
+   "text": "Oldhand is a pack of eleven agent skills",
+   "tag": "p.lede",
+   "color": "rgb(27, 27, 24)",
+   "fontSize": "19px",
+   "fontWeight": "400",
+   "bgBehindElement": "#fbfaf7",
+   "bgLayers": [
+    "body #fbfaf7"
+   ],
+   "bgNotes": [],
+   "pageBackground": "#fbfaf7",
+   "ratioVsPageBackground": 16.54,
+   "ratioVsBackgroundBehindElement": 16.54,
+   "threshold": 4.5
+  },
+  "linkNav": {
+   "label": "link: nav \"Install\"",
+   "text": "Install",
+   "tag": "a",
+   "color": "rgb(27, 27, 24)",
+   "fontSize": "15px",
+   "fontWeight": "400",
+   "bgBehindElement": "#fbfaf7",
+   "bgLayers": [
+    "header.top #fbfaf7"
+   ],
+   "bgNotes": [],
+   "pageBackground": "#fbfaf7",
+   "ratioVsPageBackground": 16.54,
+   "ratioVsBackgroundBehindElement": 16.54,
+   "threshold": 4.5
+  },
+  "linkContent": {
+   "label": "link: in-content \"hosts.md\"",
+   "text": "hosts.md",
+   "tag": "a",
+   "color": "rgb(180, 68, 28)",
+   "fontSize": "15px",
+   "fontWeight": "400",
+   "bgBehindElement": "#f2f0ea",
+   "bgLayers": [
+    "div.install #f2f0ea"
+   ],
+   "bgNotes": [],
+   "pageBackground": "#fbfaf7",
+   "ratioVsPageBackground": 5.32,
+   "ratioVsBackgroundBehindElement": 4.87,
+   "threshold": 4.5
+  },
+  "linkFooter": {
+   "label": "link: footer first link",
+   "text": "GitHub",
+   "tag": "a",
+   "color": "rgb(180, 68, 28)",
+   "fontSize": "15px",
+   "fontWeight": "400",
+   "bgBehindElement": "#fbfaf7",
+   "bgLayers": [
+    "body #fbfaf7"
+   ],
+   "bgNotes": [],
+   "pageBackground": "#fbfaf7",
+   "ratioVsPageBackground": 5.32,
+   "ratioVsBackgroundBehindElement": 5.32,
+   "threshold": 4.5
+  },
+  "tabSelected": {
+   "label": "selected tab",
+   "text": "Any agent",
+   "tag": "button.is-active",
+   "color": "rgb(27, 27, 24)",
+   "fontSize": "15px",
+   "fontWeight": "400",
+   "bgBehindElement": "#f2f0ea",
+   "bgLayers": [
+    "div.install #f2f0ea"
+   ],
+   "bgNotes": [],
+   "pageBackground": "#fbfaf7",
+   "ratioVsPageBackground": 16.54,
+   "ratioVsBackgroundBehindElement": 15.15,
+   "threshold": 4.5
+  },
+  "tabUnselected": {
+   "label": "unselected tab (extra)",
+   "text": "Claude Code plugin",
+   "tag": "button",
+   "color": "rgb(92, 90, 83)",
+   "fontSize": "15px",
+   "fontWeight": "400",
+   "bgBehindElement": "#f2f0ea",
+   "bgLayers": [
+    "div.install #f2f0ea"
+   ],
+   "bgNotes": [],
+   "pageBackground": "#fbfaf7",
+   "ratioVsPageBackground": 6.61,
+   "ratioVsBackgroundBehindElement": 6.06,
+   "threshold": 4.5
+  }
+ },
+ "contrastSweepLowestFirst": [
+  {
+   "fg": "#b4441c",
+   "bg": "#f2f0ea",
+   "ratio": 4.87,
+   "threshold": 4.5,
+   "count": 1,
+   "example": "a: hosts.md",
+   "imgBg": false
+  },
+  {
+   "fg": "#b4441c",
+   "bg": "#fbfaf7",
+   "ratio": 5.32,
+   "threshold": 4.5,
+   "count": 28,
+   "example": "a: a small script",
+   "imgBg": false
+  },
+  {
+   "fg": "#5c5a53",
+   "bg": "#f2f0ea",
+   "ratio": 6.06,
+   "threshold": 4.5,
+   "count": 16,
+   "example": "button: Claude Code plugin",
+   "imgBg": false
+  },
+  {
+   "fg": "#2f6b3a",
+   "bg": "#fbfaf7",
+   "ratio": 6.12,
+   "threshold": 4.5,
+   "count": 1,
+   "example": "p: Verdict: VERIFIED",
+   "imgBg": false
+  },
+  {
+   "fg": "#5c5a53",
+   "bg": "#fbfaf7",
+   "ratio": 6.61,
+   "threshold": 4.5,
+   "count": 9,
+   "example": "span: v",
+   "imgBg": false
+  },
+  {
+   "fg": "#1b1b18",
+   "bg": "#f2f0ea",
+   "ratio": 15.15,
+   "threshold": 4.5,
+   "count": 43,
+   "example": "code: SKILL.md",
+   "imgBg": false
+  },
+  {
+   "fg": "#1b1b18",
+   "bg": "#fbfaf7",
+   "ratio": 16.54,
+   "threshold": 4.5,
+   "count": 164,
+   "example": "a: oldhand",
+   "imgBg": false
+  },
+  {
+   "fg": "#1b1b18",
+   "bg": "#fbfaf7",
+   "ratio": 16.54,
+   "threshold": 3,
+   "count": 7,
+   "example": "h1: A definition of done for coding agents.",
+   "imgBg": false
+  }
+ ],
+ "sweepFailures": [],
+ "combo": "1440x900-light",
+ "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+ "pageTitle": "Oldhand",
+ "url": "http://localhost:4180/",
+ "consoleMessages": [
+  "debug: [vite] connecting...",
+  "debug: [vite] connected.",
+  "info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+ ],
+ "failedRequests": []
+}

@@ -1,0 +1,7 @@
+S11 run3 - console and network (Browser pane tab-6)
+Console: read_console_messages onlyErrors=true after my loads -> "No console logs" (no errors). The buffer holds only Vite debug/log/info lines
+  ("[vite] connecting...", "[vite] connected.", "[vite] hot updated: /src/styles.css", "[vite] server connection lost. Polling for restart..." from
+  earlier dev-server restarts, and the React DevTools info line). No [error] or [warn] entries.
+Network: read_network_requests (limit 200, urlPattern localhost): every request returned 200 OK or 304 Not Modified, including GET / for each of my loads.
+  No 4xx/5xx, no failed requests, no requests to other hosts.
+Note: the tab buffer is cumulative and pre-dates my run; the dev server was hot-reloading styles.css/App.jsx at 12:47 while the QA ran.

@@ -1,0 +1,18 @@
+# Timestamps (local time) of the source files the page is built from, and of the build output, at the time of the final check. Read only.
+# App.jsx last changed 11:37:32, before the first read; styles.css and analytics.js changed 11:41:53-56 by another process (not by this run); the dist bundle checked is index-Bm6OPz8X.js (content-hashed name; rewritten at 11:42:31 by a later build with the same hash).
+# date: 2026-10-11 11:44:04 IST
+2026-10-11 11:37:32  src/App.jsx
+2026-10-11 11:37:25  src/slices.js
+2026-10-11 11:41:56  src/analytics.js
+2026-10-11 11:41:53  src/styles.css
+2026-10-11 11:38:19  vite.config.mjs
+2026-10-11 01:20:46  index.html
+2026-10-11 01:30:42  ../skills/oldhand/references/orchestration.md
+2026-10-11 01:20:52  ../skills/oldhand/SKILL.md
+2026-10-11 00:03:02  ../.claude-plugin/plugin.json
+2026-10-11 11:42:31  dist/client/index.html
+2026-10-11 11:42:31  dist/client/assets/index-Bm6OPz8X.js
+2026-10-11 11:42:31  dist/client/assets/index-COS68Bkw.css
+# vite dev server process still running from this site folder (not started by this run):
+  PID STARTED                      COMMAND
+80412 Sun Oct 11 01:21:37 2026     node /Users/berwinsingh/Documents/oldhand/site/node_modules/.bin/vite --host 127.0.0.1 --port 4180 --strictPort

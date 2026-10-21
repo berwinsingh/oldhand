@@ -1,0 +1,31 @@
+$ ls -laR dist/client dist/server; ls -la dist/.openai
+--- 2026-10-11 12:48:31
+total 32
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 12:48 .
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 01:10 ..
+drwxr-xr-x@ 4 berwinsingh  staff   128 Oct 11 12:48 assets
+-rw-r--r--@ 1 berwinsingh  staff  8464 Oct 11 12:48 favicon.png
+-rw-r--r--@ 1 berwinsingh  staff  3309 Oct 11 12:48 index.html
+
+dist/client/assets:
+total 496
+drwxr-xr-x@ 4 berwinsingh  staff     128 Oct 11 12:48 .
+drwxr-xr-x@ 5 berwinsingh  staff     160 Oct 11 12:48 ..
+-rw-r--r--@ 1 berwinsingh  staff    5053 Oct 11 12:48 index-BRrSHBwy.css
+-rw-r--r--@ 1 berwinsingh  staff  245428 Oct 11 12:48 index-CJn-AL1N.js
+
+-rw-r--r--@ 1 berwinsingh  staff  483 Oct 11 12:48 dist/server/index.js
+
+dist/server:
+total 8
+drwxr-xr-x@ 3 berwinsingh  staff   96 Oct 11 01:10 .
+drwxr-xr-x@ 5 berwinsingh  staff  160 Oct 11 01:10 ..
+-rw-r--r--@ 1 berwinsingh  staff  483 Oct 11 12:48 index.js
+
+-rw-r--r--@ 1 berwinsingh  staff  31 Oct 11 12:48 dist/.openai/hosting.json
+
+dist/.openai:
+total 8
+drwxr-xr-x@ 3 berwinsingh  staff   96 Oct 11 01:10 .
+drwxr-xr-x@ 5 berwinsingh  staff  160 Oct 11 01:10 ..
+-rw-r--r--@ 1 berwinsingh  staff   31 Oct 11 12:48 hosting.json

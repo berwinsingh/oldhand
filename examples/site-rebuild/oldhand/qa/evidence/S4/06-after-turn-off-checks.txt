@@ -1,0 +1,8 @@
+S4 step 6 - real click on the footer button "Turn it off" (tab-1, re-run 11 Oct 2026)
+Footer before click: "Google Analytics is on. Turn it off · How Google uses data"
+Footer after click:  "Google Analytics is off; nothing is sent. Turn on Google Analytics · How Google uses data"  (footer buttons: ["Turn on Google Analytics"])
+localStorage.getItem('oldhand-analytics-consent')  -> "denied"
+position:fixed element count -> 0
+Script element script[data-oldhand-analytics] is still in the DOM in the same page session (the app does not remove an already-loaded tag; it sends a gtag consent update instead).
+window.dataLayer tail: ..., "consent update {analytics_storage: granted}" (from the load/click that turned it on), ..., "consent update {analytics_storage: denied}" (from this click).
+Resource Timing in this page session: gtag/js @36ms, google-analytics collect beacons @5201ms and @13008ms (all before the turn-off click at ~21 s; none after it).

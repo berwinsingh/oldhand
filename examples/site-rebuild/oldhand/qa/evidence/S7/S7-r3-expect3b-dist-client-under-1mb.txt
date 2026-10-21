@@ -1,0 +1,6 @@
+$ total bytes of every file under dist/client (find dist/client -type f, summed with stat)
+total_bytes=262254
+1 MB (1,000,000 bytes) limit: UNDER
+1 MiB (1,048,576 bytes) limit: UNDER
+headroom under 1 MB (decimal): 737746 bytes
+du -sh dist/client: 264K

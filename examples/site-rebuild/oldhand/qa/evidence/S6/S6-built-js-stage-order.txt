@@ -1,0 +1,14 @@
+# Step 3 (cont.): stage names in order inside the built bundle, read from the stages array only
+ 1. oldhand
+ 2. oldhand-contract
+ 3. oldhand-trace
+ 4. oldhand-rca
+ 5. oldhand-research
+ 6. oldhand-plan
+ 7. oldhand-build
+ 8. oldhand-review
+ 9. oldhand-qa
+10. oldhand-ship
+11. oldhand-learn
+count: 11
+matches expected order exactly: True

@@ -1,0 +1,2828 @@
+diff --git a/README.md b/README.md
+index 47deaae..8f4f839 100644
+--- a/README.md
++++ b/README.md
+@@ -4,45 +4,52 @@
+ 
+ [Website](https://berwinsingh.github.io/oldhand/)
+ 
+-Oldhand is one portable development workflow for Claude Code and ChatGPT
+-Codex. It accepts a Jira, Asana, monday.com, Linear, or GitHub issue—or just a
+-plain prompt—then makes the agent understand the real flow, research permissive
+-open-source prior art, implement the smallest safe change with Ponytail, and
+-verify the result end to end.
++Oldhand is a pack of 11 Agent Skills for any coding agent that reads
++`SKILL.md` files: Claude Code, Codex, GitHub Copilot, Cursor, Gemini CLI and
++Antigravity, OpenCode and more. A conductor (`oldhand`) routes a Jira, Asana,
++monday.com, Linear or GitHub issue, a document or a plain prompt through ten
++stages: contract, trace, rca, research, plan, build, review, qa, ship and learn.
++Each stage does one job and writes to a shared task folder, and small scripts,
++not the model, decide when the work is verified.
+ 
+ ## Install
+ 
+-### Claude Code
+-
+-Run these as two separate prompts inside Claude Code:
+-
+-```text
+-/plugin marketplace add berwinsingh/oldhand
+-/plugin install oldhand@oldhand
+-```
++Install the whole pack. Every stage calls `skills/oldhand/scripts/ledger.py`,
++so a single stage installed on its own stops and asks for the rest. Pick one
++install method per host: a plugin plus a skill-folder install shows twice.
+ 
+-Then start a new session and use:
+-
+-```text
+-/oldhand:oldhand Implement DOCQ-123
+-```
+-
+-### ChatGPT Codex / Codex CLI
++| host | install |
++| --- | --- |
++| any agent | `npx skills add berwinsingh/oldhand --skill '*' -g` (all eleven skills; add `-a cursor`, `-a codex` and so on to skip the picker) |
++| Claude Code plugin | `/plugin marketplace add berwinsingh/oldhand`, then `/plugin install oldhand@oldhand` (two separate prompts) |
++| Codex plugin | `codex plugin marketplace add berwinsingh/oldhand`, then `codex plugin add oldhand@oldhand` |
++| git clone | see below |
+ 
+ ```sh
+-codex plugin marketplace add berwinsingh/oldhand
+-codex plugin add oldhand@oldhand
++git clone https://github.com/berwinsingh/oldhand ~/.oldhand
++mkdir -p ~/.agents/skills ~/.claude/skills
++for s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/.claude/skills/; done
+ ```
+ 
+-Restart Codex or start a new task, then use:
++`~/.agents/skills` is read by Codex, Cursor, Copilot, Gemini CLI, OpenCode,
++Amp, Roo, Goose, Droid and Junie; `~/.claude/skills` by Claude Code. An
++installer that takes one skill at a time must be given all eleven.
+ 
+-```text
+-$oldhand Implement DOCQ-123
+-```
++Start a new session after installing. Then invoke it:
++
++| host | invoke |
++| --- | --- |
++| Claude Code plugin | `/oldhand:oldhand Implement DOCQ-123` (a stage: `/oldhand:oldhand-qa`) |
++| Claude Code skill folder | `/oldhand Implement DOCQ-123` |
++| Codex | `$oldhand Implement DOCQ-123` |
++| Cursor, Copilot, Kiro, Cline, Factory Droid, Junie, Antigravity app and `agy` | `/oldhand Implement DOCQ-123` |
++| Devin Desktop (was Windsurf) | `@oldhand Implement DOCQ-123` |
++| Gemini CLI, OpenCode, Roo Code, Amp, Goose, Antigravity IDE | automatic from the description, or "use the oldhand skill to implement DOCQ-123" |
+ 
+-That is the complete installation. The plugin contains the skill and its
+-platform manifests. It does not require a tracker integration or MCP server to
+-install.
++A stage runs alone the same way: replace `oldhand` with `oldhand-<stage>`.
++Per-host details and fallbacks are in
++[skills/oldhand/references/hosts.md](skills/oldhand/references/hosts.md). No
++tracker integration or MCP server is needed to install.
+ 
+ ## Give it the real context
+ 
+@@ -102,22 +109,16 @@ Oldhand makes the agent:
+ 
+ ## Model orchestration
+ 
+-### Claude Code
++The skills name roles, not models. The lead (the strongest model on the host)
++writes the contract, chairs the review, runs the final end-to-end check and
++makes the release decision. Workers (the standard tier) take implementation
++slices, lens reviews and QA flows; scouts (the fast tier) take sweeps and
++read-only checks. A sub-agent's report is evidence, never verification.
+ 
+-Fable is the orchestrator and final verifier. It may delegate bounded work to
+-Haiku, Sonnet, or Opus according to complexity and risk. Fable reviews the
+-integrated result and performs the final end-to-end verification through the
+-user's browser or computer-use tools. If Fable is unavailable, the workflow
+-uses Opus as the explicit fallback orchestrator.
+-
+-### ChatGPT Codex
+-
+-GPT-5.6 Sol is the orchestrator and final verifier. It may delegate bounded work
+-to GPT-5.6 Terra or GPT-5.6 Luna according to complexity and risk. Sol reviews
+-the integrated result and performs the final end-to-end verification through
+-the browser or computer-use tools. If an exact named model is unavailable or
+-has been superseded, the workflow uses the latest available equivalent and
+-names the substitution in the plan.
++The current model for each role on each host, and the substitution rule when
++one is missing, are in
++[skills/oldhand/references/orchestration.md](skills/oldhand/references/orchestration.md):
++the one file to update when model lineups change.
+ 
+ ## Integrations
+ 
+@@ -150,14 +151,27 @@ Repository validation is dependency-free:
+ claude plugin validate .
+ ```
+ 
+-To test the exact local installation flow before publishing:
++To test this checkout before publishing with Claude Code:
+ 
+ ```sh
+ claude plugin marketplace add "$PWD"
+ claude plugin install oldhand@oldhand
++```
+ 
+-codex plugin marketplace add "$PWD"
+-codex plugin add oldhand@oldhand
++The Codex marketplace in `.agents/plugins/marketplace.json` installs GitHub
++`main`, not this checkout. For Codex, point a throwaway marketplace at the
++checkout with a local source:
++
++```sh
++m=$(mktemp -d) && mkdir -p "$m/.agents/plugins" && ln -s "$PWD" "$m/oldhand"
++cat > "$m/.agents/plugins/marketplace.json" <<'EOF'
++{"name": "oldhand-local", "plugins": [{"name": "oldhand",
++  "source": {"source": "local", "path": "./oldhand"},
++  "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
++  "category": "Productivity"}]}
++EOF
++codex plugin marketplace add "$m"
++codex plugin add oldhand@oldhand-local
+ ```
+ 
+ Command discovery proves installation only. A development task is complete
+diff --git a/site/AGENTS.md b/site/AGENTS.md
+index 0129896..e7e123f 100644
+--- a/site/AGENTS.md
++++ b/site/AGENTS.md
+@@ -1,9 +1,18 @@
+-# Prototype Instructions
++# Site instructions
+ 
+-Run the local server yourself and open the preview in the browser available to this environment. Do not give the user server-start instructions when you can run it.
++The page shows the real thing. Its content comes from the repository at build
++time: `skills/oldhand/SKILL.md`, `examples/*/oldhand/report.md` and
++`.claude-plugin/plugin.json` are imported, never copied. Never invent ids,
++screenshots, results, badges or checkmarks. An install command appears on the
++page only after someone has run it, with the tool version and date it was run.
+ 
+-Before making substantial visual changes, use the Product Design plugin's `get-context` skill when the visual source is unclear or no longer matches the current goal. When the user gives durable prototype-specific design feedback, preferences, or decisions, record them in `AGENTS.md`.
++Run the local server yourself (`npm run dev`) and open the preview in the
++browser available to this environment; do not hand the user server-start
++instructions when you can run it.
+ 
+-When implementing from a selected generated mock, treat that image as the source of truth for layout, component anatomy, density, spacing, color, typography, visible content, and hierarchy.
+-
+-Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts/prepare-sites-build.mjs`, and `tests/sites-worker.test.mjs` intact so the same local prototype can be handed to Sites. Before a Sites handoff, run `npm run build` and `npm run test:sites`; the build must leave `dist/client/index.html`, `dist/server/index.js`, and `dist/.openai/hosting.json`.
++Keep `.openai/hosting.json`, `worker/index.js`, `scripts/prepare-sites-build.mjs`
++and `tests/sites-worker.test.mjs` intact so the same build can be handed to
++Sites. Before a handoff run `npm run build`, `npm test` and `npm run test:sites`;
++the build must leave `dist/client/index.html`, `dist/server/index.js` and
++`dist/.openai/hosting.json`. The Pages workflow screenshots `?social-preview=1`
++at 1200 x 627, so the hero must fit that box.
+diff --git a/site/index.html b/site/index.html
+index dfcf075..f937584 100644
+--- a/site/index.html
++++ b/site/index.html
+@@ -4,21 +4,28 @@
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ 
+-    <title>OldHand — Give your coding agent a definition of done</title>
++    <title>Oldhand</title>
+     <meta
+       name="description"
+-      content="OldHand gives Claude Code and ChatGPT Codex a disciplined path from a vague request to a minimal, end-to-end verified change."
++      content="Oldhand is a pack of eleven agent skills that gives a coding agent a definition of done: read the whole request, trace the real path, change the minimum, review and QA with sub-agents, and let a computed verdict say when it is done. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI and any agent that reads SKILL.md."
+     />
+-    <meta name="theme-color" content="#f3eedf" />
++    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
++    <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)" />
+     <link rel="canonical" href="https://berwinsingh.github.io/oldhand/" />
+     <link rel="icon" type="image/png" href="./favicon.png" />
++    <link rel="preconnect" href="https://fonts.googleapis.com" />
++    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
++    <link
++      rel="stylesheet"
++      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
++    />
+ 
+     <meta property="og:type" content="website" />
+-    <meta property="og:site_name" content="OldHand" />
+-    <meta property="og:title" content="OldHand — Give your coding agent a definition of done" />
++    <meta property="og:site_name" content="Oldhand" />
++    <meta property="og:title" content="Oldhand: a definition of done for coding agents" />
+     <meta
+       property="og:description"
+-      content="Understand the request, trace the real flow, make the smallest safe change, and verify it end to end with Claude Code or Codex."
++      content="Eleven agent skills: contract, trace, root cause, research, plan, build, review, QA, ship, learn. The verdict is computed, not written. MIT."
+     />
+     <meta property="og:url" content="https://berwinsingh.github.io/oldhand/" />
+     <meta property="og:image" content="https://berwinsingh.github.io/oldhand/og-image.png" />
+@@ -26,22 +33,16 @@
+     <meta property="og:image:type" content="image/png" />
+     <meta property="og:image:width" content="1200" />
+     <meta property="og:image:height" content="627" />
+-    <meta
+-      property="og:image:alt"
+-      content="OldHand website hero showing the path from a vague request to a verified change."
+-    />
++    <meta property="og:image:alt" content="The Oldhand website hero: a definition of done for coding agents, with the install commands." />
+ 
+     <meta name="twitter:card" content="summary_large_image" />
+-    <meta name="twitter:title" content="OldHand — Give your coding agent a definition of done" />
++    <meta name="twitter:title" content="Oldhand: a definition of done for coding agents" />
+     <meta
+       name="twitter:description"
+-      content="A proof-driven development workflow for Claude Code and ChatGPT Codex."
++      content="Eleven agent skills for Claude Code, Codex, Cursor, Copilot, Gemini CLI and any agent that reads SKILL.md. MIT."
+     />
+     <meta name="twitter:image" content="https://berwinsingh.github.io/oldhand/og-image.png" />
+-    <meta
+-      name="twitter:image:alt"
+-      content="OldHand website hero showing the path from a vague request to a verified change."
+-    />
++    <meta name="twitter:image:alt" content="The Oldhand website hero: a definition of done for coding agents, with the install commands." />
+ 
+     <script>
+       if (new URLSearchParams(window.location.search).has("social-preview")) {
+@@ -55,10 +56,6 @@
+         height: 627px;
+         overflow: hidden;
+       }
+-
+-      html.social-preview .analytics-consent {
+-        display: none !important;
+-      }
+     </style>
+   </head>
+   <body>
+diff --git a/site/package-lock.json b/site/package-lock.json
+index 33084ca..f61bfd3 100644
+--- a/site/package-lock.json
++++ b/site/package-lock.json
+@@ -8,13 +8,11 @@
+       "name": "site",
+       "version": "0.0.0",
+       "dependencies": {
+-        "@phosphor-icons/react": "^2.1.10",
+         "@vitejs/plugin-react": "5.0.4",
+         "react": "19.2.0",
+         "react-dom": "19.2.0",
+         "vite": "6.4.2"
+-      },
+-      "devDependencies": {}
++      }
+     },
+     "node_modules/@babel/code-frame": {
+       "version": "7.29.7",
+@@ -740,19 +738,6 @@
+         "@jridgewell/sourcemap-codec": "^1.4.14"
+       }
+     },
+-    "node_modules/@phosphor-icons/react": {
+-      "version": "2.1.10",
+-      "resolved": "https://registry.npmjs.org/@phosphor-icons/react/-/react-2.1.10.tgz",
+-      "integrity": "sha512-vt8Tvq8GLjheAZZYa+YG/pW7HDbov8El/MANW8pOAz4eGxrwhnbfrQZq0Cp4q8zBEu8NIhHdnr+r8thnfRSNYA==",
+-      "license": "MIT",
+-      "engines": {
+-        "node": ">=10"
+-      },
+-      "peerDependencies": {
+-        "react": ">= 16.8",
+-        "react-dom": ">= 16.8"
+-      }
+-    },
+     "node_modules/@rolldown/pluginutils": {
+       "version": "1.0.0-beta.38",
+       "resolved": "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.0-beta.38.tgz",
+diff --git a/site/package.json b/site/package.json
+index 434fdc8..c2a50f6 100644
+--- a/site/package.json
++++ b/site/package.json
+@@ -7,10 +7,10 @@
+     "dev": "vite",
+     "build": "vite build && node scripts/prepare-sites-build.mjs",
+     "preview": "vite preview",
+-    "test:sites": "node --test tests/sites-worker.test.mjs"
++    "test:sites": "node --test tests/sites-worker.test.mjs",
++    "test": "node --test tests/analytics.test.mjs"
+   },
+   "dependencies": {
+-    "@phosphor-icons/react": "^2.1.10",
+     "@vitejs/plugin-react": "5.0.4",
+     "react": "19.2.0",
+     "react-dom": "19.2.0",
+diff --git a/site/src/App.jsx b/site/src/App.jsx
+index ae18c81..6418f3b 100644
+--- a/site/src/App.jsx
++++ b/site/src/App.jsx
+@@ -1,190 +1,133 @@
+ import { useEffect, useState } from "react";
+-import {
+-  ArrowDown,
+-  ArrowRight,
+-  Browser,
+-  Check,
+-  CheckCircle,
+-  ClipboardText,
+-  Code,
+-  Copy,
+-  FileText,
+-  GitBranch,
+-  GithubLogo,
+-  MagnifyingGlass,
+-  PlugsConnected,
+-  SealCheck,
+-  Sparkle,
+-  Stack,
+-  TerminalWindow,
+-  Wrench,
+-  X,
+-} from "@phosphor-icons/react";
+-
+-const installs = {
+-  claude: [
+-    "/plugin marketplace add berwinsingh/oldhand",
+-    "/plugin install oldhand@oldhand",
+-  ],
+-  codex: [
+-    "codex plugin marketplace add berwinsingh/oldhand",
+-    "codex plugin add oldhand@oldhand",
+-  ],
+-};
+-
+-const usageExamples = {
+-  claude: `/oldhand:oldhand Implement DOCQ-123.
+-Changes since ticket: support guests; keep the admin flow unchanged.
+-Assumptions: the current session cookie remains authoritative.
+-Prove: finish guest signup, reload, and confirm persistence.`,
+-  codex: `$oldhand No ticket. Fix intermittent CSV imports.
+-Current behavior: files over 20 MB sometimes create duplicate rows.
+-Constraints: no schema migration; preserve queued jobs.
+-Acceptance: one persisted batch even after a retry.`,
+-};
+-
+-const failures = [
++import skillText from "../../skills/oldhand/SKILL.md?raw";
++import reportText from "../../examples/csv-import-dupes/oldhand/report.md?raw";
++import plugin from "../../.claude-plugin/plugin.json";
++import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
++
++const REPO = "https://github.com/berwinsingh/oldhand";
++const BLOB = `${REPO}/blob/main/`;
++const TESTED = "2026-10-11";
++
++// Every command below was run on this date in a throwaway home folder before
++// it was written here. See examples/ and the PR that shipped this page.
++const installs = [
+   {
+-    title: "Starts before understanding",
+-    body: "A ticket title becomes a plan. Constraints and linked work get missed.",
+-    icon: ClipboardText,
++    key: "any",
++    label: "Any agent",
++    blocks: ["npx skills add berwinsingh/oldhand --skill '*' -g"],
++    note:
++      "Installs all eleven skills under ~/.agents/skills and links them for the agents it finds. Add -a cursor (or codex, github-copilot, gemini-cli, opencode, claude-code) to skip the picker.",
++    tested: `Tested ${TESTED} on macOS with skills 1.7.2 for claude-code, codex, cursor, github-copilot, gemini-cli and opencode.`,
++    then: [
++      ["Claude Code, Cursor, Copilot, Kiro, Antigravity", "/oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists."],
++      ["Codex", "$oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists."],
++      ["Gemini CLI, OpenCode, Amp, Goose", "Use the oldhand skill: fix DOCQ-123 and prove it end to end."],
++    ],
+   },
+   {
+-    title: "Reinvents solved work",
+-    body: "No search for existing code, native features, or maintained prior art.",
+-    icon: Stack,
++    key: "claude",
++    label: "Claude Code plugin",
++    blocks: ["/plugin marketplace add berwinsingh/oldhand", "/plugin install oldhand@oldhand"],
++    note: "Two separate prompts inside Claude Code, then a new session.",
++    tested: `Tested ${TESTED} with Claude Code 2.1.274.`,
++    then: [["Claude Code", "/oldhand:oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists."]],
+   },
+   {
+-    title: "Overwrites the codebase",
+-    body: "A small fix expands into a refactor and unrelated work gets disturbed.",
+-    icon: GitBranch,
++    key: "codex",
++    label: "Codex plugin",
++    blocks: ["codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand"],
++    note: "Then restart Codex or start a new task.",
++    tested: `Tested ${TESTED} with Codex CLI 0.146.0.`,
++    then: [["Codex", "$oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists."]],
+   },
+   {
+-    title: "Stops at unit tests",
+-    body: "Green checks replace proof that the real browser flow works.",
+-    icon: Browser,
++    key: "git",
++    label: "Git clone",
++    blocks: [
++      'git clone https://github.com/berwinsingh/oldhand ~/.oldhand\nmkdir -p ~/.agents/skills ~/.claude/skills\nfor s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/.claude/skills/; done',
++    ],
++    note:
++      "~/.agents/skills is read by Codex, Cursor, Copilot, Gemini CLI, OpenCode, Amp, Roo, Goose, Droid and Junie; ~/.claude/skills by Claude Code. Update with git -C ~/.oldhand pull.",
++    tested: `Tested ${TESTED} on macOS with git 2.x and zsh.`,
++    then: [
++      ["Claude Code, Cursor, Copilot", "/oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists."],
++      ["Codex", "$oldhand Fix DOCQ-123. Prove: guest signup, reload, data persists."],
++    ],
+   },
+ ];
+ 
+-const steps = [
+-  {
+-    eyebrow: "01 / INTAKE",
+-    title: "Understand",
+-    body: "Read the request, comments, files, dependencies, and acceptance criteria.",
+-    icon: ClipboardText,
+-  },
+-  {
+-    eyebrow: "02 / TRACE",
+-    title: "Map the path",
+-    body: "Follow UI, API, auth, services, persistence, and integrations end to end.",
+-    icon: GitBranch,
+-  },
+-  {
+-    eyebrow: "03 / PRIOR ART",
+-    title: "Reuse",
+-    body: "Study real MIT and Apache-2.0 implementations before inventing.",
+-    icon: MagnifyingGlass,
+-  },
+-  {
+-    eyebrow: "04 / CHANGE",
+-    title: "Stay minimal",
+-    body: "Use Ponytail to land the smallest safe change in the shared fix point.",
+-    icon: Wrench,
+-  },
+-  {
+-    eyebrow: "05 / INSPECT",
+-    title: "Prove it",
+-    body: "Run the real journey in your browser and keep fixing until it passes.",
+-    icon: SealCheck,
+-  },
++const stages = [
++  ["oldhand", "the conductor: routes the request through the stages, keeps one task folder and a ledger, and decides from the verdict"],
++  ["oldhand-contract", "the request, with its assumptions and changed requirements, becomes numbered acceptance and regression criteria, each with the proof it needs"],
++  ["oldhand-trace", "the real path hop by hop, from entry point to rendered result, and every caller of what will change"],
++  ["oldhand-rca", "evidence-first root cause for bugs; read-only refuters try to break it before it is accepted"],
++  ["oldhand-research", "before anything new: the codebase, the standard library, the platform, installed dependencies, then open source behind a licence gate"],
++  ["oldhand-plan", "the smallest complete change, with blast radius, rollback, delegation and a budget for live runs"],
++  ["oldhand-build", "the Ponytail ladder, one focused regression check, proven by mutation: break the fix and the check must fail"],
++  ["oldhand-review", "a board of read-only reviewers, one lens each; the chair refutes every finding before it counts"],
++  ["oldhand-qa", "one sub-agent per scenario drives the real app and brings back evidence; the lead re-runs the key one"],
++  ["oldhand-ship", "the verdict is computed by a script from the ledger; publication only when the request authorized it"],
++  ["oldhand-learn", "the non-obvious lessons go where the project keeps its instructions, so the next session does not relearn them"],
+ ];
+ 
+-const sources = [
+-  ["Jira issue", "PROJ-1234 + newer changes"],
+-  ["Asana task", "Launch / improve signup"],
+-  ["monday.com item", "Fix onboarding flow"],
+-  ["Linear issue", "ENG-4567 + assumptions"],
+-  ["GitHub issue", "owner/repo#812"],
+-  ["Document", "PRD, ADR, runbook"],
+-  ["Plain prompt", "Context + constraints + proof"],
++const models = [
++  ["Claude Code", "Fable, else Opus", "Sonnet; Opus for hard slices", "Haiku"],
++  ["Codex", "GPT-6 Astra", "GPT-6.1 Sol", "GPT-6 Luna"],
++  ["GitHub Copilot", "Fable or GPT-6 Astra", "Sonnet or GPT-6.1 Sol", "Haiku or GPT-6 Luna"],
++  ["Cursor", "the strongest frontier model enabled", "Composer", "Composer"],
++  ["Gemini CLI, Antigravity", "Gemini Pro", "Gemini Flash", "Gemini Flash or Flash-Lite"],
++  ["OpenCode", "the strongest model configured", "the provider's standard model", "the provider's fast model"],
+ ];
+ 
+-const GA_MEASUREMENT_ID = "G-75YW6HE9FT";
+-const ANALYTICS_CONSENT_KEY = "oldhand-analytics-consent";
+-
+-function readAnalyticsChoice() {
+-  try {
+-    const choice = window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
+-    return choice === "granted" || choice === "denied" ? choice : null;
+-  } catch {
+-    return null;
+-  }
++function section(text, heading) {
++  const start = text.indexOf(`\n${heading}\n`);
++  if (start < 0) return "";
++  const body = text.slice(start + heading.length + 2);
++  const end = body.search(/\n#{1,2} /);
++  return (end < 0 ? body : body.slice(0, end)).trim();
+ }
+ 
+-function saveAnalyticsChoice(choice) {
+-  try {
+-    window.localStorage.setItem(ANALYTICS_CONSENT_KEY, choice);
+-  } catch {
+-    // The choice still applies for this page when storage is unavailable.
+-  }
++function inline(text) {
++  return text.split(/(`[^`]*`)/g).map((part, i) =>
++    part.startsWith("`") ? <code key={i}>{part.slice(1, -1)}</code> : part,
++  );
+ }
+ 
+-function loadAnalytics() {
+-  window.dataLayer = window.dataLayer || [];
+-  window.gtag = window.gtag || function gtag() {
+-    window.dataLayer.push(arguments);
+-  };
+-
+-  if (document.querySelector("script[data-oldhand-analytics]")) {
+-    window.gtag("consent", "update", { analytics_storage: "granted" });
+-    return;
++function List({ text, ordered }) {
++  const items = [];
++  for (const line of text.split("\n")) {
++    const m = line.match(/^(?:\d+\.|-)\s+(.*)$/);
++    if (m) items.push(m[1]);
++    else if (items.length && line.trim()) items[items.length - 1] += " " + line.trim();
+   }
+-
+-  window.gtag("consent", "default", {
+-    analytics_storage: "denied",
+-    ad_storage: "denied",
+-    ad_user_data: "denied",
+-    ad_personalization: "denied",
+-  });
+-  window.gtag("consent", "update", { analytics_storage: "granted" });
+-  window.gtag("js", new Date());
+-  window.gtag("config", GA_MEASUREMENT_ID);
+-
+-  const script = document.createElement("script");
+-  script.async = true;
+-  script.dataset.oldhandAnalytics = "true";
+-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+-  document.head.appendChild(script);
++  const Tag = ordered ? "ol" : "ul";
++  return <Tag>{items.map((item, i) => <li key={i}>{inline(item)}</li>)}</Tag>;
+ }
+ 
+-function AnalyticsConsent({ choice, onChoose }) {
+-  if (choice !== null) return null;
+-
++function Table({ text, columns }) {
++  const rows = text
++    .split("\n")
++    .filter((line) => line.startsWith("|"))
++    .map((line) => line.slice(1, -1).split("|").map((cell) => cell.trim()))
++    .filter((row) => !row.every((cell) => /^-+$/.test(cell)));
++  if (!rows.length) return null;
++  const keep = columns ? columns.map((name) => rows[0].indexOf(name)).filter((i) => i >= 0) : rows[0].map((_, i) => i);
+   return (
+-    <aside className="analytics-consent" aria-labelledby="analytics-consent-title">
+-      <strong id="analytics-consent-title">Help improve Oldhand?</strong>
+-      <p>
+-        Allow Google Analytics so we can see visits and improve the site. We keep
+-        advertising storage off, and Analytics loads only if you allow it. {" "}
+-        <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer">
+-          How Google uses data
+-        </a>
+-      </p>
+-      <div className="analytics-actions">
+-        <button type="button" className="analytics-choice analytics-choice--allow" onClick={() => onChoose("granted")}>
+-          Allow analytics
+-        </button>
+-        <button type="button" className="analytics-choice" onClick={() => onChoose("denied")}>
+-          No thanks
+-        </button>
+-      </div>
+-    </aside>
++    <table>
++      <thead>
++        <tr>{keep.map((i) => <th key={i}>{rows[0][i]}</th>)}</tr>
++      </thead>
++      <tbody>
++        {rows.slice(1).map((row, r) => (
++          <tr key={r}>{keep.map((i) => <td key={i}>{inline(row[i] || "")}</td>)}</tr>
++        ))}
++      </tbody>
++    </table>
+   );
+ }
+ 
+-function CopyButton({ value, label = "Copy command" }) {
++function CopyButton({ value, label }) {
+   const [copied, setCopied] = useState(false);
+-
+   async function copy() {
+     try {
+       await navigator.clipboard.writeText(value);
+@@ -201,426 +144,274 @@ function CopyButton({ value, label = "Copy command" }) {
+     setCopied(true);
+     window.setTimeout(() => setCopied(false), 1600);
+   }
+-
+   return (
+-    <button className="copy-button" type="button" onClick={copy} aria-label={label}>
+-      {copied ? <Check size={18} weight="bold" /> : <Copy size={18} />}
++    <button className="copy" type="button" onClick={copy} aria-label={label}>
+       <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
+     </button>
+   );
+ }
+ 
+-function InstallPanel({ compact = false }) {
+-  const [platform, setPlatform] = useState("claude");
+-
++function Command({ text }) {
+   return (
+-    <div
+-      className={`install-panel ${compact ? "install-panel--compact" : ""}`}
+-      data-testid={compact ? "hero-install-panel" : "final-install-panel"}
+-    >
+-      <div className="install-tabs" role="tablist" aria-label="Install platform">
+-        <button
+-          type="button"
+-          className={platform === "claude" ? "is-active" : ""}
+-          onClick={() => setPlatform("claude")}
+-          role="tab"
+-          aria-selected={platform === "claude"}
+-        >
+-          Claude Code
+-        </button>
+-        <button
+-          type="button"
+-          className={platform === "codex" ? "is-active" : ""}
+-          onClick={() => setPlatform("codex")}
+-          role="tab"
+-          aria-selected={platform === "codex"}
+-        >
+-          ChatGPT Codex
+-        </button>
+-      </div>
++    <div className="command">
++      <pre><code>{text}</code></pre>
++      <CopyButton value={text} label={`Copy: ${text}`} />
++    </div>
++  );
++}
+ 
+-      <div className="command-list" role="tabpanel">
+-        {installs[platform].map((command) => (
+-          <div className="command-row" key={command}>
+-            <code>{command}</code>
+-            <CopyButton value={command} label={`Copy ${command}`} />
+-          </div>
++function readTab() {
++  const keys = installs.map((i) => i.key);
++  try {
++    const fromUrl = new URLSearchParams(window.location.search).get("agent");
++    if (keys.includes(fromUrl)) return fromUrl;
++    const stored = window.localStorage.getItem("oldhand-install-tab");
++    if (keys.includes(stored)) return stored;
++  } catch {
++    // no storage: fall through to the first tab
++  }
++  return keys[0];
++}
++
++function InstallSwitcher() {
++  const [tab, setTab] = useState(readTab);
++  const current = installs.find((i) => i.key === tab);
++
++  function choose(key) {
++    setTab(key);
++    try {
++      window.localStorage.setItem("oldhand-install-tab", key);
++    } catch {
++      // the choice still applies for this page
++    }
++  }
++
++  function onKeyDown(event) {
++    const index = installs.findIndex((i) => i.key === tab);
++    const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
++    if (!step) return;
++    event.preventDefault();
++    const next = installs[(index + step + installs.length) % installs.length].key;
++    choose(next);
++    document.getElementById(`tab-${next}`)?.focus();
++  }
++
++  return (
++    <div className="install" id="install">
++      <div className="tabs" role="tablist" aria-label="Install route" onKeyDown={onKeyDown}>
++        {installs.map((i) => (
++          <button
++            key={i.key}
++            id={`tab-${i.key}`}
++            role="tab"
++            type="button"
++            aria-selected={i.key === tab}
++            aria-controls={`panel-${i.key}`}
++            tabIndex={i.key === tab ? 0 : -1}
++            className={i.key === tab ? "is-active" : ""}
++            onClick={() => choose(i.key)}
++          >
++            {i.label}
++          </button>
+         ))}
+       </div>
+-
+-      <div className="install-note">
+-        <CheckCircle size={18} weight="fill" />
+-        Complete install. Add tracker or browser integrations only when you need them.
++      <div className="panel" role="tabpanel" id={`panel-${current.key}`} aria-labelledby={`tab-${current.key}`}>
++        {current.blocks.map((block) => <Command key={block} text={block} />)}
++        <p className="note">{current.note}</p>
++        <dl className="then">
++          {current.then.map(([hosts, line]) => (
++            <div key={hosts}>
++              <dt>Then, in {hosts}</dt>
++              <dd><code>{line}</code></dd>
++            </div>
++          ))}
++        </dl>
++        <p className="tested">{current.tested}</p>
+       </div>
+-
+-      {!compact && (
+-        <div className="usage-example">
+-          <div>
+-            <strong>Give it the full context</strong>
+-            <span>Ticket optional · assumptions welcome · newer changes win</span>
+-          </div>
+-          <pre><code>{usageExamples[platform]}</code></pre>
+-        </div>
+-      )}
+     </div>
+   );
+ }
+ 
+ export function App() {
+-  const [selectedSources, setSelectedSources] = useState([0, 6]);
+-  const [analyticsChoice, setAnalyticsChoice] = useState(readAnalyticsChoice);
+-  const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
+-
++  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+   useEffect(() => {
+-    if (analyticsChoice === "granted") loadAnalytics();
+-  }, [analyticsChoice]);
++    applyAnalyticsChoice(analytics);
++  }, [analytics]);
+ 
+-  function toggleSource(index) {
+-    setSelectedSources((current) =>
+-      current.includes(index)
+-        ? current.filter((item) => item !== index)
+-        : [...current, index],
+-    );
++  function toggleAnalytics() {
++    const next = analytics === "granted" ? "denied" : "granted";
++    saveAnalyticsChoice(next);
++    setAnalytics(next);
+   }
+ 
+-  function scrollToInstall() {
+-    document.querySelector("#install")?.scrollIntoView({ behavior: "smooth" });
+-  }
+-
+-  function chooseAnalytics(choice) {
+-    saveAnalyticsChoice(choice);
+-    if (choice === "denied") {
+-      window.gtag?.("consent", "update", { analytics_storage: "denied" });
+-    }
+-    setAnalyticsChoice(choice);
+-  }
++  const hardStops = section(skillText, "## Hard stops");
++  const [stopsIntro, ...stopsRest] = hardStops.split("\n\n");
++  const verdict = (reportText.match(/^### (Verdict: .+)$/m) || [])[1];
++  const lines = reportText.split("\n");
++  const first = lines.findIndex((line) => line.startsWith("| criterion"));
++  const criteriaTable = first < 0 ? "" : lines.slice(first, lines.findIndex((line, i) => i > first && !line.startsWith("|"))).join("\n");
++  const rootCause = section(reportText, "## Root cause");
++  const notVerified = section(reportText, "## Not verified");
++  const computed = (reportText.match(/^Computed by ledger\.py .+$/m) || [])[0];
+ 
+   return (
+-    <main>
+-      <header className="site-header">
+-        <a className="brand" href="#top" aria-label="Oldhand home">
+-          <span>OLDHAND</span>
+-          <small>/ verified delivery</small>
+-        </a>
+-        <nav aria-label="Primary navigation">
+-          <a href="#process">How it works</a>
+-          <a href="#orchestration">Models</a>
+-          <a href="#proof">Proof</a>
++    <>
++      <header className="top">
++        <a className="wordmark" href="#top">oldhand</a>
++        <span className="meta">v{plugin.version} · MIT</span>
++        <nav aria-label="Sections">
+           <a href="#install">Install</a>
++          <a href="#how">How it works</a>
++          <a href="#example">Example</a>
++          <a href="#skill">The skill</a>
++          <a href="#models">Models</a>
++          <a href={REPO}>GitHub</a>
+         </nav>
+-        <a
+-          className="header-github"
+-          href="https://github.com/berwinsingh/oldhand"
+-          target="_blank"
+-          rel="noreferrer"
+-        >
+-          <GithubLogo size={19} weight="fill" />
+-          GitHub
+-        </a>
+       </header>
+ 
+-      <section className="hero sheet" id="top">
+-        <div className="work-order" aria-label="Work order">
+-          <div>
+-            <span>WORK ORDER</span>
+-            <strong>OH-24-0517</strong>
+-          </div>
+-          <div>
+-            <span>STATUS</span>
+-            <strong>READY TO PROVE</strong>
+-          </div>
+-          <div className="work-order-accent">BUILD WITH CONFIDENCE.</div>
+-        </div>
+-
+-        <div className="hero-grid">
+-          <div className="hero-copy">
+-            <p className="kicker">Development discipline for coding agents</p>
+-            <h1>From vague request to verified change.</h1>
+-            <p className="lede">
+-              Oldhand turns any ticket, document, or prompt into understood,
+-              researched, minimally implemented, browser-proven work.
+-            </p>
+-            <div className="hero-actions">
+-              <button className="button button--primary" type="button" onClick={scrollToInstall}>
+-                Install Oldhand
+-                <ArrowDown size={19} weight="bold" />
+-              </button>
+-              <a
+-                className="button button--secondary"
+-                href="https://github.com/berwinsingh/oldhand#readme"
+-                target="_blank"
+-                rel="noreferrer"
+-              >
+-                Read the skill
+-                <ArrowRight size={19} />
+-              </a>
+-            </div>
+-          </div>
+-
+-          <div className="stamp-wrap">
+-            <img
+-              src={asset("delivered-stamp.png")}
+-              alt="Delivered: end-to-end proof, signed Oldhand, not just code"
+-            />
+-          </div>
+-        </div>
+-
+-        <div className="hero-install">
+-          <div className="section-bar">
+-            <span>Two commands. Then give it the work.</span>
+-            <span>NO CLONE · NO COPY · NO CONFIG FILE</span>
+-          </div>
+-          <InstallPanel compact />
+-        </div>
+-      </section>
++      <main id="top">
++        <section className="hero">
++          <h1>A definition of done for coding agents.</h1>
++          <p className="lede">
++            Oldhand is a pack of eleven agent skills. Your agent reads the whole request, traces
++            the real code path, reuses before it writes, changes the minimum, has sub-agents review
++            and QA the result in the running app, and a small script, not the model, says when it
++            is done. It works with Claude Code, Codex, Cursor, Copilot, Gemini CLI and any other
++            agent that reads <code>SKILL.md</code>.
++          </p>
++          <InstallSwitcher />
++        </section>
+ 
+-      <section className="section shell" aria-labelledby="failures-title">
+-        <div className="section-heading">
+-          <p className="kicker">The problem</p>
+-          <h2 id="failures-title">The handoff is where agents fail.</h2>
++        <section id="how">
++          <h2>How it works</h2>
+           <p>
+-            Speed is useful. Speed without context, restraint, and proof is just
+-            faster rework.
++            One request runs through the stages below in order; <code>rca</code> only for bugs,{" "}
++            <code>research</code> only when something new is built. Each stage is its own skill,
++            reads what the earlier ones wrote into <code>.oldhand/&lt;task&gt;/</code>, and can run
++            alone.
+           </p>
+-        </div>
+-        <div className="failure-grid">
+-          {failures.map(({ title, body, icon: Icon }, index) => (
+-            <article className="failure-card" key={title}>
+-              <div className="failure-index">0{index + 1}</div>
+-              <Icon size={34} weight="duotone" />
+-              <h3>{title}</h3>
+-              <p>{body}</p>
+-              <X className="failure-x" size={19} weight="bold" />
+-            </article>
+-          ))}
+-        </div>
+-      </section>
+-
+-      <section className="section shell" id="process" aria-labelledby="process-title">
+-        <div className="section-heading section-heading--row">
+-          <div>
+-            <p className="kicker">Oldhand inspection process</p>
+-            <h2 id="process-title">One discipline. Every project.</h2>
+-          </div>
+-          <p>Understand first. Reuse what works. Prove the result.</p>
+-        </div>
+-        <div className="process-grid">
+-          {steps.map(({ eyebrow, title, body, icon: Icon }) => (
+-            <article className="process-step" key={title}>
+-              <div className="process-icon">
+-                <Icon size={30} weight="duotone" />
+-              </div>
+-              <span>{eyebrow}</span>
+-              <h3>{title}</h3>
+-              <p>{body}</p>
+-            </article>
+-          ))}
+-        </div>
+-      </section>
+-
+-      <section className="section shell split-section" id="orchestration">
+-        <div className="intake-card" data-testid="source-intake">
+-          <div className="card-title">
+-            <span>ADAPTABLE SOURCES / INTAKE</span>
+-            <small>{selectedSources.length} selected</small>
+-          </div>
+-          <div className="source-table" role="group" aria-label="Example work sources">
+-            {sources.map(([source, example], index) => {
+-              const checked = selectedSources.includes(index);
+-              return (
+-                <button
+-                  type="button"
+-                  className={checked ? "source-row is-selected" : "source-row"}
+-                  onClick={() => toggleSource(index)}
+-                  aria-pressed={checked}
+-                  key={source}
+-                >
+-                  <span className="source-check">{checked && <Check size={15} weight="bold" />}</span>
+-                  <strong>{source}</strong>
+-                  <span>{example}</span>
+-                </button>
+-              );
+-            })}
+-          </div>
+-          <p className="intake-note">
+-            No tracker? No problem. Give Oldhand the prompt, assumptions, changed requirements, constraints, partial work, and proof you expect.
++          <ol className="stages">
++            {stages.map(([name, line]) => (
++              <li key={name}>
++                <a href={`${BLOB}skills/${name}/SKILL.md`}>{name}</a>
++                <span>{line}</span>
++              </li>
++            ))}
++          </ol>
++          <p>
++            Three standard-library Python tools keep it honest:{" "}
++            <a href={`${BLOB}skills/oldhand/scripts/ledger.py`}>ledger.py</a> records every check
++            against the exact working tree and computes the verdict,{" "}
++            <a href={`${BLOB}skills/oldhand-qa/scripts/qa.py`}>qa.py</a> deals the scenario briefs
++            and tallies the results, and{" "}
++            <a href={`${BLOB}skills/oldhand-build/scripts/mutate.py`}>mutate.py</a> proves a test
++            guards the fix.
+           </p>
+-        </div>
+-
+-        <div className="orchestration-card">
+-          <div className="card-title">
+-            <span>ORCHESTRATION CREW</span>
+-            <small>Final verification returns to the lead</small>
+-          </div>
+-
+-          <article className="model-card model-card--orange">
+-            <div>
+-              <span>CLAUDE CODE</span>
+-              <strong>Fable orchestrates</strong>
+-            </div>
+-            <p>Routes Haiku, Sonnet, and Opus by complexity. If Fable is unavailable, Opus becomes orchestrator and final verifier.</p>
+-            <div className="model-status">
+-              <span><Check size={15} />Understood</span>
+-              <span><Check size={15} />Reused</span>
+-              <span><Check size={15} />Browser verified</span>
+-            </div>
+-          </article>
+-
+-          <article className="model-card model-card--green">
+-            <div>
+-              <span>CHATGPT CODEX</span>
+-              <strong>GPT-5.6 Sol orchestrates</strong>
+-            </div>
+-            <p>Routes GPT-5.6 Terra and Luna by complexity, then owns the final proof.</p>
+-            <div className="model-status">
+-              <span><Check size={15} />Understood</span>
+-              <span><Check size={15} />Reused</span>
+-              <span><Check size={15} />Browser verified</span>
+-            </div>
+-          </article>
+-        </div>
+-      </section>
+-
+-      <section className="section shell" id="proof" aria-labelledby="proof-title">
+-        <div className="section-heading section-heading--row">
+-          <div>
+-            <p className="kicker">Browser inspection / proof receipt</p>
+-            <h2 id="proof-title">Done means observed.</h2>
+-          </div>
+-          <div className="status-badge">
+-            <CheckCircle size={21} weight="fill" />
+-            Browser verified
+-          </div>
+-        </div>
++        </section>
+ 
+-        <div className="proof-card">
+-          <div className="proof-metadata">
+-            <dl>
+-              <div><dt>CHECK ID</dt><dd>OH-24-0517-0912</dd></div>
+-              <div><dt>URL</dt><dd>/signup</dd></div>
+-              <div><dt>VIEWPORT</dt><dd>Desktop 1280 × 800</dd></div>
+-              <div><dt>MODE</dt><dd>Real browser / clean session</dd></div>
+-            </dl>
+-            <ol>
+-              <li>Navigate from the real entry point</li>
+-              <li>Complete the form with valid data</li>
+-              <li>Submit and observe the success state</li>
+-              <li>Reload and verify persisted behavior</li>
+-            </ol>
+-            <div className="proof-result">
+-              <CheckCircle size={26} weight="fill" />
+-              PASSED
+-            </div>
+-          </div>
+-
+-          <figure className="browser-evidence">
+-            <div className="browser-bar">
+-              <span />
+-              <span />
+-              <span />
+-              <code>staging.example.com/signup</code>
+-            </div>
+-            <img
+-              src={asset("browser-proof.png")}
+-              alt="Successful signup flow shown in a real browser verification capture"
+-            />
+-            <figcaption>
+-              Screenshot captured after the final integrated flow passed.
+-            </figcaption>
+-          </figure>
+-        </div>
+-
+-        <div className="evidence-strip">
+-          <span><FileText size={20} />screenshot.png</span>
+-          <span><TerminalWindow size={20} />console.log</span>
+-          <span><PlugsConnected size={20} />network.har</span>
+-          <span><Code size={20} />diff.patch</span>
+-          <span><ClipboardText size={20} />delivery-notes.md</span>
+-        </div>
+-      </section>
+-
+-      <section className="section shell principles" aria-labelledby="principles-title">
+-        <div className="section-heading">
+-          <p className="kicker">Built-in restraint</p>
+-          <h2 id="principles-title">Less code. More proof.</h2>
+-        </div>
+-        <div className="principle-grid">
+-          <article>
+-            <MagnifyingGlass size={34} weight="duotone" />
+-            <span>01</span>
+-            <h3>Research before inventing</h3>
+-            <p>
+-              Compare real, maintained MIT and Apache-2.0 implementations before
+-              adding a new pattern or dependency.
+-            </p>
+-          </article>
+-          <article>
+-            <Sparkle size={34} weight="duotone" />
+-            <span>02</span>
+-            <h3>Ponytail the change</h3>
+-            <p>
+-              Reuse the codebase, standard library, native platform, and installed
+-              dependencies before writing anything new.
+-            </p>
+-          </article>
+-          <article>
+-            <SealCheck size={34} weight="duotone" />
+-            <span>03</span>
+-            <h3>Keep ownership at the top</h3>
+-            <p>
+-              Delegation helps with speed. The orchestrator still integrates,
+-              verifies, and owns the final answer.
+-            </p>
+-          </article>
+-        </div>
+-      </section>
++        <section id="stops">
++          <h2>What it will not do</h2>
++          <p>
++            The hard stops, as they appear at the top of{" "}
++            <a href={`${BLOB}skills/oldhand/SKILL.md`}>the conductor skill</a>. {stopsIntro}
++          </p>
++          <List text={stopsRest.join("\n\n")} ordered />
++        </section>
+ 
+-      <section className="section install-section" id="install" aria-labelledby="install-title">
+-        <div className="shell">
+-          <div className="install-heading">
+-            <div>
+-              <p className="kicker">Install Oldhand</p>
+-              <h2 id="install-title">Two commands. That’s it.</h2>
+-            </div>
+-            <p>
+-              The skill, manifests, model routing, research gates, and browser
+-              definition of done arrive together.
+-            </p>
+-          </div>
+-          <InstallPanel />
+-          <div className="install-footer">
+-            <strong>Give it the work. Get back proof.</strong>
+-            <a
+-              href="https://github.com/berwinsingh/oldhand#integrations"
+-              target="_blank"
+-              rel="noreferrer"
+-            >
+-              Optional integrations and MCPs
+-              <ArrowRight size={18} />
+-            </a>
++        <section id="example">
++          <h2>Example run</h2>
++          <p>
++            A seeded bug in a small Python importer: a transient write failure plus a retry stored a
++            CSV batch twice. The prompt, the project and every file the pack wrote are in{" "}
++            <a href={`${REPO}/tree/main/examples/csv-import-dupes`}>examples/csv-import-dupes</a>.
++            The blocks below are read from its <code>report.md</code> at build time.
++          </p>
++          {verdict && <p className="verdict">{verdict}</p>}
++          <Table text={criteriaTable} columns={["criterion", "outcome", "proof", "status", "by"]} />
++          <h3>Root cause</h3>
++          <p>{inline(rootCause)}</p>
++          <h3>Not verified</h3>
++          <List text={notVerified} />
++          {computed && <p className="computed">{computed}</p>}
++        </section>
++
++        <section id="skill">
++          <h2>The skill</h2>
++          <p>
++            The conductor, <code>skills/oldhand/SKILL.md</code>, imported from the repository when
++            this page was built. The ten stage skills are linked above.
++          </p>
++          <div className="skill-actions">
++            <CopyButton value={skillText} label="Copy the whole SKILL.md" />
++            <a href={`${BLOB}skills/oldhand/SKILL.md`}>View on GitHub</a>
+           </div>
+-        </div>
+-      </section>
++          <pre className="skill">{skillText}</pre>
++        </section>
+ 
+-      <footer className="site-footer">
+-        <div>
+-          <strong>OLDHAND</strong>
+-          <span>Development discipline for Claude Code and ChatGPT Codex.</span>
+-        </div>
+-        <div>
+-          <a href="https://github.com/berwinsingh/oldhand" target="_blank" rel="noreferrer">
+-            GitHub
+-          </a>
+-          <a href="https://github.com/berwinsingh/oldhand/blob/main/LICENSE" target="_blank" rel="noreferrer">
+-            MIT License
+-          </a>
+-          <button type="button" className="analytics-preferences" onClick={() => setAnalyticsChoice(null)}>
+-            Analytics preferences
++        <section id="models">
++          <h2>Models</h2>
++          <p>
++            The skills name roles, not models: the lead owns the contract, the review chair, the
++            final check and the release decision; workers implement, investigate, review and drive
++            QA; scouts sweep files, read logs and run read-only checks. One dated file,{" "}
++            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a>,
++            maps the roles to current models (as of October 2026):
++          </p>
++          <table>
++            <thead>
++              <tr><th>host</th><th>lead</th><th>worker</th><th>scout</th></tr>
++            </thead>
++            <tbody>
++              {models.map((row) => (
++                <tr key={row[0]}>{row.map((cell, i) => <td key={i}>{cell}</td>)}</tr>
++              ))}
++            </tbody>
++          </table>
++          <p>
++            If a named model is missing, the agent uses the newest one the host offers in the same
++            role, never puts the lead below worker tier, and records the model that actually ran.
++          </p>
++        </section>
++
++        <section id="limits">
++          <h2>Honest scope</h2>
++          <ul>
++            <li>
++              It is instructions plus three small scripts, not a runtime. An agent can still ignore
++              it; the ledger only refuses to print VERIFIED without evidence on the current tree.
++            </li>
++            <li>
++              It costs turns and tokens. Review lenses and QA scenarios are sub-agents; the
++              conductor tells you the count before spawning more than ten.
++            </li>
++            <li>
++              Browser and desktop QA need a browser or computer-use tool on your host. Without one,
++              UI scenarios are reported as blocked, never as passed.
++            </li>
++            <li>Skip it for typos, lookups and one-line edits. The skill says so itself.</li>
++            <li>
++              The example above ran in a host with no sub-agent tool, so its reviews and QA were run
++              by one agent in turn. Its report says so.
++            </li>
++          </ul>
++        </section>
++      </main>
++
++      <footer>
++        <span>oldhand v{plugin.version} · MIT · Berwin Singh</span>
++        <nav aria-label="Project links">
++          <a href={REPO}>GitHub</a>
++          <a href={`${REPO}/issues`}>Issues</a>
++          <a href={`${REPO}/discussions`}>Discussions</a>
++          <a href={`${BLOB}SECURITY.md`}>Security</a>
++        </nav>
++        <p className="analytics">
++          {analytics === "granted" ? "Anonymous Google Analytics is on." : "Analytics are off."}{" "}
++          <button type="button" className="link" onClick={toggleAnalytics}>
++            {analytics === "granted" ? "Turn it off" : "Turn on anonymous Google Analytics"}
+           </button>
+-        </div>
++        </p>
+       </footer>
+-
+-      <AnalyticsConsent choice={analyticsChoice} onChoose={chooseAnalytics} />
+-    </main>
++    </>
+   );
+ }
+diff --git a/site/src/styles.css b/site/src/styles.css
+index 21082eb..8efd094 100644
+--- a/site/src/styles.css
++++ b/site/src/styles.css
+@@ -1,1259 +1,456 @@
+-@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Space+Mono:wght@400;700&display=swap");
+-
+ :root {
+-  color: #10110f;
+-  background: #f3eedf;
+-  font-family: "Archivo Narrow", "Arial Narrow", sans-serif;
+-  font-synthesis: none;
+-  --paper: #f3eedf;
+-  --paper-deep: #e9e1cd;
+-  --ink: #10110f;
+-  --orange: #ef5a20;
+-  --green: #365e3b;
+-  --blue: #4c78a8;
+-  --rule: rgba(16, 17, 15, 0.68);
+-  --muted: #5e5a51;
++  --bg: #fbfaf7;
++  --surface: #f2f0ea;
++  --text: #1b1b18;
++  --muted: #5c5a53;
++  --border: #dedad0;
++  --accent: #b4441c;
++  --ok: #2f6b3a;
++  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
++  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
++  color-scheme: light dark;
++}
++
++@media (prefers-color-scheme: dark) {
++  :root:not([data-theme="light"]) {
++    --bg: #141413;
++    --surface: #1d1d1b;
++    --text: #ecebe6;
++    --muted: #a3a097;
++    --border: #2e2d2a;
++    --accent: #f08a5d;
++    --ok: #7fbf8a;
++  }
++}
++
++:root[data-theme="dark"] {
++  --bg: #141413;
++  --surface: #1d1d1b;
++  --text: #ecebe6;
++  --muted: #a3a097;
++  --border: #2e2d2a;
++  --accent: #f08a5d;
++  --ok: #7fbf8a;
+ }
+ 
+ * {
+   box-sizing: border-box;
+ }
+ 
++html {
++  -webkit-text-size-adjust: 100%;
++}
++
+ body {
+   margin: 0;
+-  min-width: 320px;
+-  min-height: 100vh;
+-  color: var(--ink);
+-  background: var(--paper);
++  background: var(--bg);
++  color: var(--text);
++  font-family: var(--sans);
++  font-size: 17px;
++  line-height: 1.6;
+   -webkit-font-smoothing: antialiased;
+ }
+ 
+-button,
+ a {
+-  font: inherit;
+-}
+-
+-button {
+-  color: inherit;
++  color: var(--accent);
++  text-decoration-thickness: 1px;
++  text-underline-offset: 3px;
+ }
+ 
+-a {
+-  color: inherit;
++a:hover {
++  text-decoration-thickness: 2px;
+ }
+ 
+-button:focus-visible,
+-a:focus-visible {
+-  outline: 3px solid var(--blue);
++:focus-visible {
++  outline: 2px solid var(--accent);
+   outline-offset: 3px;
+ }
+ 
+-.shell,
+-.sheet,
+-.site-header,
+-.site-footer {
+-  width: min(1220px, calc(100% - 64px));
+-  margin-inline: auto;
+-}
+-
+-.site-header {
+-  min-height: 88px;
+-  display: grid;
+-  grid-template-columns: auto 1fr auto;
+-  align-items: center;
+-  gap: 44px;
+-  border-bottom: 1.5px solid var(--ink);
+-}
+-
+-.brand {
+-  display: inline-flex;
+-  align-items: baseline;
+-  gap: 12px;
+-  text-decoration: none;
+-}
+-
+-.brand span {
+-  padding: 9px 12px 8px;
+-  color: var(--paper);
+-  background: var(--ink);
+-  font-family: "Archivo Black", sans-serif;
+-  font-size: 22px;
+-  letter-spacing: 0.02em;
+-}
+-
+-.brand small {
+-  font-family: "Space Mono", monospace;
+-  font-size: 11px;
+-}
+-
+-.site-header nav {
+-  display: flex;
+-  justify-content: flex-end;
+-  gap: 30px;
+-}
+-
+-.site-header nav a,
+-.header-github {
+-  font-family: "Space Mono", monospace;
+-  font-size: 11px;
+-  font-weight: 700;
+-  text-decoration: none;
+-  text-transform: uppercase;
+-  letter-spacing: 0.04em;
+-}
+-
+-.site-header nav a:hover {
+-  color: var(--orange);
+-}
+-
+-.header-github {
+-  display: inline-flex;
+-  align-items: center;
+-  gap: 7px;
+-  padding: 10px 12px;
+-  border: 1.5px solid var(--ink);
+-}
+-
+-.header-github:hover {
+-  color: var(--paper);
+-  background: var(--ink);
+-}
+-
+-.hero {
+-  padding-block: 26px 64px;
+-}
+-
+-.work-order {
+-  width: min(440px, 100%);
+-  margin-left: auto;
+-  display: grid;
+-  grid-template-columns: 1fr 1fr;
+-  border: 1.5px solid var(--ink);
+-  font-family: "Space Mono", monospace;
+-}
+-
+-.work-order > div {
+-  display: grid;
+-  gap: 3px;
+-  padding: 7px 10px;
+-}
+-
+-.work-order > div:first-child {
+-  border-right: 1px solid var(--ink);
+-}
+-
+-.work-order span {
+-  font-size: 8px;
+-}
+-
+-.work-order strong {
+-  font-size: 11px;
+-}
+-
+-.work-order .work-order-accent {
+-  grid-column: 1 / -1;
+-  padding: 5px 10px;
+-  color: var(--orange);
+-  border-top: 1px solid var(--ink);
+-  font-size: 9px;
+-  font-weight: 700;
+-  letter-spacing: 0.08em;
+-}
+-
+-.hero-grid {
+-  display: grid;
+-  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.7fr);
+-  align-items: center;
+-  gap: 60px;
+-  padding-block: 28px 42px;
++code,
++pre {
++  font-family: var(--mono);
++  font-size: 14px;
+ }
+ 
+-.kicker {
+-  margin: 0 0 12px;
+-  color: var(--blue);
+-  font-family: "Space Mono", monospace;
+-  font-size: 11px;
+-  font-weight: 700;
+-  text-transform: uppercase;
+-  letter-spacing: 0.08em;
++p code,
++li code,
++dd code,
++td code {
++  background: var(--surface);
++  border: 1px solid var(--border);
++  border-radius: 4px;
++  padding: 1px 5px;
++  font-size: 0.9em;
++  overflow-wrap: anywhere;
+ }
+ 
+ h1,
+ h2,
+-h3,
+-p {
+-  margin-top: 0;
+-}
+-
+-h1,
+-h2 {
+-  font-family: "Archivo Black", sans-serif;
+-  letter-spacing: -0.04em;
++h3 {
++  font-weight: 600;
++  line-height: 1.15;
++  letter-spacing: -0.01em;
++  margin: 0 0 16px;
+ }
+ 
+ h1 {
+-  max-width: 830px;
+-  margin-bottom: 24px;
+-  font-size: clamp(62px, 7.7vw, 116px);
+-  line-height: 0.91;
++  font-size: clamp(2rem, 1.2rem + 3vw, 3rem);
+ }
+ 
+ h2 {
+-  margin-bottom: 18px;
+-  font-size: clamp(42px, 5vw, 70px);
+-  line-height: 0.96;
++  font-size: 28px;
++  margin-top: 0;
+ }
+ 
+ h3 {
+-  font-family: "Archivo Narrow", sans-serif;
+-  font-size: 23px;
+-  line-height: 1;
+-}
+-
+-.lede {
+-  max-width: 650px;
+-  margin-bottom: 30px;
+-  font-size: 23px;
+-  line-height: 1.34;
+-}
+-
+-.hero-actions {
+-  display: flex;
+-  flex-wrap: wrap;
+-  gap: 12px;
+-}
+-
+-.button {
+-  min-height: 52px;
+-  display: inline-flex;
+-  align-items: center;
+-  justify-content: center;
+-  gap: 12px;
+-  padding: 0 20px;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 0;
+-  font-family: "Space Mono", monospace;
+-  font-size: 12px;
+-  font-weight: 700;
+-  text-decoration: none;
+-  text-transform: uppercase;
+-  cursor: pointer;
+-}
+-
+-.button--primary {
+-  color: var(--paper);
+-  background: var(--orange);
+-}
+-
+-.button--primary:hover {
+-  background: var(--ink);
+-}
+-
+-.button--secondary {
+-  background: transparent;
+-}
+-
+-.button--secondary:hover {
+-  color: var(--paper);
+-  background: var(--green);
++  font-size: 20px;
++  margin-top: 32px;
+ }
+ 
+-.stamp-wrap {
+-  display: flex;
+-  justify-content: center;
+-  transform: rotate(-4deg);
++p,
++ul,
++ol,
++dl {
++  margin: 0 0 16px;
++  max-width: 72ch;
+ }
+ 
+-.stamp-wrap img {
+-  width: min(390px, 100%);
+-  height: auto;
+-  mix-blend-mode: multiply;
++li {
++  margin-bottom: 6px;
+ }
+ 
+-.hero-install {
+-  border: 1.5px solid var(--ink);
+-  box-shadow: 8px 8px 0 var(--ink);
++.top,
++main,
++footer {
++  width: min(960px, 100% - 32px);
++  margin-inline: auto;
+ }
+ 
+-.section-bar {
+-  min-height: 44px;
++.top {
++  position: sticky;
++  top: 0;
++  z-index: 2;
+   display: flex;
+   align-items: center;
+-  justify-content: space-between;
+-  gap: 20px;
+-  padding: 8px 15px;
+-  color: var(--ink);
+-  background: var(--orange);
+-  border-bottom: 1.5px solid var(--ink);
+-  font-family: "Space Mono", monospace;
+-  font-size: 11px;
+-  font-weight: 700;
+-  text-transform: uppercase;
+-}
+-
+-.section-bar span:last-child {
+-  font-size: 9px;
+-}
+-
+-.install-panel {
+-  border: 1.5px solid var(--ink);
+-  background: rgba(243, 238, 223, 0.74);
++  gap: 16px;
++  min-height: 56px;
++  background: var(--bg);
++  border-bottom: 1px solid var(--border);
+ }
+ 
+-.hero-install .install-panel {
+-  border: 0;
++.wordmark {
++  color: var(--text);
++  font-weight: 600;
++  text-decoration: none;
++  font-size: 18px;
+ }
+ 
+-.install-tabs {
+-  display: grid;
+-  grid-template-columns: 1fr 1fr;
+-  border-bottom: 1.5px solid var(--ink);
++.meta {
++  color: var(--muted);
++  font-size: 14px;
+ }
+ 
+-.install-tabs button {
+-  min-height: 48px;
+-  padding: 9px 15px;
+-  border: 0;
+-  background: transparent;
+-  font-family: "Space Mono", monospace;
+-  font-size: 11px;
+-  font-weight: 700;
+-  text-align: left;
+-  text-transform: uppercase;
+-  cursor: pointer;
++.top nav {
++  margin-left: auto;
++  display: flex;
++  gap: 18px;
++  overflow-x: auto;
++  white-space: nowrap;
++  font-size: 15px;
+ }
+ 
+-.install-tabs button + button {
+-  border-left: 1px solid var(--ink);
++.top nav a {
++  color: var(--text);
++  text-decoration: none;
+ }
+ 
+-.install-tabs button.is-active {
+-  color: var(--paper);
+-  background: var(--ink);
++.top nav a:hover {
++  text-decoration: underline;
+ }
+ 
+-.command-list {
+-  padding: 18px;
++main {
++  padding-bottom: 48px;
+ }
+ 
+-.command-row {
+-  min-height: 62px;
+-  display: grid;
+-  grid-template-columns: minmax(0, 1fr) auto;
+-  align-items: center;
+-  gap: 14px;
+-  padding: 11px 13px;
+-  color: var(--paper);
+-  background: var(--ink);
+-  border-bottom: 1px solid rgba(243, 238, 223, 0.24);
++section {
++  padding: 56px 0 24px;
++  border-bottom: 1px solid var(--border);
+ }
+ 
+-.command-row:last-child {
++section:last-child {
+   border-bottom: 0;
+ }
+ 
+-.command-row code {
+-  overflow-wrap: anywhere;
+-  color: #d5ee92;
+-  font-family: "Space Mono", monospace;
+-  font-size: 12px;
+-  line-height: 1.45;
++.hero {
++  padding-top: 48px;
+ }
+ 
+-.copy-button {
+-  min-width: 78px;
+-  display: inline-flex;
+-  align-items: center;
+-  justify-content: center;
+-  gap: 6px;
+-  padding: 8px;
+-  color: var(--paper);
+-  background: transparent;
+-  border: 1px solid rgba(243, 238, 223, 0.35);
+-  font-family: "Space Mono", monospace;
+-  font-size: 9px;
+-  text-transform: uppercase;
+-  cursor: pointer;
++.lede {
++  font-size: 19px;
++  max-width: 68ch;
++  margin-bottom: 28px;
+ }
+ 
+-.copy-button:hover {
+-  color: var(--ink);
+-  background: var(--paper);
++.install {
++  border: 1px solid var(--border);
++  border-radius: 8px;
++  background: var(--surface);
++  max-width: 960px;
+ }
+ 
+-.install-note {
++.tabs {
+   display: flex;
+-  align-items: center;
+-  gap: 8px;
+-  padding: 9px 18px 13px;
+-  color: var(--green);
+-  font-family: "Space Mono", monospace;
+-  font-size: 10px;
+-  font-weight: 700;
+-}
+-
+-.usage-example {
+-  display: grid;
+-  grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
+-  gap: 18px;
+-  padding: 18px;
+-  border-top: 1.5px solid var(--ink);
++  gap: 4px;
++  padding: 8px 8px 0;
++  border-bottom: 1px solid var(--border);
++  overflow-x: auto;
+ }
+ 
+-.usage-example > div {
+-  display: flex;
+-  flex-direction: column;
+-  gap: 6px;
++.tabs button {
++  font: inherit;
++  font-size: 15px;
++  color: var(--muted);
++  background: none;
++  border: 0;
++  border-bottom: 2px solid transparent;
++  padding: 8px 12px;
++  cursor: pointer;
++  white-space: nowrap;
+ }
+ 
+-.usage-example strong,
+-.usage-example span {
+-  font-family: "Space Mono", monospace;
+-  text-transform: uppercase;
++.tabs button.is-active {
++  color: var(--text);
++  border-bottom-color: var(--accent);
+ }
+ 
+-.usage-example strong {
+-  font-size: 11px;
++.panel {
++  padding: 16px;
+ }
+ 
+-.usage-example span {
+-  color: var(--muted);
+-  font-size: 9px;
+-  line-height: 1.5;
++.command {
++  display: flex;
++  align-items: flex-start;
++  gap: 12px;
++  margin-bottom: 12px;
++  border: 1px solid var(--border);
++  border-radius: 6px;
++  background: var(--bg);
+ }
+ 
+-.usage-example pre {
+-  min-width: 0;
++.command pre {
+   margin: 0;
+-  padding: 15px;
++  padding: 12px 14px;
+   overflow-x: auto;
+-  color: var(--paper);
+-  background: var(--ink);
+-  white-space: pre-wrap;
+-}
+-
+-.usage-example code {
+-  color: #d5ee92;
+-  font-family: "Space Mono", monospace;
+-  font-size: 11px;
++  flex: 1;
+   line-height: 1.55;
+ }
+ 
+-.section {
+-  padding-block: 92px;
+-  border-top: 1.5px solid var(--ink);
++.copy {
++  font: inherit;
++  font-size: 14px;
++  color: var(--text);
++  background: var(--surface);
++  border: 1px solid var(--border);
++  border-radius: 6px;
++  padding: 6px 12px;
++  margin: 8px 8px 0 0;
++  cursor: pointer;
++  flex-shrink: 0;
+ }
+ 
+-.section-heading {
+-  max-width: 740px;
+-  margin-bottom: 42px;
++.copy:hover {
++  border-color: var(--accent);
+ }
+ 
+-.section-heading > p:last-child {
+-  margin-bottom: 0;
++.note,
++.tested {
+   color: var(--muted);
+-  font-size: 20px;
+-  line-height: 1.4;
+-}
+-
+-.section-heading--row {
++  font-size: 15px;
+   max-width: none;
+-  display: grid;
+-  grid-template-columns: 1.25fr 0.75fr;
+-  align-items: end;
+-  gap: 60px;
+-}
+-
+-.failure-grid {
+-  display: grid;
+-  grid-template-columns: repeat(4, 1fr);
+-  border: 1.5px solid var(--ink);
+-}
+-
+-.failure-card {
+-  min-height: 300px;
+-  position: relative;
+-  padding: 28px 23px;
+-}
+-
+-.failure-card + .failure-card {
+-  border-left: 1px solid var(--blue);
+-}
+-
+-.failure-index {
+-  margin-bottom: 34px;
+-  color: var(--orange);
+-  font-family: "Space Mono", monospace;
+-  font-size: 12px;
+-  font-weight: 700;
+-}
+-
+-.failure-card svg {
+-  color: var(--blue);
+-}
+-
+-.failure-card h3 {
+-  max-width: 180px;
+-  margin: 16px 0 13px;
+-  text-transform: uppercase;
+-}
+-
+-.failure-card p {
+-  color: var(--muted);
+-  font-size: 17px;
+-  line-height: 1.35;
+ }
+ 
+-.failure-card .failure-x {
+-  position: absolute;
+-  right: 20px;
+-  bottom: 20px;
+-  color: var(--orange);
++.then {
++  margin: 16px 0;
+ }
+ 
+-.process-grid {
++.then div {
+   display: grid;
+-  grid-template-columns: repeat(5, 1fr);
+-  border: 1.5px solid var(--ink);
++  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
++  gap: 8px 16px;
++  margin-bottom: 8px;
+ }
+ 
+-.process-step {
+-  min-height: 330px;
+-  padding: 26px 20px;
+-  text-align: center;
+-}
+-
+-.process-step + .process-step {
+-  border-left: 1px solid rgba(76, 120, 168, 0.46);
+-}
+-
+-.process-icon {
+-  width: 78px;
+-  height: 78px;
+-  margin: 0 auto 24px;
+-  display: grid;
+-  place-items: center;
+-  border: 1.5px solid var(--ink);
+-  border-radius: 50%;
+-  background: var(--paper);
+-}
+-
+-.process-step > span {
+-  color: var(--blue);
+-  font-family: "Space Mono", monospace;
+-  font-size: 9px;
+-  font-weight: 700;
+-}
+-
+-.process-step h3 {
+-  margin: 10px 0 12px;
+-  text-transform: uppercase;
+-}
+-
+-.process-step p {
+-  color: var(--muted);
+-  font-size: 16px;
+-  line-height: 1.38;
+-}
+-
+-.split-section {
+-  display: grid;
+-  grid-template-columns: 0.95fr 1.35fr;
+-  gap: 28px;
+-}
+-
+-.intake-card,
+-.orchestration-card,
+-.proof-card,
+-.principle-grid {
+-  border: 1.5px solid var(--ink);
+-}
+-
+-.card-title {
+-  min-height: 46px;
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 20px;
+-  padding: 10px 14px;
+-  color: var(--blue);
+-  border-bottom: 1.5px solid var(--ink);
+-  font-family: "Space Mono", monospace;
+-  font-size: 10px;
+-  font-weight: 700;
+-}
+-
+-.card-title small {
+-  color: var(--muted);
+-  font-size: 8px;
+-}
+-
+-.source-table {
+-  display: grid;
+-}
+-
+-.source-row {
+-  min-height: 49px;
+-  display: grid;
+-  grid-template-columns: 28px 0.8fr 1.2fr;
+-  align-items: center;
+-  gap: 9px;
+-  padding: 7px 12px;
+-  background: transparent;
+-  border: 0;
+-  border-bottom: 1px solid rgba(76, 120, 168, 0.42);
+-  text-align: left;
+-  cursor: pointer;
+-}
+-
+-.source-row:hover,
+-.source-row.is-selected {
+-  background: rgba(76, 120, 168, 0.09);
+-}
+-
+-.source-check {
+-  width: 19px;
+-  height: 19px;
+-  display: grid;
+-  place-items: center;
+-  border: 1px solid var(--ink);
+-}
+-
+-.source-row.is-selected .source-check {
+-  color: var(--paper);
+-  background: var(--green);
+-}
+-
+-.source-row strong {
+-  font-family: "Space Mono", monospace;
+-  font-size: 9px;
+-  text-transform: uppercase;
+-}
+-
+-.source-row > span:last-child {
++.then dt {
+   color: var(--muted);
+   font-size: 15px;
+ }
+ 
+-.intake-note {
++.then dd {
+   margin: 0;
+-  padding: 18px;
+-  color: var(--blue);
+-  font-family: "Space Mono", monospace;
+-  font-size: 10px;
+-  line-height: 1.5;
+-}
+-
+-.orchestration-card {
+-  padding-bottom: 18px;
+-}
+-
+-.orchestration-card .card-title {
+-  margin-bottom: 18px;
+-}
+-
+-.model-card {
+-  margin: 0 18px 16px;
+-  border: 1.5px solid var(--ink);
+-}
+-
+-.model-card > div:first-child {
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 18px;
+-  padding: 10px 13px;
+-  color: var(--paper);
+-  font-family: "Space Mono", monospace;
+-  font-size: 9px;
+-}
+-
+-.model-card--orange > div:first-child {
+-  background: var(--orange);
+-}
+-
+-.model-card--green > div:first-child {
+-  background: var(--green);
+-}
+-
+-.model-card > div:first-child strong {
+-  font-size: 13px;
+-  text-transform: uppercase;
+-}
+-
+-.model-card p {
+-  min-height: 72px;
+-  margin: 0;
+-  padding: 14px;
+-  font-size: 16px;
+-  line-height: 1.4;
+-}
+-
+-.model-status {
+-  display: grid;
+-  grid-template-columns: repeat(3, 1fr);
+-  border-top: 1px solid var(--ink);
+-}
+-
+-.model-status span {
+-  min-height: 44px;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  gap: 5px;
+-  color: var(--green);
+-  font-family: "Space Mono", monospace;
+-  font-size: 8px;
+-  font-weight: 700;
+-  text-transform: uppercase;
+-}
+-
+-.model-status span + span {
+-  border-left: 1px solid var(--ink);
+-}
+-
+-.status-badge {
+-  width: fit-content;
+-  display: inline-flex;
+-  align-items: center;
+-  gap: 8px;
+-  padding: 10px 13px;
+-  color: var(--paper);
+-  background: var(--green);
+-  font-family: "Space Mono", monospace;
+-  font-size: 10px;
+-  font-weight: 700;
+-  text-transform: uppercase;
+-}
+-
+-.proof-card {
+-  display: grid;
+-  grid-template-columns: 0.8fr 1.4fr;
+-}
+-
+-.proof-metadata {
+-  padding: 24px;
+-  border-right: 1.5px solid var(--ink);
+-}
+-
+-.proof-metadata dl {
+-  margin: 0 0 26px;
++  min-width: 0;
+ }
+ 
+-.proof-metadata dl div {
+-  display: grid;
+-  grid-template-columns: 100px 1fr;
+-  gap: 8px;
+-  padding-block: 6px;
++.then dd code {
++  display: block;
++  padding: 6px 10px;
++  white-space: pre-wrap;
++  overflow-wrap: anywhere;
+ }
+ 
+-.proof-metadata dt,
+-.proof-metadata dd {
+-  margin: 0;
+-  font-family: "Space Mono", monospace;
+-  font-size: 10px;
++.tested {
++  margin-bottom: 0;
+ }
+ 
+-.proof-metadata dt {
+-  color: var(--blue);
+-  font-weight: 700;
++.stages {
++  list-style: decimal;
++  padding-left: 24px;
++  max-width: none;
+ }
+ 
+-.proof-metadata ol {
+-  margin: 0;
+-  padding-left: 21px;
+-  font-size: 17px;
+-  line-height: 1.55;
++.stages li {
++  margin-bottom: 10px;
+ }
+ 
+-.proof-result {
+-  margin-top: 26px;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  gap: 9px;
+-  padding: 13px;
+-  color: var(--green);
+-  border: 2px solid var(--green);
+-  font-family: "Space Mono", monospace;
++.stages a {
++  font-family: var(--mono);
+   font-size: 15px;
+-  font-weight: 700;
+-}
+-
+-.browser-evidence {
+-  margin: 0;
+-  padding: 24px;
+-}
+-
+-.browser-bar {
+-  min-height: 36px;
+-  display: flex;
+-  align-items: center;
+-  gap: 7px;
+-  padding: 7px 10px;
+-  color: var(--paper);
+-  background: var(--ink);
+-}
+-
+-.browser-bar > span {
+-  width: 8px;
+-  height: 8px;
+-  border-radius: 50%;
+-  background: var(--paper);
+-  opacity: 0.65;
+-}
+-
+-.browser-bar code {
+-  margin-left: 8px;
+-  color: var(--paper);
+-  font-family: "Space Mono", monospace;
+-  font-size: 8px;
++  margin-right: 8px;
+ }
+ 
+-.browser-evidence img {
++table {
++  border-collapse: collapse;
+   width: 100%;
+-  height: auto;
++  margin: 0 0 16px;
++  font-size: 15px;
+   display: block;
+-  border: 1.5px solid var(--ink);
+-  border-top: 0;
+-}
+-
+-.browser-evidence figcaption {
+-  padding-top: 9px;
+-  color: var(--muted);
+-  font-family: "Space Mono", monospace;
+-  font-size: 9px;
+-}
+-
+-.evidence-strip {
+-  display: grid;
+-  grid-template-columns: repeat(5, 1fr);
+-  border: 1.5px solid var(--ink);
+-  border-top: 0;
+-}
+-
+-.evidence-strip span {
+-  min-height: 62px;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  gap: 8px;
+-  font-family: "Space Mono", monospace;
+-  font-size: 9px;
+-}
+-
+-.evidence-strip span + span {
+-  border-left: 1px solid var(--ink);
+-}
+-
+-.principles .section-heading {
+-  margin-bottom: 32px;
+-}
+-
+-.principle-grid {
+-  display: grid;
+-  grid-template-columns: repeat(3, 1fr);
+-}
+-
+-.principle-grid article {
+-  min-height: 270px;
+-  position: relative;
+-  padding: 28px;
+-}
+-
+-.principle-grid article + article {
+-  border-left: 1px solid var(--ink);
+-}
+-
+-.principle-grid article > svg {
+-  color: var(--orange);
+-}
+-
+-.principle-grid article > span {
+-  position: absolute;
+-  top: 24px;
+-  right: 24px;
+-  color: var(--blue);
+-  font-family: "Space Mono", monospace;
+-  font-size: 11px;
+-}
+-
+-.principle-grid h3 {
+-  margin: 44px 0 13px;
+-  font-size: 28px;
+-}
+-
+-.principle-grid p {
+-  color: var(--muted);
+-  font-size: 18px;
+-  line-height: 1.4;
+-}
+-
+-.install-section {
+-  color: var(--paper);
+-  background: var(--ink);
+-  border-top: 0;
+-}
+-
+-.install-heading {
+-  display: grid;
+-  grid-template-columns: 1.2fr 0.8fr;
+-  align-items: end;
+-  gap: 60px;
+-  margin-bottom: 34px;
++  overflow-x: auto;
+ }
+ 
+-.install-heading .kicker {
+-  color: #88b6e6;
++th,
++td {
++  text-align: left;
++  vertical-align: top;
++  padding: 8px 10px;
++  border-bottom: 1px solid var(--border);
+ }
+ 
+-.install-heading h2 {
+-  margin-bottom: 0;
++th {
++  font-weight: 600;
++  white-space: nowrap;
+ }
+ 
+-.install-heading > p {
+-  color: #c8c1b1;
++.verdict {
++  font-weight: 600;
++  color: var(--ok);
+   font-size: 19px;
+-  line-height: 1.45;
+ }
+ 
+-.install-section .install-panel {
+-  color: var(--ink);
+-  background: var(--paper);
++.computed {
++  color: var(--muted);
++  font-size: 14px;
+ }
+ 
+-.install-footer {
+-  min-height: 90px;
++.skill-actions {
+   display: flex;
+   align-items: center;
+-  justify-content: space-between;
+-  gap: 30px;
+-  padding-top: 26px;
++  gap: 16px;
++  margin-bottom: 12px;
+ }
+ 
+-.install-footer strong {
+-  color: var(--orange);
+-  font-family: "Archivo Black", sans-serif;
+-  font-size: clamp(28px, 4vw, 48px);
++.skill-actions .copy {
++  margin: 0;
+ }
+ 
+-.install-footer a {
+-  display: inline-flex;
+-  align-items: center;
+-  gap: 9px;
+-  color: var(--paper);
+-  font-family: "Space Mono", monospace;
+-  font-size: 10px;
+-  text-transform: uppercase;
++.skill {
++  margin: 0 0 16px;
++  padding: 16px;
++  max-height: 70vh;
++  overflow: auto;
++  white-space: pre-wrap;
++  overflow-wrap: anywhere;
++  background: var(--surface);
++  border: 1px solid var(--border);
++  border-radius: 8px;
++  line-height: 1.55;
+ }
+ 
+-.site-footer {
+-  min-height: 120px;
++footer {
++  padding: 24px 0 40px;
++  color: var(--muted);
++  font-size: 15px;
+   display: flex;
++  flex-wrap: wrap;
++  gap: 8px 24px;
+   align-items: center;
+-  justify-content: space-between;
+-  gap: 30px;
+ }
+ 
+-.site-footer > div {
++footer nav {
+   display: flex;
+-  align-items: center;
+-  gap: 20px;
++  gap: 16px;
+ }
+ 
+-.site-footer strong {
+-  font-family: "Archivo Black", sans-serif;
+-  letter-spacing: 0.08em;
+-}
+-
+-.site-footer span,
+-.site-footer a {
+-  font-family: "Space Mono", monospace;
+-  font-size: 9px;
+-}
+-
+-.site-footer a + a {
+-  margin-left: 16px;
++footer .analytics {
++  width: 100%;
++  margin: 0;
++  max-width: none;
+ }
+ 
+-.analytics-preferences {
+-  padding: 0;
++button.link {
++  font: inherit;
++  color: var(--accent);
++  background: none;
+   border: 0;
+-  border-bottom: 1px solid currentColor;
+-  background: transparent;
+-  font-family: "Space Mono", monospace;
+-  font-size: 9px;
++  padding: 0;
+   cursor: pointer;
+-}
+-
+-.analytics-consent {
+-  position: fixed;
+-  right: 24px;
+-  bottom: 24px;
+-  z-index: 100;
+-  width: min(420px, calc(100% - 32px));
+-  padding: 22px;
+-  color: var(--paper);
+-  background: var(--ink);
+-  border: 2px solid var(--orange);
+-  box-shadow: 8px 8px 0 var(--green);
+-}
+-
+-.analytics-consent strong {
+-  display: block;
+-  font-family: "Archivo Black", sans-serif;
+-  font-size: 19px;
+-}
+-
+-.analytics-consent p {
+-  margin: 10px 0 18px;
+-  font-family: "Space Mono", monospace;
+-  font-size: 10px;
+-  line-height: 1.6;
+-}
+-
+-.analytics-consent a {
+   text-decoration: underline;
++  text-underline-offset: 3px;
+ }
+ 
+-.analytics-actions {
+-  display: flex;
+-  gap: 10px;
+-}
+-
+-.analytics-choice {
+-  padding: 9px 12px;
+-  color: var(--paper);
+-  background: transparent;
+-  border: 1px solid var(--paper);
+-  font-family: "Space Mono", monospace;
+-  font-size: 10px;
+-  font-weight: 700;
+-  text-transform: uppercase;
+-  cursor: pointer;
+-}
+-
+-.analytics-choice--allow {
+-  color: var(--ink);
+-  background: var(--paper);
+-}
+-
+-@media (max-width: 980px) {
+-  .site-header {
+-    grid-template-columns: 1fr auto;
+-  }
+-
+-  .site-header nav {
+-    display: none;
+-  }
+-
+-  .hero-grid,
+-  .section-heading--row,
+-  .split-section,
+-  .proof-card,
+-  .install-heading {
+-    grid-template-columns: 1fr;
+-  }
+-
+-  .stamp-wrap {
+-    justify-content: flex-start;
+-  }
+-
+-  .stamp-wrap img {
+-    width: 280px;
+-  }
+-
+-  .failure-grid,
+-  .process-grid {
+-    grid-template-columns: repeat(2, 1fr);
+-    background: none;
+-  }
+-
+-  .failure-card + .failure-card,
+-  .process-step + .process-step {
+-    border-left: 0;
+-  }
+-
+-  .failure-card:nth-child(even),
+-  .process-step:nth-child(even) {
+-    border-left: 1px solid var(--blue);
+-  }
+-
+-  .failure-card:nth-child(n + 3),
+-  .process-step:nth-child(n + 3) {
+-    border-top: 1px solid var(--blue);
+-  }
+-
+-  .proof-metadata {
+-    border-right: 0;
+-    border-bottom: 1.5px solid var(--ink);
+-  }
+-
+-  .evidence-strip {
+-    grid-template-columns: repeat(3, 1fr);
+-  }
+-
+-  .evidence-strip span:nth-child(4) {
+-    border-left: 0;
+-  }
+-
+-  .evidence-strip span:nth-child(n + 4) {
+-    border-top: 1px solid var(--ink);
+-  }
+-}
+-
+-@media (max-width: 680px) {
+-  .shell,
+-  .sheet,
+-  .site-header,
+-  .site-footer {
+-    width: min(100% - 32px, 1220px);
++@media (max-width: 720px) {
++  body {
++    font-size: 16px;
+   }
+ 
+-  .site-header {
+-    min-height: 72px;
+-  }
+-
+-  .brand small,
+-  .header-github span {
+-    display: none;
+-  }
+-
+-  .brand span {
+-    font-size: 17px;
+-  }
+-
+-  .header-github {
+-    padding: 9px;
+-  }
+-
+-  .hero {
+-    padding-top: 18px;
+-  }
+-
+-  .work-order {
+-    display: none;
+-  }
+-
+-  .hero-grid {
+-    gap: 20px;
+-    padding-block: 34px;
+-  }
+-
+-  h1 {
+-    font-size: clamp(52px, 16vw, 74px);
++  h2 {
++    font-size: 22px;
+   }
+ 
+   .lede {
+-    font-size: 19px;
+-  }
+-
+-  .stamp-wrap img {
+-    width: 210px;
+-  }
+-
+-  .section-bar {
+-    align-items: flex-start;
+-    flex-direction: column;
+-  }
+-
+-  .section-bar span:last-child {
+-    display: none;
+-  }
+-
+-  .install-tabs {
+-    grid-template-columns: 1fr;
+-  }
+-
+-  .install-tabs button + button {
+-    border-left: 0;
+-    border-top: 1px solid var(--ink);
+-  }
+-
+-  .command-list {
+-    padding: 10px;
++    font-size: 17px;
+   }
+ 
+-  .command-row,
+-  .usage-example {
+-    grid-template-columns: 1fr;
++  .top {
++    flex-wrap: wrap;
++    gap: 8px 16px;
++    padding: 8px 0;
+   }
+ 
+-  .copy-button {
++  .top nav {
++    margin-left: 0;
+     width: 100%;
++    gap: 14px;
+   }
+ 
+-  .section {
+-    padding-block: 68px;
++  section {
++    padding-top: 40px;
+   }
+ 
+-  .failure-grid,
+-  .process-grid,
+-  .principle-grid,
+-  .model-status,
+-  .evidence-strip {
++  .then div {
+     grid-template-columns: 1fr;
++    gap: 4px;
+   }
+ 
+-  .failure-card,
+-  .process-step,
+-  .principle-grid article {
+-    min-height: 0;
+-  }
+-
+-  .failure-card:nth-child(even),
+-  .process-step:nth-child(even),
+-  .principle-grid article + article,
+-  .model-status span + span,
+-  .evidence-strip span + span {
+-    border-left: 0;
+-  }
+-
+-  .failure-card + .failure-card,
+-  .process-step + .process-step,
+-  .principle-grid article + article,
+-  .model-status span + span,
+-  .evidence-strip span + span {
+-    border-top: 1px solid var(--ink);
+-  }
+-
+-  .source-row {
+-    grid-template-columns: 28px 1fr;
+-  }
+-
+-  .source-row > span:last-child {
+-    grid-column: 2;
+-  }
+-
+-  .model-card > div:first-child {
+-    align-items: flex-start;
++  .command {
+     flex-direction: column;
++    gap: 0;
+   }
+ 
+-  .proof-metadata,
+-  .browser-evidence {
+-    padding: 15px;
+-  }
+-
+-  .proof-metadata dl div {
+-    grid-template-columns: 78px 1fr;
+-  }
+-
+-  .evidence-strip span:nth-child(4) {
+-    border-left: 0;
+-  }
+-
+-  .install-footer,
+-  .site-footer {
+-    align-items: flex-start;
+-    flex-direction: column;
+-  }
+-
+-  .site-footer {
+-    padding-block: 30px;
++  .copy {
++    margin: 0 12px 12px;
+   }
++}
+ 
+-  .site-footer > div {
+-    align-items: flex-start;
+-    flex-direction: column;
+-  }
++html.social-preview .top nav,
++html.social-preview footer {
++  display: none;
+ }
+diff --git a/site/vite.config.mjs b/site/vite.config.mjs
+index 42e9181..0531aef 100644
+--- a/site/vite.config.mjs
++++ b/site/vite.config.mjs
+@@ -12,6 +12,9 @@ export default defineConfig({
+   server: {
+     host: "0.0.0.0",
+     allowedHosts: ["terminal.local"],
++    // The page imports the skill, the example report and the plugin manifest
++    // from the repository root at build time, so the dev server must serve them.
++    fs: { allow: [".."] },
+     warmup: {
+       clientFiles: ["./src/main.jsx"],
+     },

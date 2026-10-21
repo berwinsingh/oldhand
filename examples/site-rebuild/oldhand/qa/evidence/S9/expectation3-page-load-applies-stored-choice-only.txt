@@ -1,0 +1,43 @@
+# Expectation 3. Everything that runs on page load, read-only: index.html scripts, main.jsx entry, and the analytics references in the tree
+
+## index.html script tags (grep -n '<script')
+47:    <script>
+63:    <script type="module" src="/src/main.jsx"></script>
+
+## index.html lines 47-52 (inline script)
+     1	    <script>
+     2	      if (new URLSearchParams(window.location.search).has("social-preview")) {
+     3	        document.documentElement.classList.add("social-preview");
+     4	      }
+     5	    </script>
+     6	    <style>
+
+## main.jsx (entry)
+     1	import React from "react";
+     2	import { createRoot } from "react-dom/client";
+     3	import { App } from "./App.jsx";
+     4	import "./styles.css";
+     5	
+     6	createRoot(document.getElementById("root")).render(
+     7	  <React.StrictMode>
+     8	    <App />
+     9	  </React.StrictMode>,
+    10	);
+
+## grep -rn 'gtag\|googletagmanager\|loadAnalytics' across site excluding node_modules, dist (any hit outside analytics.js/tests?)
+tests/analytics.test.mjs:30:  assert.equal(win.gtag, undefined);
+tests/analytics.test.mjs:33:test("denied without a loaded gtag loads nothing", () => {
+src/analytics.js:23:export function loadAnalytics(win, doc) {
+src/analytics.js:27:  w.gtag =
+src/analytics.js:28:    w.gtag ||
+src/analytics.js:29:    function gtag() {
+src/analytics.js:34:    w.gtag("consent", "update", { analytics_storage: "granted" });
+src/analytics.js:38:  w.gtag("consent", "default", {
+src/analytics.js:44:  w.gtag("consent", "update", { analytics_storage: "granted" });
+src/analytics.js:45:  w.gtag("js", new Date());
+src/analytics.js:46:  w.gtag("config", GA_MEASUREMENT_ID);
+src/analytics.js:51:  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+src/analytics.js:56:// loaded gtag to stop; null (no choice yet) does nothing.
+src/analytics.js:59:  if (choice === "granted") loadAnalytics(w, doc);
+src/analytics.js:60:  else if (choice === "denied" && typeof w.gtag === "function") {
+src/analytics.js:61:    w.gtag("consent", "update", { analytics_storage: "denied" });

@@ -1,0 +1,14 @@
+$ cat -n src/main.jsx ; grep -rn StrictMode src
+     1	import React from "react";
+     2	import { createRoot } from "react-dom/client";
+     3	import { App } from "./App.jsx";
+     4	import "./styles.css";
+     5	
+     6	createRoot(document.getElementById("root")).render(
+     7	  <React.StrictMode>
+     8	    <App />
+     9	  </React.StrictMode>,
+    10	);
+
+src/main.jsx:7:  <React.StrictMode>
+src/main.jsx:9:  </React.StrictMode>,

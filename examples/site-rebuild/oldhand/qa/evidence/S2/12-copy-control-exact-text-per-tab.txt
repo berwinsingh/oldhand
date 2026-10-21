@@ -1,0 +1,46 @@
+S2 / expectation 3: Copy copies the exact command; copied text (or the control's aria-label after "Copy: ") equals the command block's text exactly, newlines included.
+Page: http://localhost:4180/ at 1440x900. On each tab the Copy control of the FIRST command block was clicked with a real click.
+
+Clipboard read:
+  navigator.clipboard.readText() -> NotAllowedError: Failed to execute 'readText' on 'Clipboard': Read permission denied.
+  (blocked in this browser pane, so the brief's fallback applies: the aria-label of the control, which carries the exact text.)
+Extra evidence beyond the fallback: before clicking, a small observer was put on the page that records what the page's own copy handler sends
+  (a wrapper that logs the argument of navigator.clipboard.writeText and then calls the original, plus a document "copy" event listener that logs the selection).
+  navigator.clipboard.writeText also threw "NotAllowedError ... Write permission denied" in this pane; the page then used its textarea + document.execCommand("copy") fallback,
+  and the "copy" event fired with the selected text. The recorded values are given below. The button label changed to "Copied" after each click (see screenshots 02, 03, 05).
+  The page does not show an error when writeText is denied (it falls back silently). That is the page's designed behavior, not a failure.
+
+Comparison (JS strings; \n = a real newline character):
+
+TAB Any agent
+  block text          : npx skills add berwinsingh/oldhand --skill '*' -g
+  aria-label          : Copy: npx skills add berwinsingh/oldhand --skill '*' -g
+  label minus "Copy: ": equals block text exactly -> true
+  writeText argument  : npx skills add berwinsingh/oldhand --skill '*' -g  (equals block text)
+  copy-event selection: npx skills add berwinsingh/oldhand --skill '*' -g  (equals block text)
+
+TAB Claude Code plugin (two blocks; first one clicked)
+  block 1 text        : /plugin marketplace add berwinsingh/oldhand
+  aria-label 1        : Copy: /plugin marketplace add berwinsingh/oldhand
+  label minus "Copy: ": equals block text exactly -> true
+  writeText argument  : /plugin marketplace add berwinsingh/oldhand  (equals block text)
+  copy-event selection: /plugin marketplace add berwinsingh/oldhand  (equals block text)
+  block 2 aria-label (not clicked): Copy: /plugin install oldhand@oldhand  (matches block 2 text /plugin install oldhand@oldhand)
+
+TAB Codex plugin (one block, two lines)
+  block text          : "codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand"
+  aria-label          : "Copy: codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand"
+  label minus "Copy: ": equals block text exactly, newline included -> true
+  writeText argument  : "codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand"  (equals block text, newline included)
+  copy-event selection: same string, newline included (equals block text)
+
+TAB Git clone (one block, three lines)
+  block text          : "git clone https://github.com/berwinsingh/oldhand ~/.oldhand\nmkdir -p ~/.agents/skills ~/.claude/skills\nfor s in ~/.oldhand/skills/*; do ln -sfn \"$s\" ~/.agents/skills/; ln -sfn \"$s\" ~/.claude/skills/; done"
+  aria-label          : "Copy: " + the same string
+  label minus "Copy: ": equals block text exactly, two newlines included -> true
+  writeText argument  : equals block text -> true
+  copy-event selection: equals block text -> true
+  (the block's <pre> is 876px wide inside an 846px box with overflow-x:auto, so the long third line scrolls sideways rather than wrapping; the copied text is the full string)
+
+Note on the Codex tab: the first click attempt on its Copy control did not register (the test harness reported a transient tool error and the control still read "Copy"). It was retried once as-is and the copy was recorded then.
+Screenshots: 02-any-agent-after-copy-click.jpg (shows "Copied"), 03-claude-code-plugin-after-copy-click.jpg (shows "Copied" on block 1 only), 04-codex-plugin-tab.jpg (taken after the 1.6 s "Copied" label had reset), 05-git-clone-after-copy-click.jpg (shows "Copied").

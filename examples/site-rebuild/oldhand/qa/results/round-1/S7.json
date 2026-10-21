@@ -1,0 +1,17 @@
+{
+  "id": "S7",
+  "status": "pass",
+  "observed": "1) Ran 'cd /Users/berwinsingh/Documents/oldhand/site && npm run build'. Vite transformed 34 modules and wrote dist/client/index.html, one CSS asset and one JS asset. The prepare step then printed 'Prepared Sites build: dist/server/index.js and dist/.openai/hosting.json'. Exit code 0, no warnings. 2) Ran 'npm run test:sites' (node --test tests/sites-worker.test.mjs). Result: tests 4, pass 4, fail 0, cancelled 0, skipped 0, todo 0. Exit code 0. 3) Listed dist: dist/client/index.html (3,309 bytes), dist/client/favicon.png (8,464 bytes), dist/client/assets/index-Cnbwz_nJ.js (230,089 bytes), dist/client/assets/index-BKevaKTi.css (5,017 bytes), dist/server/index.js (483 bytes), dist/.openai/hosting.json (31 bytes). The total size of dist/client is 246,879 bytes (about 0.25 MB, 252 KB on disk). The only .png file under dist/client is dist/client/favicon.png.",
+  "expected": "npm run build exits 0 and prints 'Prepared Sites build'. npm run test:sites reports 4 passing tests and 0 failing. dist/client/index.html, dist/server/index.js and dist/.openai/hosting.json exist. dist/client is under 1 MB and contains no .png other than favicon.png.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/01_npm_run_build_output.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/02_npm_run_test_sites_output.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/03_dist_listing_and_size.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/04_dist_server_and_hosting_contents.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S7/05_dist_client_index_html.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "CLI surface, so no screenshots were taken; evidence is the saved command output and file listings. Build and test output contained no warnings. The build rewrites dist/, as the entry point does by design; the dist/ from an earlier build was overwritten and not captured first. No pre-change baseline output was available, so 'exactly as it did' is confirmed against the stated expectations only. du -sb is not supported on macOS, so the byte total is the sum of stat sizes (246,879 bytes). Test names that passed: serves existing static assets without a fallback; falls back to index.html for an unknown app route; does not turn missing API or write requests into the app shell; emits the files required by Sites packaging."
+}

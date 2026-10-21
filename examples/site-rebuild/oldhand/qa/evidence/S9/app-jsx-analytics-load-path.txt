@@ -1,0 +1,35 @@
+$ cat -n src/App.jsx (lines 1-6: imports)
+     1	import { useEffect, useState } from "react";
+     2	import skillText from "../../skills/oldhand/SKILL.md?raw";
+     3	import reportText from "../../examples/csv-import-dupes/oldhand/report.md?raw";
+     4	import orchestrationText from "../../skills/oldhand/references/orchestration.md?raw";
+     5	import plugin from "../../.claude-plugin/plugin.json";
+     6	import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+
+$ cat -n src/App.jsx (lines 200-210: App state and effect)
+   200	export function App() {
+   201	  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+   202	  useEffect(() => {
+   203	    applyAnalyticsChoice(analytics);
+   204	  }, [analytics]);
+   205	
+   206	  function toggleAnalytics() {
+   207	    const next = analytics === "granted" ? "denied" : "granted";
+   208	    saveAnalyticsChoice(next);
+   209	    setAnalytics(next);
+   210	  }
+
+$ grep -nE 'analytics|Analytics' src/App.jsx
+6:import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+201:  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+203:    applyAnalyticsChoice(analytics);
+204:  }, [analytics]);
+206:  function toggleAnalytics() {
+207:    const next = analytics === "granted" ? "denied" : "granted";
+208:    saveAnalyticsChoice(next);
+209:    setAnalytics(next);
+359:        <p className="analytics">
+360:          {analytics === "granted" ? "Google Analytics is on." : "Google Analytics is off; nothing is sent."}{" "}
+361:          <button type="button" className="link" onClick={toggleAnalytics}>
+362:            {analytics === "granted" ? "Turn it off" : "Turn on Google Analytics"}
+grep_exit=0

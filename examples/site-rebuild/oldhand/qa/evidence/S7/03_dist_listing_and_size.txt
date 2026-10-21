@@ -1,0 +1,48 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && find dist -print | sort
+dist
+dist/.openai
+dist/.openai/hosting.json
+dist/client
+dist/client/assets
+dist/client/assets/index-BKevaKTi.css
+dist/client/assets/index-Cnbwz_nJ.js
+dist/client/favicon.png
+dist/client/index.html
+dist/server
+dist/server/index.js
+
+$ ls -la dist/client dist/server/index.js dist/.openai/hosting.json
+total 32
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 01:37 .
+drwxr-xr-x@ 5 berwinsingh  staff   160 Oct 11 01:10 ..
+drwxr-xr-x@ 4 berwinsingh  staff   128 Oct 11 01:37 assets
+-rw-r--r--@ 1 berwinsingh  staff  8464 Oct 11 01:37 favicon.png
+-rw-r--r--@ 1 berwinsingh  staff  3309 Oct 11 01:37 index.html
+
+dist/client/assets:
+total 472
+drwxr-xr-x@ 4 berwinsingh  staff     128 Oct 11 01:37 .
+drwxr-xr-x@ 5 berwinsingh  staff     160 Oct 11 01:37 ..
+-rw-r--r--@ 1 berwinsingh  staff    5017 Oct 11 01:37 index-BKevaKTi.css
+-rw-r--r--@ 1 berwinsingh  staff  230089 Oct 11 01:37 index-Cnbwz_nJ.js
+-rw-r--r--@ 1 berwinsingh  staff   31 Oct 11 01:37 dist/.openai/hosting.json
+-rw-r--r--@ 1 berwinsingh  staff  483 Oct 11 01:37 dist/server/index.js
+
+$ du -sk dist/client
+252	dist/client
+$ du -sb dist/client (apparent bytes)
+246879 bytes total
+
+$ find dist/client -type f -name '*.png'
+dist/client/favicon.png
+$ find dist/client -type f -iname '*.png' | wc -l
+       1
+
+$ find dist/client -type f | wc -l
+       4
+
+$ find dist/client -type f -print0 | xargs -0 stat -f '%z %N'
+3309 dist/client/index.html
+8464 dist/client/favicon.png
+230089 dist/client/assets/index-Cnbwz_nJ.js
+5017 dist/client/assets/index-BKevaKTi.css

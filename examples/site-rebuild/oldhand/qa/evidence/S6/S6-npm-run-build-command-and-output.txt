@@ -1,0 +1,17 @@
+$ cd /Users/berwinsingh/Documents/oldhand/site && npm run build
+
+> site@0.0.0 build
+> node scripts/check-sources.mjs && vite build && node scripts/prepare-sites-build.mjs
+
+check-sources: ok (v2.0.0, 10 hard stops, 6 criteria, 7 hosts, 4 not-verified items)
+vite v6.4.2 building for production...
+transforming...
+✓ 36 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/client/index.html                   3.31 kB │ gzip:  1.14 kB
+dist/client/assets/index-COS68Bkw.css    4.99 kB │ gzip:  1.70 kB
+dist/client/assets/index-Bm6OPz8X.js   245.43 kB │ gzip: 80.42 kB
+✓ built in 357ms
+Prepared Sites build: dist/server/index.js and dist/.openai/hosting.json
+exit status: 0

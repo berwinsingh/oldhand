@@ -1,0 +1,225 @@
+{
+ "title": "Fix duplicate batches on CSV import retry",
+ "quick": false,
+ "total": 9,
+ "counts": {
+  "pass": 9,
+  "fail": 0,
+  "blocked": 0,
+  "missing": 0,
+  "invalid": 0
+ },
+ "rows": [
+  {
+   "id": "S1",
+   "criterion": "AC1",
+   "kind": "acceptance",
+   "surface": "cli",
+   "env": "local",
+   "tier": "worker",
+   "title": "A batch hit twice by a transient lock is retried and stored once",
+   "status": "pass",
+   "problem": "",
+   "observed": "Import printed 'import 1: 5 rows in 3 batches', exit=0, stderr had retry 1/3 and retry 2/3. list: '1 samples/products.csv done batches=3 rows=5 stored=5'.",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S1/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S1.json"
+  },
+  {
+   "id": "S2",
+   "criterion": "AC1",
+   "kind": "failing-case",
+   "surface": "cli",
+   "env": "local",
+   "tier": "worker",
+   "title": "The reported case: one transient lock after the rows are written, then a retry",
+   "status": "pass",
+   "problem": "",
+   "observed": "Import printed 'import 1: 5 rows in 3 batches', exit=0, one 'retry 1/3' line. list: done batches=3 rows=5 stored=5 (the report says it was 7 before the fix; not re-checked here).",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S2/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S2.json"
+  },
+  {
+   "id": "S3",
+   "criterion": "AC1",
+   "kind": "negative",
+   "surface": "cli",
+   "env": "local",
+   "tier": "worker",
+   "title": "The lock outlasts the retries: the import fails visibly and leaves no doubled or half batch",
+   "status": "pass",
+   "problem": "",
+   "observed": "exit=1; stderr 'retry 1/1' then 'error: storage failed after retries: database is locked'. list: '1 samples/products.csv failed batches=0 rows=0 stored=0'.",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S3/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S3.json"
+  },
+  {
+   "id": "S4",
+   "criterion": "AC2",
+   "kind": "acceptance",
+   "surface": "cli",
+   "env": "local",
+   "tier": "worker",
+   "title": "A messy CSV (BOM, CRLF, padded cells, quoted comma, accented name) under two transient locks stores each row once",
+   "status": "pass",
+   "problem": "",
+   "observed": "Import printed 'import 1: 5 rows in 3 batches', exit=0, retry 1/3 and 2/3. list: done batches=3 rows=5 stored=5.",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S4/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S4.json"
+  },
+  {
+   "id": "S5",
+   "criterion": "AC2",
+   "kind": "messy",
+   "surface": "cli",
+   "env": "local",
+   "tier": "worker",
+   "title": "A messy TSV, one row per batch, with locks both before and after the rows are written",
+   "status": "pass",
+   "problem": "",
+   "observed": "Import printed 'import 1: 3 rows in 3 batches', exit=0, retries 1/3, 2/3, 3/3. list: done batches=3 rows=3 stored=3.",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S5/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S5.json"
+  },
+  {
+   "id": "S6",
+   "criterion": "R1",
+   "kind": "regression",
+   "surface": "cli",
+   "env": "local",
+   "tier": "worker",
+   "title": "A plain CSV import with no faults works as before",
+   "status": "pass",
+   "problem": "",
+   "observed": "Import printed exactly 'import 1: 5 rows in 3 batches', exit=0, no stderr. list: done batches=3 rows=5 stored=5.",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S6/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S6.json"
+  },
+  {
+   "id": "S7",
+   "criterion": "R2",
+   "kind": "regression",
+   "surface": "cli",
+   "env": "local",
+   "tier": "scout",
+   "title": "A dry run counts the rows and writes nothing",
+   "status": "pass",
+   "problem": "",
+   "observed": "Printed 'dry run: 3 rows in 1 batches, nothing written', exit=0. ls of the evidence folder showed it empty: no s7.db.",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S7/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S7.json"
+  },
+  {
+   "id": "S8",
+   "criterion": "R3",
+   "kind": "regression",
+   "surface": "cli",
+   "env": "local",
+   "tier": "scout",
+   "title": "Every CLI flag is still accepted",
+   "status": "pass",
+   "problem": "",
+   "observed": "import --help lists file, --db DB, --retries RETRIES, --batch-size BATCH_SIZE, --dry-run; list --help lists --db DB. import with --retries 0 --batch-size 1: 'import 1: 3 rows in 3 batches' exit=0; with --dry-run: 'dry run: 3 rows in 2 batches, nothing written' exit=0; list: stored=3 exit=0.",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S8/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S8.json"
+  },
+  {
+   "id": "S9",
+   "criterion": "R4",
+   "kind": "regression",
+   "surface": "cli",
+   "env": "local",
+   "tier": "worker",
+   "title": "A bad row stops the import with a clear message and keeps the earlier batch once",
+   "status": "pass",
+   "problem": "",
+   "observed": "exit=2; stderr \"error: line 4: bad row {'sku': 'E-502', 'name': 'Broken', 'qty': 'lots'}\". list: '1 ... failed batches=1 rows=2 stored=2'.",
+   "blocker": "",
+   "evidence": [
+    "<project>/.oldhand/csv-import-dupes/qa/evidence/S9/run.txt"
+   ],
+   "console_errors": [],
+   "network_failures": [],
+   "result": "qa/results/S9.json"
+  }
+ ],
+ "recorded": [
+  [
+   "S1",
+   "C19"
+  ],
+  [
+   "S2",
+   "C20"
+  ],
+  [
+   "S3",
+   "C21"
+  ],
+  [
+   "S4",
+   "C22"
+  ],
+  [
+   "S5",
+   "C23"
+  ],
+  [
+   "S6",
+   "C24"
+  ],
+  [
+   "S7",
+   "C25"
+  ],
+  [
+   "S8",
+   "C26"
+  ],
+  [
+   "S9",
+   "C27"
+  ]
+ ],
+ "ledger_errors": [],
+ "time": "2026-10-10T19:17:04+00:00"
+}

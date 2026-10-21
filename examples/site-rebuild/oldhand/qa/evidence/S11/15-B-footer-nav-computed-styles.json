@@ -1,0 +1,21 @@
+{
+ "nav": {
+  "display": "flex",
+  "flexWrap": "nowrap",
+  "gap": "16px",
+  "overflowX": "visible",
+  "width": 549.125,
+  "linkRightEdges": [
+   "GitHub:127",
+   "Issues:248",
+   "Discussions:439",
+   "Security:581"
+  ]
+ },
+ "footer": {
+  "display": "flex",
+  "flexWrap": "wrap",
+  "overflowX": "visible",
+  "width": 311
+ }
+}

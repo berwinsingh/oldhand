@@ -1,0 +1,10 @@
+S2 step 4 - ArrowRight on a focused tab (real key press via the browser tool; state read from the DOM)
+
+Start: clicked "Any agent" tab -> activeElement=tab-any, aria-selected true only on Any agent.
+ArrowRight #1 -> activeElement=tab-claude; aria-selected: Any agent=false, Claude Code plugin=true, Codex plugin=false, Git clone=false; tabindex 0 on Claude Code plugin only; panel-claude shown (first command "/plugin marketplace add berwinsingh/oldhand"); screenshot run4-after-right-arrow-from-any-agent.jpg shows Claude Code plugin underlined with focus ring.
+ArrowRight #2 -> selected: Codex plugin (focus tab-codex)
+ArrowRight #3 -> selected: Git clone (focus tab-git)
+ArrowRight #4 -> selected: Any agent (focus tab-any)   (wraps from the last tab back to the first)
+ArrowRight #5 -> selected: Claude Code plugin
+
+Quirk: the first screenshot taken straight after ArrowRight #1 still showed the old frame (Any agent selected) while the DOM already said Claude Code plugin; a second screenshot matched the DOM. That is screenshot lag in the browser tool, not an app state problem.

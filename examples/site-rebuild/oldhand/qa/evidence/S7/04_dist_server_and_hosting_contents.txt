@@ -1,0 +1,30 @@
+$ cat dist/server/index.js
+export default {
+  async fetch(request, env) {
+    const response = await env.ASSETS.fetch(request);
+    const acceptsHtml = request.headers.get("accept")?.includes("text/html");
+
+    if (response.status !== 404 || !acceptsHtml || !["GET", "HEAD"].includes(request.method)) {
+      return response;
+    }
+
+    const indexUrl = new URL(request.url);
+    indexUrl.pathname = "/index.html";
+    indexUrl.search = "";
+    return env.ASSETS.fetch(new Request(indexUrl, request));
+  },
+};
+
+--- end ---
+
+$ cat dist/.openai/hosting.json
+{
+  "d1": null,
+  "r2": null
+}
+
+--- end ---
+
+$ stat dist/server/index.js dist/.openai/hosting.json (size in bytes)
+483 bytes  dist/server/index.js
+31 bytes  dist/.openai/hosting.json

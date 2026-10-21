@@ -1,0 +1,52 @@
+# Context for the 'this worked before the change' framing (read-only git queries, run from /Users/berwinsingh/Documents/oldhand)
+# HEAD = 56029eb Add LinkedIn website preview metadata
+
+## git status for the three analytics-related files
+ M site/src/App.jsx
+?? site/src/analytics.js
+?? site/tests/analytics.test.mjs
+(analytics.js and analytics.test.mjs show ?? = untracked, not in HEAD)
+
+## git cat-file HEAD:site/src/analytics.js
+does not exist at HEAD
+
+## HEAD site/package.json: any test script?
+10:    "test:sites": "node --test tests/sites-worker.test.mjs"
+
+## working-tree site/package.json: test scripts
+10:    "test:sites": "node --test tests/sites-worker.test.mjs",
+11:    "test": "node --test tests/analytics.test.mjs"
+
+## HEAD site/src/App.jsx analytics lines 271-296 (load effect and chooseAnalytics)
+     1	  const [analyticsChoice, setAnalyticsChoice] = useState(readAnalyticsChoice);
+     2	  const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
+     3	
+     4	  useEffect(() => {
+     5	    if (analyticsChoice === "granted") loadAnalytics();
+     6	  }, [analyticsChoice]);
+     7	
+     8	  function toggleSource(index) {
+     9	    setSelectedSources((current) =>
+    10	      current.includes(index)
+    11	        ? current.filter((item) => item !== index)
+    12	        : [...current, index],
+    13	    );
+    14	  }
+    15	
+    16	  function scrollToInstall() {
+    17	    document.querySelector("#install")?.scrollIntoView({ behavior: "smooth" });
+    18	  }
+    19	
+    20	  function chooseAnalytics(choice) {
+    21	    saveAnalyticsChoice(choice);
+    22	    if (choice === "denied") {
+    23	      window.gtag?.("consent", "update", { analytics_storage: "denied" });
+    24	    }
+    25	    setAnalyticsChoice(choice);
+    26	  }
+
+## HEAD site/src/App.jsx lines 623 (AnalyticsConsent banner rendered at HEAD)
+      <AnalyticsConsent choice={analyticsChoice} onChoose={chooseAnalytics} />
+
+## working-tree App.jsx: AnalyticsConsent banner / 'Analytics preferences' button
+(none)

@@ -1,193 +1,112 @@
 import { useEffect, useState } from "react";
-import {
-  ArrowDown,
-  ArrowRight,
-  Browser,
-  Check,
-  CheckCircle,
-  ClipboardText,
-  Code,
-  Copy,
-  FileText,
-  GitBranch,
-  GithubLogo,
-  MagnifyingGlass,
-  PlugsConnected,
-  SealCheck,
-  Sparkle,
-  Stack,
-  TerminalWindow,
-  Wrench,
-  X,
-} from "@phosphor-icons/react";
+import skillText from "../../skills/oldhand/SKILL.md?raw";
+import reportText from "../../examples/csv-import-dupes/oldhand/report.md?raw";
+import orchestrationText from "../../skills/oldhand/references/orchestration.md?raw";
+import plugin from "../../.claude-plugin/plugin.json";
+import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+import { pageData } from "./slices.js";
 
-const installs = {
-  claude: [
-    "/plugin marketplace add berwinsingh/oldhand",
-    "/plugin install oldhand@oldhand",
-  ],
-  codex: [
-    "codex plugin marketplace add berwinsingh/oldhand",
-    "codex plugin add oldhand@oldhand",
-  ],
-};
+const REPO = "https://github.com/berwinsingh/oldhand";
+const BLOB = `${REPO}/blob/main/`;
+const TESTED = "2026-10-11";
+const EXAMPLE = "Fix DOCQ-123. Prove: guest signup, reload, data persists.";
 
-const usageExamples = {
-  claude: `/oldhand:oldhand Implement DOCQ-123.
-Changes since ticket: support guests; keep the admin flow unchanged.
-Assumptions: the current session cookie remains authoritative.
-Prove: finish guest signup, reload, and confirm persistence.`,
-  codex: `$oldhand No ticket. Fix intermittent CSV imports.
-Current behavior: files over 20 MB sometimes create duplicate rows.
-Constraints: no schema migration; preserve queued jobs.
-Acceptance: one persisted batch even after a retry.`,
-};
-
-const failures = [
+// Every command below was run on this date in a throwaway home folder, from a
+// local checkout of this repository; the GitHub source serves the same files.
+const installs = [
   {
-    title: "Starts before understanding",
-    body: "A ticket title becomes a plan. Constraints and linked work get missed.",
-    icon: ClipboardText,
+    key: "any",
+    label: "Any agent",
+    blocks: ["npx skills add berwinsingh/oldhand --skill '*' -g"],
+    note:
+      "Installs all eleven skills under ~/.agents/skills and links them for the agents it finds. Add -a cursor (or codex, github-copilot, gemini-cli, opencode, claude-code) to skip the picker.",
+    tested: `Tested ${TESTED} on macOS with skills 1.7.2 for claude-code, codex, cursor, github-copilot, gemini-cli and opencode, from a local checkout of this repository.`,
+    then: [
+      ["Claude Code, Cursor, Copilot, Kiro, Antigravity", `/oldhand ${EXAMPLE}`],
+      ["Codex", `$oldhand ${EXAMPLE}`],
+      ["Gemini CLI, OpenCode, Amp, Goose", "Use the oldhand skill: fix DOCQ-123 and prove it end to end."],
+    ],
   },
   {
-    title: "Reinvents solved work",
-    body: "No search for existing code, native features, or maintained prior art.",
-    icon: Stack,
+    key: "claude",
+    label: "Claude Code plugin",
+    blocks: ["/plugin marketplace add berwinsingh/oldhand", "/plugin install oldhand@oldhand"],
+    note: "Two separate prompts inside Claude Code, then a new session.",
+    tested: `Tested ${TESTED} with Claude Code 2.1.274 (the claude plugin CLI, from a local checkout of this repository).`,
+    then: [["Claude Code", `/oldhand:oldhand ${EXAMPLE}`]],
   },
   {
-    title: "Overwrites the codebase",
-    body: "A small fix expands into a refactor and unrelated work gets disturbed.",
-    icon: GitBranch,
+    key: "codex",
+    label: "Codex plugin",
+    blocks: ["codex plugin marketplace add berwinsingh/oldhand\ncodex plugin add oldhand@oldhand"],
+    note: "Then restart Codex or start a new task.",
+    tested: `Tested ${TESTED} with Codex CLI 0.146.0, from a local checkout of this repository.`,
+    then: [["Codex", `$oldhand ${EXAMPLE}`]],
   },
   {
-    title: "Stops at unit tests",
-    body: "Green checks replace proof that the real browser flow works.",
-    icon: Browser,
+    key: "git",
+    label: "Git clone",
+    blocks: [
+      'git clone https://github.com/berwinsingh/oldhand ~/.oldhand\nmkdir -p ~/.agents/skills ~/.claude/skills\nfor s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/.claude/skills/; done',
+    ],
+    note:
+      "~/.agents/skills is read by Codex, Cursor, Copilot, Gemini CLI, OpenCode, Amp, Roo, Goose, Droid and Junie; ~/.claude/skills by Claude Code. Update with git -C ~/.oldhand pull.",
+    tested: `Tested ${TESTED} on macOS with git 2.55.0 and zsh 5.9 against a clone of this branch: eleven links in each folder, and running it twice changes nothing.`,
+    then: [
+      ["Claude Code, Cursor, Copilot", `/oldhand ${EXAMPLE}`],
+      ["Codex", `$oldhand ${EXAMPLE}`],
+    ],
   },
 ];
 
-const steps = [
-  {
-    eyebrow: "01 / INTAKE",
-    title: "Understand",
-    body: "Read the request, comments, files, dependencies, and acceptance criteria.",
-    icon: ClipboardText,
-  },
-  {
-    eyebrow: "02 / TRACE",
-    title: "Map the path",
-    body: "Follow UI, API, auth, services, persistence, and integrations end to end.",
-    icon: GitBranch,
-  },
-  {
-    eyebrow: "03 / PRIOR ART",
-    title: "Reuse",
-    body: "Study real MIT and Apache-2.0 implementations before inventing.",
-    icon: MagnifyingGlass,
-  },
-  {
-    eyebrow: "04 / CHANGE",
-    title: "Stay minimal",
-    body: "Use Ponytail to land the smallest safe change in the shared fix point.",
-    icon: Wrench,
-  },
-  {
-    eyebrow: "05 / INSPECT",
-    title: "Prove it",
-    body: "Run the real journey in your browser and keep fixing until it passes.",
-    icon: SealCheck,
-  },
+const stages = [
+  ["oldhand", "the conductor: routes the request through the stages, keeps one task folder and a ledger, and decides from the verdict"],
+  ["oldhand-contract", "the request, with its assumptions and changed requirements, becomes numbered acceptance and regression criteria, each with the proof it needs"],
+  ["oldhand-trace", "the real path hop by hop, from entry point to rendered result, and every caller of what will change"],
+  ["oldhand-rca", "evidence-first root cause for bugs; read-only refuters try to break it before it is accepted"],
+  ["oldhand-research", "before anything new: the codebase, the standard library, the platform, installed dependencies, then open source behind a licence gate"],
+  ["oldhand-plan", "the smallest complete change, with blast radius, rollback, delegation and a budget for live runs"],
+  ["oldhand-build", "the Ponytail ladder, one focused regression check, proven by mutation: break the fix and the check must fail"],
+  ["oldhand-review", "a board of read-only reviewers, one lens each; the chair refutes every finding before it counts"],
+  ["oldhand-qa", "one sub-agent per scenario drives the real app and brings back evidence; the lead re-runs the key one"],
+  ["oldhand-ship", "the verdict is computed by a script from the ledger; publication only when the request authorized it"],
+  ["oldhand-learn", "the non-obvious lessons go where the project keeps its instructions, so the next session does not relearn them"],
 ];
 
-const sources = [
-  ["Jira issue", "PROJ-1234 + newer changes"],
-  ["Asana task", "Launch / improve signup"],
-  ["monday.com item", "Fix onboarding flow"],
-  ["Linear issue", "ENG-4567 + assumptions"],
-  ["GitHub issue", "owner/repo#812"],
-  ["Document", "PRD, ADR, runbook"],
-  ["Plain prompt", "Context + constraints + proof"],
-];
+const data = pageData({ skill: skillText, report: reportText, orchestration: orchestrationText, plugin });
 
-const GA_MEASUREMENT_ID = "G-75YW6HE9FT";
-const ANALYTICS_CONSENT_KEY = "oldhand-analytics-consent";
-
-function readAnalyticsChoice() {
-  try {
-    const choice = window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
-    return choice === "granted" || choice === "denied" ? choice : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveAnalyticsChoice(choice) {
-  try {
-    window.localStorage.setItem(ANALYTICS_CONSENT_KEY, choice);
-  } catch {
-    // The choice still applies for this page when storage is unavailable.
-  }
-}
-
-function loadAnalytics() {
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || function gtag() {
-    window.dataLayer.push(arguments);
-  };
-
-  if (document.querySelector("script[data-oldhand-analytics]")) {
-    window.gtag("consent", "update", { analytics_storage: "granted" });
-    return;
-  }
-
-  window.gtag("consent", "default", {
-    analytics_storage: "denied",
-    ad_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
-  });
-  window.gtag("consent", "update", { analytics_storage: "granted" });
-  window.gtag("js", new Date());
-  window.gtag("config", GA_MEASUREMENT_ID);
-
-  const script = document.createElement("script");
-  script.async = true;
-  script.dataset.oldhandAnalytics = "true";
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-  document.head.appendChild(script);
-}
-
-function AnalyticsConsent({ choice, onChoose }) {
-  if (choice !== null) return null;
-
-  return (
-    <aside className="analytics-consent" aria-labelledby="analytics-consent-title">
-      <strong id="analytics-consent-title">Help improve Oldhand?</strong>
-      <p>
-        Allow Google Analytics so we can see visits and improve the site. We keep
-        advertising storage off, and Analytics loads only if you allow it. {" "}
-        <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer">
-          How Google uses data
-        </a>
-      </p>
-      <div className="analytics-actions">
-        <button type="button" className="analytics-choice analytics-choice--allow" onClick={() => onChoose("granted")}>
-          Allow analytics
-        </button>
-        <button type="button" className="analytics-choice" onClick={() => onChoose("denied")}>
-          No thanks
-        </button>
-      </div>
-    </aside>
+function inline(text) {
+  return text.split(/(`[^`]*`)/g).map((part, i) =>
+    part.startsWith("`") ? <code key={i}>{part.slice(1, -1)}</code> : part,
   );
 }
 
-function CopyButton({ value, label = "Copy command" }) {
-  const [copied, setCopied] = useState(false);
+function Table({ data: tbl }) {
+  if (!tbl) return null;
+  return (
+    <div className="scroll" tabIndex={0}>
+      <table>
+        <thead>
+          <tr>{tbl.header.map((cell) => <th key={cell}>{cell}</th>)}</tr>
+        </thead>
+        <tbody>
+          {tbl.rows.map((row, r) => (
+            <tr key={r}>{row.map((cell, c) => <td key={c}>{inline(cell)}</td>)}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
-  async function copy() {
+function CopyButton({ value, label, text = "Copy" }) {
+  const [state, setState] = useState("idle");
+  async function copy(event) {
+    const button = event.currentTarget;
+    let ok = false;
     try {
       await navigator.clipboard.writeText(value);
+      ok = true;
     } catch {
       const textarea = document.createElement("textarea");
       textarea.value = value;
@@ -195,432 +114,257 @@ function CopyButton({ value, label = "Copy command" }) {
       textarea.style.opacity = "0";
       document.body.appendChild(textarea);
       textarea.select();
-      document.execCommand("copy");
+      ok = document.execCommand("copy");
       textarea.remove();
+      button.focus();
     }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
+    setState(ok ? "copied" : "failed");
+    window.setTimeout(() => setState("idle"), 1600);
   }
-
+  const shown = state === "copied" ? "Copied" : state === "failed" ? "Copy failed: select the text" : text;
   return (
-    <button className="copy-button" type="button" onClick={copy} aria-label={label}>
-      {copied ? <Check size={18} weight="bold" /> : <Copy size={18} />}
-      <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
+    <button className="copy" type="button" onClick={copy} aria-label={label}>
+      <span role="status">{shown}</span>
     </button>
   );
 }
 
-function InstallPanel({ compact = false }) {
-  const [platform, setPlatform] = useState("claude");
+function Command({ text, index }) {
+  return (
+    <div className="command">
+      <pre><code>{text}</code></pre>
+      <CopyButton value={text} label={`Copy command ${index}`} />
+    </div>
+  );
+}
+
+function tabFromUrl() {
+  const key = new URLSearchParams(window.location.search).get("agent");
+  return installs.some((i) => i.key === key) ? key : installs[0].key;
+}
+
+function InstallSwitcher() {
+  const [tab, setTab] = useState(tabFromUrl);
+  const current = installs.find((i) => i.key === tab);
+
+  function onKeyDown(event) {
+    if (event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) return;
+    const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+    if (!step) return;
+    event.preventDefault();
+    const index = installs.findIndex((i) => i.key === tab);
+    const next = installs[(index + step + installs.length) % installs.length].key;
+    setTab(next);
+    document.getElementById(`tab-${next}`)?.focus();
+  }
 
   return (
-    <div
-      className={`install-panel ${compact ? "install-panel--compact" : ""}`}
-      data-testid={compact ? "hero-install-panel" : "final-install-panel"}
-    >
-      <div className="install-tabs" role="tablist" aria-label="Install platform">
-        <button
-          type="button"
-          className={platform === "claude" ? "is-active" : ""}
-          onClick={() => setPlatform("claude")}
-          role="tab"
-          aria-selected={platform === "claude"}
-        >
-          Claude Code
-        </button>
-        <button
-          type="button"
-          className={platform === "codex" ? "is-active" : ""}
-          onClick={() => setPlatform("codex")}
-          role="tab"
-          aria-selected={platform === "codex"}
-        >
-          ChatGPT Codex
-        </button>
-      </div>
-
-      <div className="command-list" role="tabpanel">
-        {installs[platform].map((command) => (
-          <div className="command-row" key={command}>
-            <code>{command}</code>
-            <CopyButton value={command} label={`Copy ${command}`} />
-          </div>
+    <div className="install" id="install">
+      <div className="tabs" role="tablist" aria-label="Install route" onKeyDown={onKeyDown}>
+        {installs.map((i) => (
+          <button
+            key={i.key}
+            id={`tab-${i.key}`}
+            role="tab"
+            type="button"
+            aria-selected={i.key === tab}
+            aria-controls={`panel-${i.key}`}
+            tabIndex={i.key === tab ? 0 : -1}
+            className={i.key === tab ? "is-active" : ""}
+            onClick={() => setTab(i.key)}
+          >
+            {i.label}
+          </button>
         ))}
       </div>
-
-      <div className="install-note">
-        <CheckCircle size={18} weight="fill" />
-        Complete install. Add tracker or browser integrations only when you need them.
+      <div className="panel" role="tabpanel" id={`panel-${current.key}`} aria-labelledby={`tab-${current.key}`}>
+        {current.blocks.map((block, n) => <Command key={block} text={block} index={n + 1} />)}
+        <p className="note">{current.note}</p>
+        <dl className="then">
+          {current.then.map(([hosts, text]) => (
+            <div key={hosts}>
+              <dt>Then, in {hosts}, for example</dt>
+              <dd><code>{text}</code></dd>
+            </div>
+          ))}
+        </dl>
+        <p className="tested">
+          {current.tested} Invocation per host:{" "}
+          <a href={`${BLOB}skills/oldhand/references/hosts.md`}>hosts.md</a>.
+        </p>
       </div>
-
-      {!compact && (
-        <div className="usage-example">
-          <div>
-            <strong>Give it the full context</strong>
-            <span>Ticket optional · assumptions welcome · newer changes win</span>
-          </div>
-          <pre><code>{usageExamples[platform]}</code></pre>
-        </div>
-      )}
     </div>
   );
 }
 
 export function App() {
-  const [selectedSources, setSelectedSources] = useState([0, 6]);
-  const [analyticsChoice, setAnalyticsChoice] = useState(readAnalyticsChoice);
-  const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
-
+  const [analytics, setAnalytics] = useState(readAnalyticsChoice);
   useEffect(() => {
-    if (analyticsChoice === "granted") loadAnalytics();
-  }, [analyticsChoice]);
+    applyAnalyticsChoice(analytics);
+  }, [analytics]);
 
-  function toggleSource(index) {
-    setSelectedSources((current) =>
-      current.includes(index)
-        ? current.filter((item) => item !== index)
-        : [...current, index],
-    );
-  }
-
-  function scrollToInstall() {
-    document.querySelector("#install")?.scrollIntoView({ behavior: "smooth" });
-  }
-
-  function chooseAnalytics(choice) {
-    saveAnalyticsChoice(choice);
-    if (choice === "denied") {
-      window.gtag?.("consent", "update", { analytics_storage: "denied" });
-    }
-    setAnalyticsChoice(choice);
+  function toggleAnalytics() {
+    const next = analytics === "granted" ? "denied" : "granted";
+    saveAnalyticsChoice(next);
+    setAnalytics(next);
   }
 
   return (
-    <main>
-      <header className="site-header">
-        <a className="brand" href="#top" aria-label="Oldhand home">
-          <span>OLDHAND</span>
-          <small>/ verified delivery</small>
-        </a>
-        <nav aria-label="Primary navigation">
-          <a href="#process">How it works</a>
-          <a href="#orchestration">Models</a>
-          <a href="#proof">Proof</a>
+    <>
+      <header className="top">
+        <a className="wordmark" href="#top">oldhand</a>
+        <span className="meta">v{data.version} · MIT</span>
+        <nav aria-label="Sections">
           <a href="#install">Install</a>
+          <a href="#how">How it works</a>
+          <a href="#example">Example</a>
+          <a href="#skill">The skill</a>
+          <a href="#models">Models</a>
+          <a href={REPO}>GitHub</a>
         </nav>
-        <a
-          className="header-github"
-          href="https://github.com/berwinsingh/oldhand"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <GithubLogo size={19} weight="fill" />
-          GitHub
-        </a>
       </header>
 
-      <section className="hero sheet" id="top">
-        <div className="work-order" aria-label="Work order">
-          <div>
-            <span>WORK ORDER</span>
-            <strong>OH-24-0517</strong>
-          </div>
-          <div>
-            <span>STATUS</span>
-            <strong>READY TO PROVE</strong>
-          </div>
-          <div className="work-order-accent">BUILD WITH CONFIDENCE.</div>
-        </div>
+      <main id="top">
+        <section className="hero">
+          <h1>A definition of done for coding agents.</h1>
+          <p className="lede">
+            Oldhand is a pack of eleven agent skills. Your agent reads the whole request, traces
+            the real code path, reuses before it writes, changes the minimum, has sub-agents review
+            and QA the result in the running app, and{" "}
+            <a href={`${BLOB}skills/oldhand/scripts/ledger.py`}>a small script</a>, not the model,
+            says when it is done. It works with Claude Code, Codex, Cursor, Copilot, Gemini CLI and
+            any other agent that reads <code>SKILL.md</code>.
+          </p>
+          <InstallSwitcher />
+        </section>
 
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <p className="kicker">Development discipline for coding agents</p>
-            <h1>From vague request to verified change.</h1>
-            <p className="lede">
-              Oldhand turns any ticket, document, or prompt into understood,
-              researched, minimally implemented, browser-proven work.
-            </p>
-            <div className="hero-actions">
-              <button className="button button--primary" type="button" onClick={scrollToInstall}>
-                Install Oldhand
-                <ArrowDown size={19} weight="bold" />
-              </button>
-              <a
-                className="button button--secondary"
-                href="https://github.com/berwinsingh/oldhand#readme"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Read the skill
-                <ArrowRight size={19} />
-              </a>
-            </div>
-          </div>
-
-          <div className="stamp-wrap">
-            <img
-              src={asset("delivered-stamp.png")}
-              alt="Delivered: end-to-end proof, signed Oldhand, not just code"
-            />
-          </div>
-        </div>
-
-        <div className="hero-install">
-          <div className="section-bar">
-            <span>Two commands. Then give it the work.</span>
-            <span>NO CLONE · NO COPY · NO CONFIG FILE</span>
-          </div>
-          <InstallPanel compact />
-        </div>
-      </section>
-
-      <section className="section shell" aria-labelledby="failures-title">
-        <div className="section-heading">
-          <p className="kicker">The problem</p>
-          <h2 id="failures-title">The handoff is where agents fail.</h2>
+        <section id="how">
+          <h2>How it works</h2>
           <p>
-            Speed is useful. Speed without context, restraint, and proof is just
-            faster rework.
+            One request runs through the stages below in order; <code>rca</code> only for bugs,{" "}
+            <code>research</code> only when something new is built. Each stage is its own skill,
+            reads what the earlier ones wrote into <code>.oldhand/&lt;task&gt;/</code>, and can run
+            alone.
           </p>
-        </div>
-        <div className="failure-grid">
-          {failures.map(({ title, body, icon: Icon }, index) => (
-            <article className="failure-card" key={title}>
-              <div className="failure-index">0{index + 1}</div>
-              <Icon size={34} weight="duotone" />
-              <h3>{title}</h3>
-              <p>{body}</p>
-              <X className="failure-x" size={19} weight="bold" />
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section shell" id="process" aria-labelledby="process-title">
-        <div className="section-heading section-heading--row">
-          <div>
-            <p className="kicker">Oldhand inspection process</p>
-            <h2 id="process-title">One discipline. Every project.</h2>
-          </div>
-          <p>Understand first. Reuse what works. Prove the result.</p>
-        </div>
-        <div className="process-grid">
-          {steps.map(({ eyebrow, title, body, icon: Icon }) => (
-            <article className="process-step" key={title}>
-              <div className="process-icon">
-                <Icon size={30} weight="duotone" />
-              </div>
-              <span>{eyebrow}</span>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section shell split-section" id="orchestration">
-        <div className="intake-card" data-testid="source-intake">
-          <div className="card-title">
-            <span>ADAPTABLE SOURCES / INTAKE</span>
-            <small>{selectedSources.length} selected</small>
-          </div>
-          <div className="source-table" role="group" aria-label="Example work sources">
-            {sources.map(([source, example], index) => {
-              const checked = selectedSources.includes(index);
-              return (
-                <button
-                  type="button"
-                  className={checked ? "source-row is-selected" : "source-row"}
-                  onClick={() => toggleSource(index)}
-                  aria-pressed={checked}
-                  key={source}
-                >
-                  <span className="source-check">{checked && <Check size={15} weight="bold" />}</span>
-                  <strong>{source}</strong>
-                  <span>{example}</span>
-                </button>
-              );
-            })}
-          </div>
-          <p className="intake-note">
-            No tracker? No problem. Give Oldhand the prompt, assumptions, changed requirements, constraints, partial work, and proof you expect.
+          <ol className="stages">
+            {stages.map(([name, text]) => (
+              <li key={name}>
+                <a href={`${BLOB}skills/${name}/SKILL.md`}>{name}</a>
+                <span>{text}</span>
+              </li>
+            ))}
+          </ol>
+          <p>
+            Three standard-library Python tools keep it honest:{" "}
+            <a href={`${BLOB}skills/oldhand/scripts/ledger.py`}>ledger.py</a> records every check
+            against the exact working tree and computes the verdict,{" "}
+            <a href={`${BLOB}skills/oldhand-qa/scripts/qa.py`}>qa.py</a> deals the scenario briefs
+            and tallies the results, and{" "}
+            <a href={`${BLOB}skills/oldhand-build/scripts/mutate.py`}>mutate.py</a> proves a test
+            guards the fix.
           </p>
-        </div>
+        </section>
 
-        <div className="orchestration-card">
-          <div className="card-title">
-            <span>ORCHESTRATION CREW</span>
-            <small>Final verification returns to the lead</small>
+        <section id="stops">
+          <h2>What it will not do</h2>
+          <p>
+            The hard stops, as they appear at the top of{" "}
+            <a href={`${BLOB}skills/oldhand/SKILL.md`}>the conductor skill</a>. {data.hardStopsIntro}
+          </p>
+          <ol>{data.hardStops.map((item, i) => <li key={i}>{inline(item)}</li>)}</ol>
+        </section>
+
+        <section id="example">
+          <h2>Example run</h2>
+          <p>
+            A seeded bug in a small Python importer: a transient write failure plus a retry stored a
+            CSV batch twice. The prompt is in{" "}
+            <a href={`${BLOB}examples/README.md`}>examples/README.md</a>; the project and the task
+            folder the pack wrote (without its binary SQLite evidence) are in{" "}
+            <a href={`${REPO}/tree/main/examples/csv-import-dupes`}>examples/csv-import-dupes</a>.
+            The blocks below are read from its <code>report.md</code> at build time.
+          </p>
+          {data.verdict && <p className="verdict">{data.verdict}</p>}
+          <Table data={data.criteria} />
+          <h3>Root cause</h3>
+          <p>{inline(data.rootCause || "")}</p>
+          <h3>Not verified</h3>
+          <ul>{data.notVerified.map((item, i) => <li key={i}>{inline(item)}</li>)}</ul>
+          {data.computed && <p className="computed">{data.computed}</p>}
+        </section>
+
+        <section id="skill">
+          <h2>The skill</h2>
+          <p>
+            The conductor, <code>skills/oldhand/SKILL.md</code>, imported from the repository when
+            this page was built. The ten stage skills are linked above.
+          </p>
+          <div className="skill-actions">
+            <CopyButton value={skillText} label="Copy the whole SKILL.md" text="Copy raw" />
+            <a href={`${BLOB}skills/oldhand/SKILL.md`}>View on GitHub</a>
           </div>
+          <pre className="skill" tabIndex={0} aria-label="SKILL.md source">{skillText}</pre>
+        </section>
 
-          <article className="model-card model-card--orange">
-            <div>
-              <span>CLAUDE CODE</span>
-              <strong>Fable orchestrates</strong>
-            </div>
-            <p>Routes Haiku, Sonnet, and Opus by complexity. If Fable is unavailable, Opus becomes orchestrator and final verifier.</p>
-            <div className="model-status">
-              <span><Check size={15} />Understood</span>
-              <span><Check size={15} />Reused</span>
-              <span><Check size={15} />Browser verified</span>
-            </div>
-          </article>
+        <section id="models">
+          <h2>Models</h2>
+          <p>
+            The skills name roles, not models: the lead owns the contract, the review chair, the
+            final check and the release decision; workers implement, investigate, review and drive
+            QA; scouts sweep files, read logs and run read-only checks. One dated file,{" "}
+            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a>,
+            maps the roles to current models; this table is read from it ({data.modelsDate}):
+          </p>
+          <Table data={data.models} />
+          <p>
+            If a named model is missing, the agent uses the newest one the host offers in the same
+            role, never puts the lead below worker tier, and records the model that actually ran.
+          </p>
+        </section>
 
-          <article className="model-card model-card--green">
-            <div>
-              <span>CHATGPT CODEX</span>
-              <strong>GPT-5.6 Sol orchestrates</strong>
-            </div>
-            <p>Routes GPT-5.6 Terra and Luna by complexity, then owns the final proof.</p>
-            <div className="model-status">
-              <span><Check size={15} />Understood</span>
-              <span><Check size={15} />Reused</span>
-              <span><Check size={15} />Browser verified</span>
-            </div>
-          </article>
-        </div>
-      </section>
+        <section id="limits">
+          <h2>Honest scope</h2>
+          <ul>
+            <li>
+              It is instructions plus three small scripts, not a runtime. An agent can still ignore
+              it; the ledger only refuses to print VERIFIED without evidence on the current tree.
+            </li>
+            <li>
+              It costs turns and tokens. Review lenses and QA scenarios are sub-agents; the{" "}
+              <a href={`${BLOB}skills/oldhand/SKILL.md`}>conductor</a> tells you the count before
+              spawning more than ten.
+            </li>
+            <li>
+              Browser and desktop QA need a browser or computer-use tool on your host. Without one,{" "}
+              <a href={`${BLOB}skills/oldhand-qa/SKILL.md`}>oldhand-qa</a> reports UI scenarios as
+              blocked, never as passed.
+            </li>
+            <li>Skip it for typos, lookups and one-line edits. The skill says so itself.</li>
+            <li>
+              The example above ran in a host with no sub-agent tool, so its reviews and QA were run
+              by one agent in turn. Its report says so.
+            </li>
+          </ul>
+        </section>
+      </main>
 
-      <section className="section shell" id="proof" aria-labelledby="proof-title">
-        <div className="section-heading section-heading--row">
-          <div>
-            <p className="kicker">Browser inspection / proof receipt</p>
-            <h2 id="proof-title">Done means observed.</h2>
-          </div>
-          <div className="status-badge">
-            <CheckCircle size={21} weight="fill" />
-            Browser verified
-          </div>
-        </div>
-
-        <div className="proof-card">
-          <div className="proof-metadata">
-            <dl>
-              <div><dt>CHECK ID</dt><dd>OH-24-0517-0912</dd></div>
-              <div><dt>URL</dt><dd>/signup</dd></div>
-              <div><dt>VIEWPORT</dt><dd>Desktop 1280 × 800</dd></div>
-              <div><dt>MODE</dt><dd>Real browser / clean session</dd></div>
-            </dl>
-            <ol>
-              <li>Navigate from the real entry point</li>
-              <li>Complete the form with valid data</li>
-              <li>Submit and observe the success state</li>
-              <li>Reload and verify persisted behavior</li>
-            </ol>
-            <div className="proof-result">
-              <CheckCircle size={26} weight="fill" />
-              PASSED
-            </div>
-          </div>
-
-          <figure className="browser-evidence">
-            <div className="browser-bar">
-              <span />
-              <span />
-              <span />
-              <code>staging.example.com/signup</code>
-            </div>
-            <img
-              src={asset("browser-proof.png")}
-              alt="Successful signup flow shown in a real browser verification capture"
-            />
-            <figcaption>
-              Screenshot captured after the final integrated flow passed.
-            </figcaption>
-          </figure>
-        </div>
-
-        <div className="evidence-strip">
-          <span><FileText size={20} />screenshot.png</span>
-          <span><TerminalWindow size={20} />console.log</span>
-          <span><PlugsConnected size={20} />network.har</span>
-          <span><Code size={20} />diff.patch</span>
-          <span><ClipboardText size={20} />delivery-notes.md</span>
-        </div>
-      </section>
-
-      <section className="section shell principles" aria-labelledby="principles-title">
-        <div className="section-heading">
-          <p className="kicker">Built-in restraint</p>
-          <h2 id="principles-title">Less code. More proof.</h2>
-        </div>
-        <div className="principle-grid">
-          <article>
-            <MagnifyingGlass size={34} weight="duotone" />
-            <span>01</span>
-            <h3>Research before inventing</h3>
-            <p>
-              Compare real, maintained MIT and Apache-2.0 implementations before
-              adding a new pattern or dependency.
-            </p>
-          </article>
-          <article>
-            <Sparkle size={34} weight="duotone" />
-            <span>02</span>
-            <h3>Ponytail the change</h3>
-            <p>
-              Reuse the codebase, standard library, native platform, and installed
-              dependencies before writing anything new.
-            </p>
-          </article>
-          <article>
-            <SealCheck size={34} weight="duotone" />
-            <span>03</span>
-            <h3>Keep ownership at the top</h3>
-            <p>
-              Delegation helps with speed. The orchestrator still integrates,
-              verifies, and owns the final answer.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section className="section install-section" id="install" aria-labelledby="install-title">
-        <div className="shell">
-          <div className="install-heading">
-            <div>
-              <p className="kicker">Install Oldhand</p>
-              <h2 id="install-title">Two commands. That’s it.</h2>
-            </div>
-            <p>
-              The skill, manifests, model routing, research gates, and browser
-              definition of done arrive together.
-            </p>
-          </div>
-          <InstallPanel />
-          <div className="install-footer">
-            <strong>Give it the work. Get back proof.</strong>
-            <a
-              href="https://github.com/berwinsingh/oldhand#integrations"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Optional integrations and MCPs
-              <ArrowRight size={18} />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <footer className="site-footer">
-        <div>
-          <strong>OLDHAND</strong>
-          <span>Development discipline for Claude Code and ChatGPT Codex.</span>
-        </div>
-        <div>
-          <a href="https://github.com/berwinsingh/oldhand" target="_blank" rel="noreferrer">
-            GitHub
-          </a>
-          <a href="https://github.com/berwinsingh/oldhand/blob/main/LICENSE" target="_blank" rel="noreferrer">
-            MIT License
-          </a>
-          <button type="button" className="analytics-preferences" onClick={() => setAnalyticsChoice(null)}>
-            Analytics preferences
+      <footer>
+        <span>oldhand v{data.version} · MIT · Berwin Singh</span>
+        <nav aria-label="Project links">
+          <a href={REPO}>GitHub</a>
+          <a href={`${REPO}/issues`}>Issues</a>
+          <a href={`${REPO}/discussions`}>Discussions</a>
+          <a href={`${BLOB}SECURITY.md`}>Security</a>
+        </nav>
+        <p className="analytics">
+          {analytics === "granted" ? "Google Analytics is on." : "Google Analytics is off; nothing is sent."}{" "}
+          <button type="button" className="link" onClick={toggleAnalytics}>
+            {analytics === "granted" ? "Turn it off" : "Turn on Google Analytics"}
           </button>
-        </div>
+          {" · "}
+          <a href="https://policies.google.com/technologies/partner-sites">How Google uses data</a>
+        </p>
       </footer>
-
-      <AnalyticsConsent choice={analyticsChoice} onChoose={chooseAnalytics} />
-    </main>
+    </>
   );
 }

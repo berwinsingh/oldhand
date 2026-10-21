@@ -6,6 +6,11 @@ on:
     paths:
       - "site/**"
       - ".github/workflows/pages.yml"
+      # the page imports these at build time
+      - "skills/oldhand/SKILL.md"
+      - "skills/oldhand/references/orchestration.md"
+      - "examples/**"
+      - ".claude-plugin/plugin.json"
   workflow_dispatch:
 
 permissions:

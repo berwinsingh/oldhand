@@ -1,0 +1,19 @@
+S1 console and network, tab-7, http://localhost:4180/ (Vite dev server), whole session from the first load of this tab.
+
+Console (read_console_messages, no filter):
+  [debug] [vite] connecting...
+  [debug] [vite] connected.
+  [info] Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+No warnings, no errors. A window 'error' and 'unhandledrejection' listener I added around the Copy clicks recorded nothing.
+
+Network (read_network_requests): 18 requests, all 200 OK, no failures:
+  GET /  /@vite/client  /src/main.jsx  /@react-refresh  /node_modules/.vite/deps/react_jsx-dev-runtime.js  react.js  react-dom_client.js
+  /src/App.jsx  /src/styles.css  /node_modules/vite/dist/client/env.mjs  /node_modules/.vite/deps/chunk-H5I4P4DR.js
+  /@fs/Users/berwinsingh/Documents/oldhand/skills/oldhand/SKILL.md?import&raw
+  /@fs/Users/berwinsingh/Documents/oldhand/examples/csv-import-dupes/oldhand/report.md?import&raw
+  /@fs/Users/berwinsingh/Documents/oldhand/skills/oldhand/references/orchestration.md?import&raw
+  /@fs/Users/berwinsingh/Documents/oldhand/.claude-plugin/plugin.json?import
+  /src/analytics.js  /src/slices.js  /node_modules/.vite/deps/chunk-5SC5K45T.js
+Failed requests: none.
+
+Context: the Browser pane is shared with other tabs on localhost:4180 and 127.0.0.1:4193 that I did not open. I worked only in tab-7 and checked location.href = http://localhost:4180/ before each reading. localStorage on this origin held one key, 'oldhand-install-tab', which I did not set (another tab on the same origin did); it concerns the Install tab and does not affect S1.

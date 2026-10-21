@@ -1,0 +1,27 @@
+Rendered text of <section id="example"> on http://localhost:4180/#example (from get_page_text; cells separated by tabs in the original, shown here with " | ").
+
+Example run
+
+A seeded bug in a small Python importer: a transient write failure plus a retry stored a CSV batch twice. The prompt is in examples/README.md; the project and the task folder the pack wrote (without its binary SQLite evidence) are in examples/csv-import-dupes. The blocks below are read from its report.md at build time.
+
+Verdict: VERIFIED
+
+criterion | outcome | proof | status | by
+AC1 | With a transient "database is locked" failure injected right after a batch's rows are written (IMPORTER_FAULTS=progress:1) and --retries 3, python -m importer import samples/products.csv --batch-size 2 exits 0 and the database holds each batch exactly once: 5 records, batch_no counts 2/2/1, and importer list shows batches=3 rows=5 stored=5 | e2e | pass | lead:opus-5.5
+AC2 | A sloppy real-world file (UTF-8 BOM, CRLF line endings, padded cells; and the .tsv variant) imported under the same transient failure also stores each row exactly once | e2e | pass | qa:worker
+R1 | An import with no failures behaves as before: exit 0, prints import <id>: 5 rows in 3 batches, 5 records stored, list counters match | e2e | pass | qa:worker
+R2 | import FILE --dry-run still prints dry run: <n> rows in <m> batches, nothing written and creates no database file | e2e | pass | qa:scout
+R3 | The CLI keeps its flags: import FILE [--db] [--retries N] [--batch-size N] [--dry-run] and list [--db] are accepted exactly as before | e2e | pass | qa:scout
+R4 | A file with a bad row still stops with exit 2 and error: line <n>: bad row ..., marks the import failed, and keeps the batches before the bad row stored once (added by trace: same error path in cmd_import) | e2e | pass | qa:worker
+
+Root cause
+
+(traced + observed, rca.md) write_batch (importer/batches.py) was retried as a unit by with_retries but was not atomic: it committed the rows before the progress update, and any failure inside its transaction, the COMMIT included, left the transaction open on the shared connection, so the retry's INSERTs joined it. The user's "no idempotency key" is true but not the cause; an atomic, rolled-back batch makes the retry safe without a schema change. Observed on Python 3.9.6: with conn: does not roll back a failed COMMIT, so the fix rolls back explicitly.
+
+Not verified
+- Independence: every review lens, refuter and QA scenario was run by the lead, not by independent agents. The ledger's qa:worker / qa:scout labels come from the scenario tier field, not from who ran them; the lead ran all of them.
+- CPython 3.12+ behaviour (only /usr/bin/python3 3.9.6 here). The explicit rollback is correct either way (assumed).
+- A real lock end to end through the CLI: shown in-process only (probe 1 and the second unit check); the CLI scenarios use the project's fault hook.
+- Per-batch counts are checked by the lead and the replay harness only; the QA brief forbids reading the database.
+
+Computed by ledger.py from ledger.json at 2026-10-10T19:17:57+00:00 on tree 4c043ed41b:4a2697fb:e3b0c442. Not written by hand.

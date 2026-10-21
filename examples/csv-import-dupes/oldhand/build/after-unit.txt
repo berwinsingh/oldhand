@@ -1,0 +1,17 @@
+test_dry_run_writes_nothing (test_importer.CliTest) ... ok
+test_import_csv (test_importer.CliTest) ... ok
+test_bad_qty (test_importer.ReadBatchesTest) ... ok
+test_csv_batches (test_importer.ReadBatchesTest) ... ok
+test_tsv_batches (test_importer.ReadBatchesTest) ... ok
+test_does_not_retry_other_errors (test_importer.RetryTest) ... ok
+test_gives_up (test_importer.RetryTest) ... ok
+test_retries_transient_then_succeeds (test_importer.RetryTest) ... ok
+test_retry_after_commit_lock_stores_batch_once (test_importer.WriteBatchTest) ... ok
+test_retry_after_failure_after_insert_stores_batch_once (test_importer.WriteBatchTest) ... ok
+test_retry_after_failure_before_insert (test_importer.WriteBatchTest) ... ok
+test_writes_rows_and_progress (test_importer.WriteBatchTest) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.590s
+
+OK

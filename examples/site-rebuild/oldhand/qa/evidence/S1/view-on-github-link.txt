@@ -1,0 +1,14 @@
+S1 expectation 3: 'View on GitHub' link target
+Page: http://localhost:4180/, section #skill, read from the live DOM (not clicked; it is an external site, the steps ask only to note the target).
+
+<div class="skill-actions"><button class="copy" type="button" aria-label="Copy the whole SKILL.md"><span role="status">Copy raw</span></button><a href="https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md">View on GitHub</a></div>
+
+link text:            View on GitHub
+href attribute:       https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+resolved a.href:      https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+target attribute:     (none, opens in same tab)
+It is the only <a> inside <section id="skill">.
+Expected:             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+Exact string match.
+
+Result: HOLDS.

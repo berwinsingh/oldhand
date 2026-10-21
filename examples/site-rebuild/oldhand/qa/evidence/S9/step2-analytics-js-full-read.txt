@@ -1,0 +1,65 @@
+# Step 2. cat -n of /Users/berwinsingh/Documents/oldhand/site/src/analytics.js (read-only)
+
+     1	// Opt-in Google Analytics. Nothing loads until a stored "granted" choice exists.
+     2	export const GA_MEASUREMENT_ID = "G-75YW6HE9FT";
+     3	export const ANALYTICS_CONSENT_KEY = "oldhand-analytics-consent";
+     4	
+     5	export function readAnalyticsChoice(storage) {
+     6	  try {
+     7	    const store = storage || window.localStorage;
+     8	    const choice = store.getItem(ANALYTICS_CONSENT_KEY);
+     9	    return choice === "granted" || choice === "denied" ? choice : null;
+    10	  } catch {
+    11	    return null;
+    12	  }
+    13	}
+    14	
+    15	export function saveAnalyticsChoice(choice, storage) {
+    16	  try {
+    17	    (storage || window.localStorage).setItem(ANALYTICS_CONSENT_KEY, choice);
+    18	  } catch {
+    19	    // The choice still applies for this page when storage is unavailable.
+    20	  }
+    21	}
+    22	
+    23	export function loadAnalytics(win, doc) {
+    24	  const w = win || window;
+    25	  const d = doc || document;
+    26	  w.dataLayer = w.dataLayer || [];
+    27	  w.gtag =
+    28	    w.gtag ||
+    29	    function gtag() {
+    30	      w.dataLayer.push(arguments);
+    31	    };
+    32	
+    33	  if (d.querySelector("script[data-oldhand-analytics]")) {
+    34	    w.gtag("consent", "update", { analytics_storage: "granted" });
+    35	    return;
+    36	  }
+    37	
+    38	  w.gtag("consent", "default", {
+    39	    analytics_storage: "denied",
+    40	    ad_storage: "denied",
+    41	    ad_user_data: "denied",
+    42	    ad_personalization: "denied",
+    43	  });
+    44	  w.gtag("consent", "update", { analytics_storage: "granted" });
+    45	  w.gtag("js", new Date());
+    46	  w.gtag("config", GA_MEASUREMENT_ID);
+    47	
+    48	  const script = d.createElement("script");
+    49	  script.async = true;
+    50	  script.dataset.oldhandAnalytics = "true";
+    51	  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    52	  d.head.appendChild(script);
+    53	}
+    54	
+    55	// Apply a choice: only "granted" loads anything; "denied" tells an already
+    56	// loaded gtag to stop; null (no choice yet) does nothing.
+    57	export function applyAnalyticsChoice(choice, win, doc) {
+    58	  const w = win || window;
+    59	  if (choice === "granted") loadAnalytics(w, doc);
+    60	  else if (choice === "denied" && typeof w.gtag === "function") {
+    61	    w.gtag("consent", "update", { analytics_storage: "denied" });
+    62	  }
+    63	}

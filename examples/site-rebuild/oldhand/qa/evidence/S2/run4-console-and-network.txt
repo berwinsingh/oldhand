@@ -1,0 +1,13 @@
+S2 run console and network (tab-8, http://localhost:4180/, whole session)
+
+CONSOLE (read_console_messages, all levels):
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[info] Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+No console errors and no warnings.
+
+NETWORK (read_network_requests): 18 requests, all 200 OK:
+GET / ; /@vite/client ; /src/main.jsx ; /@react-refresh ; react_jsx-dev-runtime.js ; react.js ; react-dom_client.js ; /src/App.jsx ; /src/styles.css ; vite env.mjs ; chunk-H5I4P4DR.js ; @fs/.../skills/oldhand/SKILL.md?import&raw ; @fs/.../examples/csv-import-dupes/oldhand/report.md?import&raw ; @fs/.../skills/oldhand/references/orchestration.md?import&raw ; @fs/.../.claude-plugin/plugin.json?import ; /src/analytics.js ; /src/slices.js ; chunk-5SC5K45T.js
+No failed requests.
+
+Note: the app is served by the Vite dev server (HMR client connected), not a production build.

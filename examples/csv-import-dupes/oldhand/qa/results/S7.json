@@ -1,0 +1,13 @@
+{
+ "id": "S7",
+ "status": "pass",
+ "observed": "Printed 'dry run: 3 rows in 1 batches, nothing written', exit=0. ls of the evidence folder showed it empty: no s7.db.",
+ "expected": "stdout is 'dry run: 3 rows in 1 batches, nothing written' and exit=0 | the listing shows no file s7.db",
+ "evidence": [
+  "<project>/.oldhand/csv-import-dupes/qa/evidence/S7/run.txt"
+ ],
+ "console_errors": [],
+ "network_failures": [],
+ "blocker": "",
+ "notes": "The ls ran before the transcript file was saved, so the folder was empty. Run by the lead in turn (no sub-agent tool on this host)."
+}

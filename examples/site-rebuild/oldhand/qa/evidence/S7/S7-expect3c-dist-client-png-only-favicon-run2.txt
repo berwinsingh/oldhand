@@ -1,0 +1,12 @@
+$ find dist/client -iname '*.png'
+-rw-r--r--@ 1 berwinsingh  staff  8464 Oct 11 12:29 dist/client/favicon.png
+png_count=1
+
+$ every file under dist/client that is not favicon.png and ends in .png (must be empty)
+non_favicon_png_count=0
+
+$ full file list dist/client
+dist/client/assets/index-BwbMMN0x.js
+dist/client/assets/index-CZXhnbve.css
+dist/client/favicon.png
+dist/client/index.html

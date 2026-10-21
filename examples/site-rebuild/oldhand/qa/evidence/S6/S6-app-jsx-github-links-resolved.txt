@@ -1,0 +1,35 @@
+# Step 1: every GitHub link expression in site/src/App.jsx, resolved (REPO and BLOB constants from lines 9-10)
+# command: uv run python3 -I -c '<regex extraction over src/App.jsx>'
+stage names parsed from App.jsx: 11
+line  source expression                                          resolved URL
+9     https://github.com/berwinsingh/oldhand                     https://github.com/berwinsingh/oldhand
+10    ${REPO}/blob/main/                                         https://github.com/berwinsingh/oldhand/blob/main/
+50    https://github.com/berwinsingh/oldhand                     https://github.com/berwinsingh/oldhand
+193   ${BLOB}skills/oldhand/references/hosts.md                  https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/references/hosts.md
+234   ${BLOB}skills/oldhand/scripts/ledger.py                    https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/scripts/ledger.py
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-contract/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-trace/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-rca/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-research/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-plan/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-build/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-review/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-qa/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-ship/SKILL.md
+252   ${BLOB}skills/${name}/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-learn/SKILL.md
+259   ${BLOB}skills/oldhand/scripts/ledger.py                    https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/scripts/ledger.py
+261   ${BLOB}skills/oldhand-qa/scripts/qa.py                     https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-qa/scripts/qa.py
+263   ${BLOB}skills/oldhand-build/scripts/mutate.py              https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-build/scripts/mutate.py
+272   ${BLOB}skills/oldhand/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+282   ${BLOB}examples/README.md                                  https://github.com/berwinsingh/oldhand/blob/main/examples/README.md
+284   ${REPO}/tree/main/examples/csv-import-dupes                https://github.com/berwinsingh/oldhand/tree/main/examples/csv-import-dupes
+304   ${BLOB}skills/oldhand/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+315   ${BLOB}skills/oldhand/references/orchestration.md          https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/references/orchestration.md
+334   ${BLOB}skills/oldhand/SKILL.md                             https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand/SKILL.md
+339   ${BLOB}skills/oldhand-qa/SKILL.md                          https://github.com/berwinsingh/oldhand/blob/main/skills/oldhand-qa/SKILL.md
+355   ${REPO}/issues                                             https://github.com/berwinsingh/oldhand/issues
+356   ${REPO}/discussions                                        https://github.com/berwinsingh/oldhand/discussions
+357   ${BLOB}SECURITY.md                                         https://github.com/berwinsingh/oldhand/blob/main/SECURITY.md
+bare {REPO} JSX references (no path, not matched above): lines [223, 354]
+unique resolved URLs: 23

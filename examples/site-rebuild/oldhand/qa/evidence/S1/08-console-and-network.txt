@@ -1,0 +1,16 @@
+Console and network for S1 (http://localhost:4180/, Vite dev server)
+
+tab-3 (the tab used for the final Copy check), console:
+  [debug] [vite] connecting...
+  [debug] [vite] connected.
+  [info] Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+  (the same three lines again for a second load)
+  No warnings, no errors.
+
+tab-2 (first tab, used for the list, block and link checks): console read 'No console logs.' when I read it, but by then that tab had been taken over (see below), so it says nothing about the earlier page.
+
+Network, tab-3 and tab-2 on localhost:4180: every request returned 200 OK. That includes GET /, /@vite/client, /src/main.jsx, /src/App.jsx, /src/styles.css, /src/analytics.js, the React deps, and
+  GET /@fs/Users/berwinsingh/Documents/oldhand/skills/oldhand/SKILL.md?import&raw -> 200 OK
+No failed requests.
+
+Oddity: tab-2, which I had opened at http://localhost:4180/, was later found at http://127.0.0.1:4193/ (title 'Oldhand', assets /assets/index-*.js and .css, all 200). I did not navigate it there, so another process sharing the Browser pane probably did. I stopped using tab-2 and finished the Copy check in a new tab (tab-3) loaded from http://localhost:4180/. All comparisons of the list, block and link were taken on localhost:4180 before that happened.

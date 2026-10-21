@@ -1,0 +1,30 @@
+{
+ "build": "A: build served at start of run (App.jsx ?t=1791662819435, styles.css ?t=1791661927297; before the 11:37 source edits)",
+ "url": "http://localhost:4180/",
+ "tool": "Browser pane, mobile preset 375x812, colour scheme dark (same page load as the light run, scheme switched without reload)",
+ "scheme": "dark",
+ "innerWidth": 910,
+ "innerHeight": 1972,
+ "scrollWidth": 910,
+ "bodyScrollWidth": 910,
+ "clientWidth": 375,
+ "visualViewport": {"width": 375, "scale": 1},
+ "viewportMeta": "width=device-width, initial-scale=1.0",
+ "scrollWidthEqualsInnerWidth": true,
+ "horizontalOverflowVsRealViewport": "scrollWidth 910 vs clientWidth/visualViewport 375 = 535px of overflow (same as light; innerWidth inflated by the emulation)",
+ "visibleElementsExtendingPastClientWidth": ["a. right=427", "button. right=389", "button.is-active right=477", "pre. right=910", "code. right=896", "thead. right=415", "tr. right=415", "th. right=415", "tbody. right=415", "td. right=415"],
+ "textElementsScanned": 185,
+ "minVisibleFontSizePx": 13.5,
+ "minVisibleElement": "code \"IMPORTER_FAULTS=progress:\"",
+ "elementsBelow13px": [],
+ "pseudoElementsBelow13px": [],
+ "contrast": {
+  "bodyText": {"color": "#ecebe6", "effectiveBackgroundHex": "#141413", "fontSize": "16px", "ratioAgainstEffectiveBackground": 15.44, "ratioAgainstPageBackground": 15.44},
+  "paragraphText": {"color": "#ecebe6", "effectiveBackgroundHex": "#141413", "fontSize": "17px", "ratioAgainstEffectiveBackground": 15.44},
+  "linkInContent": {"label": "a 'oldhand' (first link in main)", "color": "#f08a5d", "effectiveBackgroundHex": "#141413", "fontSize": "15px", "ratioAgainstEffectiveBackground": 7.46},
+  "linkInNav": {"label": "Install", "color": "#ecebe6", "effectiveBackgroundHex": "#141413", "ratioAgainstEffectiveBackground": 15.44},
+  "linkInFooter": {"label": "GitHub", "color": "#f08a5d", "effectiveBackgroundHex": "#141413", "ratioAgainstEffectiveBackground": 7.46},
+  "selectedTab": {"label": "button.is-active 'Git clone'", "color": "#ecebe6", "effectiveBackgroundHex": "#1d1d1b", "pageBackgroundHex": "#141413", "fontSize": "15px", "ratioAgainstEffectiveBackground": 14.14, "ratioAgainstPageBackground": 15.44}
+ },
+ "visibleTextElementsFailingAA": []
+}

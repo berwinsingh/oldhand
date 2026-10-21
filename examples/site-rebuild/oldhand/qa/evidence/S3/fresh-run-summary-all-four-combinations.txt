@@ -1,0 +1,69 @@
+S3 fresh run: summary of the four combinations (headless Chrome via Playwright, isolated fresh context per combination)
+
+== 1440x900-light ==
+scheme dark=False  innerWidth=1440  documentElement.scrollWidth=1440  body.scrollWidth=1440  -> horizontal page scroll: NO
+text nodes checked=269  rendered text nodes with computed font-size < 13px: 0 (any, incl. hidden: 0; pseudo-element text <13px: 0)
+rendered font sizes (px: text-node count): {'14': 8, '15': 136, '17': 71, '18': 1, '19': 5, '20': 2, '28': 6, '48': 1, '17.1': 1, '15.3': 14, '13.5': 24}
+contrast (WCAG 2.x relative luminance; threshold 4.5 for text under 24px):
+  body (inherited text colour)           colour rgb(27, 27, 24)      size 17px  page bg #fbfaf7  ratio vs page bg 16.54  bg actually behind it #fbfaf7 ratio 16.54
+  first paragraph                        colour rgb(27, 27, 24)      size 19px  page bg #fbfaf7  ratio vs page bg 16.54  bg actually behind it #fbfaf7 ratio 16.54
+  link: nav "Install"                    colour rgb(27, 27, 24)      size 15px  page bg #fbfaf7  ratio vs page bg 16.54  bg actually behind it #fbfaf7 ratio 16.54
+  link: in-content "hosts.md"            colour rgb(180, 68, 28)     size 15px  page bg #fbfaf7  ratio vs page bg  5.32  bg actually behind it #f2f0ea ratio  4.87
+  link: footer first link                colour rgb(180, 68, 28)     size 15px  page bg #fbfaf7  ratio vs page bg  5.32  bg actually behind it #fbfaf7 ratio  5.32
+  selected tab                           colour rgb(27, 27, 24)      size 15px  page bg #fbfaf7  ratio vs page bg 16.54  bg actually behind it #f2f0ea ratio 15.15
+  unselected tab (extra)                 colour rgb(92, 90, 83)      size 15px  page bg #fbfaf7  ratio vs page bg  6.61  bg actually behind it #f2f0ea ratio  6.06
+  all rendered text, grouped by colour/background pairs, lowest ratio: 4.87 (#b4441c on #f2f0ea, e.g. a: hosts.md); pairs under threshold: 0
+  console: ['debug: [vite] connecting...', 'debug: [vite] connected.', 'info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold']
+  failed requests / HTTP>=400: []
+
+== 1440x900-dark ==
+scheme dark=True  innerWidth=1440  documentElement.scrollWidth=1440  body.scrollWidth=1440  -> horizontal page scroll: NO
+text nodes checked=269  rendered text nodes with computed font-size < 13px: 0 (any, incl. hidden: 0; pseudo-element text <13px: 0)
+rendered font sizes (px: text-node count): {'14': 8, '15': 136, '17': 71, '18': 1, '19': 5, '20': 2, '28': 6, '48': 1, '17.1': 1, '15.3': 14, '13.5': 24}
+contrast (WCAG 2.x relative luminance; threshold 4.5 for text under 24px):
+  body (inherited text colour)           colour rgb(236, 235, 230)   size 17px  page bg #141413  ratio vs page bg 15.44  bg actually behind it #141413 ratio 15.44
+  first paragraph                        colour rgb(236, 235, 230)   size 19px  page bg #141413  ratio vs page bg 15.44  bg actually behind it #141413 ratio 15.44
+  link: nav "Install"                    colour rgb(236, 235, 230)   size 15px  page bg #141413  ratio vs page bg 15.44  bg actually behind it #141413 ratio 15.44
+  link: in-content "hosts.md"            colour rgb(240, 138, 93)    size 15px  page bg #141413  ratio vs page bg  7.46  bg actually behind it #1d1d1b ratio  6.83
+  link: footer first link                colour rgb(240, 138, 93)    size 15px  page bg #141413  ratio vs page bg  7.46  bg actually behind it #141413 ratio  7.46
+  selected tab                           colour rgb(236, 235, 230)   size 15px  page bg #141413  ratio vs page bg 15.44  bg actually behind it #1d1d1b ratio 14.14
+  unselected tab (extra)                 colour rgb(163, 160, 151)   size 15px  page bg #141413  ratio vs page bg  7.05  bg actually behind it #1d1d1b ratio  6.46
+  all rendered text, grouped by colour/background pairs, lowest ratio: 6.46 (#a3a097 on #1d1d1b, e.g. button: Claude Code plugin); pairs under threshold: 0
+  console: ['debug: [vite] connecting...', 'debug: [vite] connected.', 'info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold']
+  failed requests / HTTP>=400: []
+
+== 375x812-mobile-light ==
+scheme dark=False  innerWidth=375  documentElement.scrollWidth=375  body.scrollWidth=375  -> horizontal page scroll: NO
+text nodes checked=269  rendered text nodes with computed font-size < 13px: 0 (any, incl. hidden: 0; pseudo-element text <13px: 0)
+rendered font sizes (px: text-node count): {'14': 8, '15': 136, '16': 71, '17': 4, '18': 1, '19': 1, '20': 2, '22': 6, '32': 1, '15.3': 1, '14.4': 14, '13.5': 24}
+contrast (WCAG 2.x relative luminance; threshold 4.5 for text under 24px):
+  body (inherited text colour)           colour rgb(27, 27, 24)      size 16px  page bg #fbfaf7  ratio vs page bg 16.54  bg actually behind it #fbfaf7 ratio 16.54
+  first paragraph                        colour rgb(27, 27, 24)      size 17px  page bg #fbfaf7  ratio vs page bg 16.54  bg actually behind it #fbfaf7 ratio 16.54
+  link: nav "Install"                    colour rgb(27, 27, 24)      size 15px  page bg #fbfaf7  ratio vs page bg 16.54  bg actually behind it #fbfaf7 ratio 16.54
+  link: in-content "hosts.md"            colour rgb(180, 68, 28)     size 15px  page bg #fbfaf7  ratio vs page bg  5.32  bg actually behind it #f2f0ea ratio  4.87
+  link: footer first link                colour rgb(180, 68, 28)     size 15px  page bg #fbfaf7  ratio vs page bg  5.32  bg actually behind it #fbfaf7 ratio  5.32
+  selected tab                           colour rgb(27, 27, 24)      size 15px  page bg #fbfaf7  ratio vs page bg 16.54  bg actually behind it #f2f0ea ratio 15.15
+  unselected tab (extra)                 colour rgb(92, 90, 83)      size 15px  page bg #fbfaf7  ratio vs page bg  6.61  bg actually behind it #f2f0ea ratio  6.06
+  all rendered text, grouped by colour/background pairs, lowest ratio: 4.87 (#b4441c on #f2f0ea, e.g. a: hosts.md); pairs under threshold: 0
+  console: ['debug: [vite] connecting...', 'debug: [vite] connected.', 'info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold']
+  failed requests / HTTP>=400: []
+
+== 375x812-mobile-dark ==
+scheme dark=True  innerWidth=375  documentElement.scrollWidth=375  body.scrollWidth=375  -> horizontal page scroll: NO
+text nodes checked=269  rendered text nodes with computed font-size < 13px: 0 (any, incl. hidden: 0; pseudo-element text <13px: 0)
+rendered font sizes (px: text-node count): {'14': 8, '15': 136, '16': 71, '17': 4, '18': 1, '19': 1, '20': 2, '22': 6, '32': 1, '15.3': 1, '14.4': 14, '13.5': 24}
+contrast (WCAG 2.x relative luminance; threshold 4.5 for text under 24px):
+  body (inherited text colour)           colour rgb(236, 235, 230)   size 16px  page bg #141413  ratio vs page bg 15.44  bg actually behind it #141413 ratio 15.44
+  first paragraph                        colour rgb(236, 235, 230)   size 17px  page bg #141413  ratio vs page bg 15.44  bg actually behind it #141413 ratio 15.44
+  link: nav "Install"                    colour rgb(236, 235, 230)   size 15px  page bg #141413  ratio vs page bg 15.44  bg actually behind it #141413 ratio 15.44
+  link: in-content "hosts.md"            colour rgb(240, 138, 93)    size 15px  page bg #141413  ratio vs page bg  7.46  bg actually behind it #1d1d1b ratio  6.83
+  link: footer first link                colour rgb(240, 138, 93)    size 15px  page bg #141413  ratio vs page bg  7.46  bg actually behind it #141413 ratio  7.46
+  selected tab                           colour rgb(236, 235, 230)   size 15px  page bg #141413  ratio vs page bg 15.44  bg actually behind it #1d1d1b ratio 14.14
+  unselected tab (extra)                 colour rgb(163, 160, 151)   size 15px  page bg #141413  ratio vs page bg  7.05  bg actually behind it #1d1d1b ratio  6.46
+  all rendered text, grouped by colour/background pairs, lowest ratio: 6.46 (#a3a097 on #1d1d1b, e.g. button: Claude Code plugin); pairs under threshold: 0
+  console: ['debug: [vite] connecting...', 'debug: [vite] connected.', 'info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold']
+  failed requests / HTTP>=400: []
+
+Text smaller than 14px (what sits just above the 13px line):
+  1440 light: {"13.5px code": 24}
+  375 mobile dark: {"13.5px code": 24}

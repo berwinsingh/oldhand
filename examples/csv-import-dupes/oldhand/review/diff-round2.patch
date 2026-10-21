@@ -1,0 +1,31 @@
+--- .oldhand/csv-import-dupes/review/pre-fix/test_importer.py	2026-10-11 00:43:46
++++ tests/test_importer.py	2026-10-11 00:44:04
+@@ -88,7 +88,28 @@
+         self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM records").fetchone()[0], 2)
+         self.assertEqual(self.conn.execute("SELECT batches_done, rows_done FROM imports").fetchone(), (1, 2))
+ 
++    def test_retry_after_commit_lock_stores_batch_once(self):
++        db = os.path.join(tempfile.mkdtemp(), "t.db")
++        conn = connect(db)
++        self.addCleanup(conn.close)
++        import_id = start_import(conn, "t.csv")
++        reader = sqlite3.connect(db, isolation_level=None)
++        self.addCleanup(reader.close)
++        reader.execute("BEGIN")
++        reader.execute("SELECT COUNT(*) FROM records").fetchone()  # SHARED lock: the batch COMMIT is refused
++        retries = []
+ 
++        def release(msg):
++            retries.append(msg)
++            if reader.in_transaction:
++                reader.execute("ROLLBACK")
++
++        with_retries(lambda: write_batch(conn, import_id, 1, [("A", "a", 1), ("B", "b", 2)]), delay=0, log=release)
++        self.assertEqual(len(retries), 1)
++        self.assertEqual(conn.execute("SELECT COUNT(*) FROM records").fetchone()[0], 2)
++        self.assertEqual(conn.execute("SELECT batches_done, rows_done FROM imports").fetchone(), (1, 2))
++
++
+ class CliTest(unittest.TestCase):
+     def setUp(self):
+         faults.reset()

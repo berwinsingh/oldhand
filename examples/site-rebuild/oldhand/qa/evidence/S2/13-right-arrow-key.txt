@@ -1,0 +1,12 @@
+S2 / expectation 4: the right arrow key moves the selection to the next tab.
+Page: http://localhost:4180/ at 1440x900.
+
+Before: clicked the "Any agent" tab (real click). document.activeElement.id = tab-any.
+  aria-selected: tab-any=true, tab-claude=false, tab-codex=false, tab-git=false
+Action: pressed ArrowRight once (real key press in the browser pane).
+After:
+  document.activeElement.id = tab-claude
+  aria-selected: tab-any=false, tab-claude=true, tab-codex=false, tab-git=false
+  open tabpanel id = panel-claude (shows the two /plugin commands and "Tested 2026-10-11 with Claude Code 2.1.274.")
+Result: selection moved from Any agent to the next tab, Claude Code plugin, and focus moved with it. See 06-after-right-arrow-from-any-agent.jpg (Claude Code plugin tab selected with a focus ring).
+Only this one step (Any agent -> Claude Code plugin) was exercised with the key; the wrap-around and left arrow were not tested.

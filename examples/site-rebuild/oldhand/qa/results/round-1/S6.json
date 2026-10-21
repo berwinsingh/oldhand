@@ -1,0 +1,17 @@
+{
+  "id": "S6",
+  "status": "pass",
+  "observed": "1) cd /Users/berwinsingh/Documents/oldhand/site && npm run build exited 0 and produced dist/client/index.html and dist/client/assets/index-Cnbwz_nJ.js. 2) Extracted every github.com/berwinsingh/oldhand link from App.jsx and the built bundle. The bundle holds the repo base as const Da and the blob/tree suffixes separately, so no full URL is a literal there. Page anchors: 11 stage links (blob/main/skills/<name>/SKILL.md), 3 script links (ledger.py, qa.py, mutate.py), skills/oldhand/SKILL.md (2 links), skills/oldhand/references/orchestration.md, SECURITY.md, tree/main/examples/csv-import-dupes, plus repo root, /issues and /discussions. Checked all 16 blob/tree file paths and the one tree directory against the working tree at /Users/berwinsingh/Documents/oldhand (branch enhance/oldhand-2) with exact-case, component-by-component checks: all found. 3) The stages array in App.jsx lines 59-71 has 11 names in the required order, and the built bundle carries the same order. 4) The models table (App.jsx lines 351-374) has host, lead, worker and scout columns and 6 host rows (Claude Code, Codex, GitHub Copilot, Cursor, Gemini CLI/Antigravity, OpenCode). The sentence before it reads 'maps the roles to current models (as of October 2026):'. The sentence after it gives the substitution rule: use the newest model the host offers in the same role, never put the lead below worker tier, and record the model that actually ran.",
+  "expected": "Every blob/tree path exists in the working tree (a list of the paths checked, each marked found). The stage names in order are oldhand, oldhand-contract, oldhand-trace, oldhand-rca, oldhand-research, oldhand-plan, oldhand-build, oldhand-review, oldhand-qa, oldhand-ship, oldhand-learn, each linking to skills/<name>/SKILL.md. The model table has host, lead, worker and scout columns, at least five host rows, and the text near it says 'as of October 2026' and describes the substitution rule.",
+  "evidence": [
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S6/01_npm_run_build_output.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S6/02_built_js_github_urls.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S6/03_built_js_link_and_stage_strings.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S6/04_github_blob_tree_path_check.txt",
+    "/Users/berwinsingh/Documents/oldhand/.oldhand/site-rebuild/qa/evidence/S6/05_stages_and_model_table.txt"
+  ],
+  "console_errors": [],
+  "network_failures": [],
+  "blocker": "",
+  "notes": "Surface is cli, so no browser was driven and no console or network output was captured; the lists above are empty for that reason, not because none occurred. Every linked path exists in the working tree but 15 of the 16 blob/tree file paths and examples/csv-import-dupes are NOT on main yet (the brief expects this until the merge). SECURITY.md and skills/oldhand/SKILL.md are on main. skills/oldhand/SKILL.md is linked twice. The footer issues and discussions links are not path-checkable. The table heading in skills/oldhand/references/orchestration.md also says 'as of October 2026', matching the page text. The mutate.py and ledger.py links point to files that exist in the working tree. Working tree was on branch enhance/oldhand-2 with many uncommitted changes; I did not modify anything beyond the build output in site/dist and the evidence files."
+}

@@ -1,0 +1,16 @@
+# site/src/App.jsx lines 309-323: the sentence before the models table, the table call, and the sentence after it
+        <section id="models">
+          <h2>Models</h2>
+          <p>
+            The skills name roles, not models: the lead owns the contract, the review chair, the
+            final check and the release decision; workers implement, investigate, review and drive
+            QA; scouts sweep files, read logs and run read-only checks. One dated file,{" "}
+            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a>,
+            maps the roles to current models; this table is read from it ({data.modelsDate}):
+          </p>
+          <Table data={data.models} />
+          <p>
+            If a named model is missing, the agent uses the newest one the host offers in the same
+            role, never puts the lead below worker tier, and records the model that actually ran.
+          </p>
+        </section>

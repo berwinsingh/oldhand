@@ -1,0 +1,26 @@
+# Expectation 2. Every reference to loadAnalytics / applyAnalyticsChoice in the site tree (excluding node_modules, dist)
+# $ grep -rn 'loadAnalytics\|applyAnalyticsChoice' . --exclude-dir=node_modules --exclude-dir=dist
+
+tests/analytics.test.mjs:6:  applyAnalyticsChoice,
+tests/analytics.test.mjs:28:  applyAnalyticsChoice(null, win, doc);
+tests/analytics.test.mjs:35:  applyAnalyticsChoice("denied", win, doc);
+tests/analytics.test.mjs:41:  applyAnalyticsChoice("granted", win, doc);
+tests/analytics.test.mjs:49:  applyAnalyticsChoice("granted", win, doc);
+tests/analytics.test.mjs:55:  applyAnalyticsChoice("granted", win, doc);
+tests/analytics.test.mjs:56:  applyAnalyticsChoice("denied", win, doc);
+src/analytics.js:23:export function loadAnalytics(win, doc) {
+src/analytics.js:57:export function applyAnalyticsChoice(choice, win, doc) {
+src/analytics.js:59:  if (choice === "granted") loadAnalytics(w, doc);
+src/App.jsx:5:import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
+src/App.jsx:238:    applyAnalyticsChoice(analytics);
+
+# analytics.js lines 55-63 (applyAnalyticsChoice). The only loadAnalytics call is line 59, inside if (choice === "granted"); line 59 = L5 below.
+L1+54	// Apply a choice: only "granted" loads anything; "denied" tells an already
+L2+54	// loaded gtag to stop; null (no choice yet) does nothing.
+L3+54	export function applyAnalyticsChoice(choice, win, doc) {
+L4+54	  const w = win || window;
+L5+54	  if (choice === "granted") loadAnalytics(w, doc);
+L6+54	  else if (choice === "denied" && typeof w.gtag === "function") {
+L7+54	    w.gtag("consent", "update", { analytics_storage: "denied" });
+L8+54	  }
+L9+54	}

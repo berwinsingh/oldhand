@@ -1,0 +1,13 @@
+{
+ "id": "S1",
+ "status": "pass",
+ "observed": "Import printed 'import 1: 5 rows in 3 batches', exit=0, stderr had retry 1/3 and retry 2/3. list: '1 samples/products.csv done batches=3 rows=5 stored=5'.",
+ "expected": "stderr shows two lines 'transient error (database is locked), retry 1/3' and 'retry 2/3'; the import prints 'import 1: 5 rows in 3 batches' and exit=0 | list prints one line for import 1 with status done and 'batches=3 rows=5 stored=5' (stored is the count of rows actually in the database)",
+ "evidence": [
+  "<project>/.oldhand/csv-import-dupes/qa/evidence/S1/run.txt"
+ ],
+ "console_errors": [],
+ "network_failures": [],
+ "blocker": "",
+ "notes": "Run by the lead in turn (no sub-agent tool on this host)."
+}
