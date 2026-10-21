@@ -36,7 +36,7 @@ const routes = [
   {
     id: "any",
     name: "Any agent",
-    who: "Claude Code, Codex, Cursor, GitHub Copilot, Gemini CLI, OpenCode, and other agents that read ~/.agents/skills",
+    who: "Codex, Cursor, GitHub Copilot, Gemini CLI, OpenCode and other agents that read ~/.agents/skills, plus Claude Code through links in ~/.claude/skills",
     install: ["npx skills add berwinsingh/oldhand --skill '*' -g"],
     update: ["npx skills update -g"],
     tested: "skills 1.7.2",
@@ -71,9 +71,11 @@ const routes = [
 
 const invocations = [
   ["Claude Code (plugin)", "/oldhand:oldhand Fix DOCQ-123 and prove it end to end"],
-  ["Claude Code (skills folder), Cursor, Copilot, Kiro, Antigravity", "/oldhand Fix DOCQ-123 and prove it end to end"],
+  ["Claude Code (skills folder), Cursor, Copilot in VS Code, Factory Droid, Junie", "/oldhand Fix DOCQ-123 and prove it end to end"],
   ["Codex", "$oldhand Fix DOCQ-123 and prove it end to end"],
-  ["Gemini CLI, OpenCode, Amp, Goose", "Use the oldhand skill to fix DOCQ-123 and prove it end to end"],
+  ["Devin Desktop (was Windsurf)", "@oldhand Fix DOCQ-123 and prove it end to end"],
+  ["Copilot CLI", "Use the /oldhand skill to fix DOCQ-123 and prove it end to end"],
+  ["Gemini CLI, OpenCode, Roo Code, Amp, Goose", "Use the oldhand skill to fix DOCQ-123 and prove it end to end"],
 ];
 
 const stages = [
@@ -147,17 +149,18 @@ function Ledger() {
   return (
     <figure className="ledger" aria-labelledby="ledger-title">
       <figcaption id="ledger-title">
-        The example run's ledger. <a href={`${REPO}/tree/main/examples/csv-import-dupes`}>See the run</a>
+        The example run's ledger. In that run one agent played every role; the ledger records the role each
+        check was planned for. <a href={`${REPO}/tree/main/examples/csv-import-dupes`}>See the run</a>
       </figcaption>
       <table>
         <thead>
-          <tr><th scope="col">Criterion</th><th scope="col">By</th><th scope="col">Check</th></tr>
+          <tr><th scope="col">Criterion</th><th scope="col">Role</th><th scope="col">Check</th></tr>
         </thead>
         <tbody>
           {rows.map((r) => (
             <tr key={r.id}>
               <th scope="row"><span className="id">{r.id}</span> {r.label}</th>
-              <td>{r.lead ? "the lead" : "a QA agent"}</td>
+              <td>{r.lead ? "lead" : "QA"}</td>
               <td>
                 <button
                   type="button"
@@ -174,11 +177,12 @@ function Ledger() {
         <tfoot>
           <tr className={settled ? "total in-black" : "total in-red"}>
             <th scope="row" colSpan={2}>Verdict</th>
-            <td aria-live="polite"><strong>{v.word}</strong></td>
+            <td><strong>{v.word}</strong></td>
           </tr>
         </tfoot>
       </table>
       <p className="reasons">{sentence(v.reasons)}</p>
+      <p className="visually-hidden" role="status">{`Verdict: ${v.word}. ${sentence(v.reasons)}`}</p>
       <div className="actions">
         <button type="button" onClick={() => setRows(changeAFile(rows))}>Change a file</button>
         <button type="button" onClick={() => setRows(rerunChecks(rows))}>Re-run the checks</button>
@@ -234,9 +238,9 @@ export function App() {
         <a className="wordmark" href="#top">oldhand</a>
         <span className="meta">version {data.version}, MIT licence</span>
         <nav aria-label="Sections">
-          <a href="#install">Install</a>
           <a href="#how">How it works</a>
           <a href="#example">Example</a>
+          <a href="#install">Install</a>
           <a href="#skill">The skill</a>
           <a href="#models">Models</a>
           <a href={REPO}>GitHub</a>
@@ -255,8 +259,9 @@ export function App() {
             </p>
             <Command text={routes[0].install[0]} label="Copy the install command" />
             <p className="hero-after">
-              On Claude Code or Codex you can <a href="#install">install it as a plugin</a> instead.
-              Then type <code>/oldhand</code> (or <code>$oldhand</code> in Codex) and describe the work.
+              On Claude Code or Codex you can <a href="#install">install it as a plugin</a> instead. Then
+              start it and describe the work: <code>/oldhand</code> in most agents, <code>$oldhand</code> in Codex,
+              <code>/oldhand:oldhand</code> with the Claude Code plugin; <a href="#start">other agents</a>.
             </p>
           </div>
           <Ledger />
@@ -300,7 +305,7 @@ export function App() {
           <h2>What it will not do</h2>
           <p>
             These rules sit at the top of <a href={`${BLOB}skills/oldhand/SKILL.md`}>the conductor
-            skill</a> and hold for every stage and every agent it starts. {data.hardStopsIntro}
+            skill</a>. {data.hardStopsIntro}
           </p>
           <ol className="stops">{data.hardStops.map((item, i) => <li key={i}>{inline(item)}</li>)}</ol>
         </section>
@@ -339,7 +344,7 @@ export function App() {
               {r.update.map((c) => <Command key={c} text={c} label={`Copy the ${r.name} update commands`} />)}
             </div>
           ))}
-          <h3>Then describe the work</h3>
+          <h3 id="start">Then describe the work</h3>
           <div className="scroll" tabIndex={0} role="region" aria-label="How to start it on each agent">
             <table className="ruled">
               <thead><tr><th scope="col">Agent</th><th scope="col">Type</th></tr></thead>
@@ -379,7 +384,7 @@ export function App() {
             roles to models; this table is read from it ({data.modelsDate}).
           </p>
           <Table data={data.models} label="Models per role and agent" />
-          <p>When a named model is missing, the rule is: {data.substitutionRule}</p>
+          <p>Substitution rule: {data.substitutionRule}</p>
         </section>
 
         <section id="limits">
@@ -420,11 +425,12 @@ export function App() {
           <a href={`${BLOB}SECURITY.md`}>Security</a>
         </nav>
         <p className="analytics">
-          {analytics === "granted" ? "Google Analytics is on." : "Google Analytics is off; nothing is sent."}{" "}
+          {analytics === "granted" ? "Google Analytics is on." : "Google Analytics is off."}{" "}
           <button type="button" className="link" onClick={toggleAnalytics}>
             {analytics === "granted" ? "Turn it off" : "Turn on Google Analytics"}
           </button>{" "}
-          (<a href="https://policies.google.com/technologies/partner-sites">how Google uses data</a>)
+          (<a href="https://policies.google.com/technologies/partner-sites">how Google uses data</a>). The
+          fonts on this page load from Google Fonts.
         </p>
       </footer>
     </>

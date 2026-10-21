@@ -62,9 +62,9 @@ Exit: `build.md` lists the pre-existing failures by name, or "none".
 
 ## Step 3: Implement
 
-Load the Ponytail skill if it is installed, and for user-facing UI the frontend-design skill too. Otherwise climb this
-ladder and stop at the first rung that holds: (1) does it need to exist at all; (2) is it already in this codebase; (3) the
-standard library; (4) a native platform feature; (5) an installed dependency; (6) one line; (7) the minimum new code.
+Load the Ponytail skill if it is installed; otherwise climb this ladder and stop at the first rung that holds: (1) does it
+need to exist at all; (2) is it already in this codebase; (3) the standard library; (4) a native platform feature; (5) an
+installed dependency; (6) one line; (7) the minimum new code. For new UI or a redesign the user asked for, also load the frontend-design skill if it is installed; the project's existing design system wins.
 
 - Change the fix point `plan.md` names, for the whole class: no value hard-coded to the ticket's
   example. Grep every caller again before editing a shared function: one guard there beats one each.

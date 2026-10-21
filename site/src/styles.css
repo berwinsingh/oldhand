@@ -18,9 +18,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #111a15;
-    --panel: #16231c;
-    --rule: #2e4436;
+    --paper: #14241b;
+    --panel: #1b2f23;
+    --rule: #3a5a46;
     --ink: #e4ece0;
     --faded: #a3b0a6;
     --red: #ff8e80;
@@ -288,7 +288,7 @@ section {
   margin-right: 4px;
 }
 
-.ledger td:nth-child(2) {
+.ledger tbody td:nth-child(2) {
   color: var(--faded);
   white-space: nowrap;
 }
@@ -477,6 +477,18 @@ footer nav {
   margin-bottom: 1em;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 button.link {
   font: inherit;
   color: var(--link);
@@ -535,7 +547,7 @@ button.link {
 
   .command pre {
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
   }
 
   .copy {
@@ -551,7 +563,7 @@ button.link {
     padding: 8px 6px;
   }
 
-  .ledger td:nth-child(2) {
+  .ledger tbody td:nth-child(2) {
     white-space: normal;
   }
 }

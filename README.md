@@ -2,7 +2,7 @@
 
 **Your agent says it is done. Oldhand makes it prove it.**
 
-[Website](https://berwinsingh.github.io/oldhand/) · [Example run](examples/csv-import-dupes) · [The conductor skill](skills/oldhand/SKILL.md)
+See the [website](https://berwinsingh.github.io/oldhand/), a [real example run](examples/csv-import-dupes), or [the conductor skill](skills/oldhand/SKILL.md) itself.
 
 Oldhand is eleven agent skills for Claude Code, Codex, Cursor, GitHub Copilot,
 Gemini CLI and any other agent that reads `SKILL.md`. Give it a ticket or a
@@ -18,6 +18,14 @@ Pick one route per agent. Every route installs all eleven skills, and each one
 below was run against this repository in a clean home folder on 2026-10-21.
 Start a new session afterwards.
 
+Before you start:
+
+- The three scripts need Python 3.8 or newer. Nothing to `pip install`.
+- Install the whole pack. Every stage calls `skills/oldhand/scripts/ledger.py`,
+  so a stage installed on its own stops and tells you to install the rest.
+- One route per agent. A plugin plus a skills-folder copy of the same pack shows
+  up twice.
+
 ### Any agent (recommended)
 
 ```sh
@@ -26,8 +34,10 @@ npx skills add berwinsingh/oldhand --skill '*' -g
 
 This uses Vercel's [skills](https://github.com/vercel-labs/skills) installer
 (tested with 1.7.2). It puts the skills in `~/.agents/skills`, which Codex,
-Cursor, Copilot, Gemini CLI, OpenCode, Amp, Roo Code, Goose, Factory Droid and
-Junie read, and links them into `~/.claude/skills` for Claude Code. Add
+Cursor, Copilot, Gemini CLI, OpenCode, Devin Desktop, Amp, Roo Code, Goose,
+Factory Droid and Junie read, and links them into `~/.claude/skills` for Claude
+Code. Kiro, Cline and Antigravity look in their own folders: see
+[hosts.md](skills/oldhand/references/hosts.md) for where to put the pack. Add
 `-a cursor` (or `codex`, `github-copilot`, `gemini-cli`, `opencode`,
 `claude-code`) to skip the picker.
 
@@ -79,14 +89,6 @@ for s in ~/.oldhand/skills/*; do ln -sfn "$s" ~/.agents/skills/; ln -sfn "$s" ~/
 
 Update later with `git -C ~/.oldhand pull`. Tested with git 2.55.0.
 
-### Before you start
-
-- The three scripts need Python 3.8 or newer. Nothing to `pip install`.
-- Install the whole pack. Every stage calls `skills/oldhand/scripts/ledger.py`,
-  so a stage installed on its own stops and tells you to install the rest.
-- One route per agent. A plugin plus a skills-folder copy of the same pack shows
-  up twice.
-
 ### Upgrading from 1.x
 
 Run the update commands for the route you installed with, then start a new
@@ -102,9 +104,10 @@ Start the conductor and describe the work. A ticket key is optional.
 | Agent | Type |
 | --- | --- |
 | Claude Code (plugin) | `/oldhand:oldhand Fix DOCQ-123 and prove it end to end` |
-| Claude Code (skills folder), Cursor, Copilot, Kiro, Cline, Droid, Junie, Antigravity | `/oldhand Fix DOCQ-123 and prove it end to end` |
+| Claude Code (skills folder), Cursor, Copilot in VS Code, Factory Droid, Junie | `/oldhand Fix DOCQ-123 and prove it end to end` |
 | Codex | `$oldhand Fix DOCQ-123 and prove it end to end` |
 | Devin Desktop (was Windsurf) | `@oldhand Fix DOCQ-123 and prove it end to end` |
+| Copilot CLI | `Use the /oldhand skill to fix DOCQ-123 and prove it end to end` |
 | Gemini CLI, OpenCode, Roo Code, Amp, Goose | `Use the oldhand skill to fix DOCQ-123 and prove it end to end` |
 
 Each stage also runs on its own: replace `oldhand` with `oldhand-review`,
@@ -154,20 +157,27 @@ It skips itself for typos, lookups and one-line edits.
 
 ### What you get back
 
-One line with the verdict, its reason, and where the report is:
+Three words first. A **criterion** is one thing the work must do, numbered
+`AC1`, `AC2` (acceptance) or `R1`, `R2` (regressions: what must keep working).
+A **check** is a test that proves one criterion; **e2e** means it ran end to end
+in the real app. The **lead** is the agent you are talking to: it delegates to
+other agents but runs the final check itself.
+
+You get one line with the verdict, its reason, and where the report is:
 
 ```text
 NOT YET: AC2 e2e failed after reload. Report: .oldhand/docq-123/report.md
 ```
 
-The verdict comes from `ledger.py`, never from the model:
+The verdict comes from `ledger.py`, never from the model. It checks these in
+order and the first one that matches wins:
 
 | Verdict | Means |
 | --- | --- |
-| VERIFIED | Every criterion has a passing check of the kind it needs, on the current code, and the lead ran one end to end itself |
-| NOT YET | A check failed, a check is older than the code, or a serious review finding is still open |
-| BLOCKED | Something outside the work stops a check, and the report names it and what would unblock it |
-| INCOMPLETE | A criterion has no check yet |
+| INCOMPLETE | There is no contract yet, or a criterion has no check of the kind it needs (an e2e criterion with only a unit test, or a check whose evidence file is missing) |
+| NOT YET | A check failed or is older than the code; a high or medium review finding is open, or deferred without your yes; or, when code was changed or checked, the lead has no end-to-end pass of its own on the current code |
+| BLOCKED | Nothing above, but something outside the work stops a check; the report names it and what would unblock it |
+| VERIFIED | None of the above |
 
 ## How it works
 
@@ -185,7 +195,7 @@ accident.
 | [oldhand-contract](skills/oldhand-contract/SKILL.md) | Turns the ticket or prompt into numbered acceptance criteria (`AC1`, `AC2`) and regression criteria (`R1`: what must keep working) | `contract.md`, `ledger.json` |
 | [oldhand-trace](skills/oldhand-trace/SKILL.md) | Follows the real path from entry point to rendered result, and finds every caller of what will change | `trace.md` |
 | [oldhand-rca](skills/oldhand-rca/SKILL.md) | For bugs: finds the root cause from evidence, then has read-only agents try to break it | `rca.md` |
-| [oldhand-research](skills/oldhand-research/SKILL.md) | Before adding anything: the codebase, the standard library, installed packages, then open source behind a licence check (MIT and Apache-2.0 only, unless you approve) | `research.md` |
+| [oldhand-research](skills/oldhand-research/SKILL.md) | Before adding anything: the codebase, the standard library, installed packages, then open source behind a licence check (MIT and Apache-2.0; BSD and ISC with your yes; copyleft and unknown licences rejected) | `research.md` |
 | [oldhand-plan](skills/oldhand-plan/SKILL.md) | The smallest complete change, with blast radius, rollback and a budget for live or paid runs | `plan.md` |
 | [oldhand-build](skills/oldhand-build/SKILL.md) | Makes the change and one focused test, then breaks the fix on purpose to prove the test catches it | `build.md` |
 | [oldhand-review](skills/oldhand-review/SKILL.md) | A panel of read-only reviewers, one lens each (contract, correctness, security, simplicity, data, AI behaviour); every finding must survive an attempt to refute it | `review.md`, `review/` |
@@ -260,7 +270,7 @@ work in front of it.
 | For | Use |
 | --- | --- |
 | The smallest correct change | [Ponytail](https://github.com/DietrichGebert/ponytail); oldhand-build loads it when installed |
-| User-facing UI with a deliberate look | Anthropic's [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) skill; oldhand-build loads it for UI work when installed. `npx skills add anthropics/skills --skill frontend-design -g`, or `frontend-design@claude-plugins-official` in Claude Code |
+| New UI or a requested redesign | Anthropic's [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) skill; oldhand-build loads it for new UI or a redesign you asked for (your project's existing design system wins). `npx skills add anthropics/skills --skill frontend-design -g`, or `frontend-design@claude-plugins-official` in Claude Code |
 | Jira and Confluence | [Atlassian Rovo MCP](https://developer.atlassian.com/cloud/rovo-mcp/) |
 | Asana | [Asana MCP](https://developers.asana.com/docs/using-asanas-mcp-server) |
 | monday.com | [monday MCP](https://developer.monday.com/api-reference/docs/integrate-with-monday-mcp) |
@@ -290,10 +300,10 @@ No tracker connected? Paste the ticket text, or just describe the work.
 | --- | --- |
 | The skills do not show up | Start a new session. Plugins and skill folders load at startup. |
 | Every skill shows twice | Two install routes for one agent. Remove one. |
-| "ledger.py not found" | Only part of the pack is installed. Install all eleven with one of the routes above. |
-| `python3: command not found`, or a shim refuses to run it | The scripts need Python 3.8+. On Windows try `py -3`; elsewhere call the system Python directly. |
+| A stage says the pack is only partly installed | Only some of the eleven skills are installed. Install all eleven with one of the routes above. |
+| `python3: command not found`, or a shim refuses to run it | The scripts need Python 3.8+. Tell your agent to run them with `py -3` on Windows, or with `/usr/bin/python3` (or your system Python) elsewhere. |
 | `.oldhand/` shows in `git status` | The folder's own `.gitignore` is missing (a task started before 2.0, or the file was deleted). Add `.oldhand/` to `.git/info/exclude`. |
-| A check keeps going stale | A file in the repo changes on every run (a log, a tool's state file). Move it under `.oldhand/` or add it to `.git/info/exclude`. |
+| A check keeps going stale | A file in the repo changes on every run (a log, a tool's state file). If git does not track it, move it under `.oldhand/` or add it to `.git/info/exclude`; if git tracks it, commit or undo that change, then re-run the check. |
 
 ## Develop and test the pack
 

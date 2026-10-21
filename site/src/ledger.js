@@ -22,7 +22,7 @@ export function verdict(rows) {
   if (reasons.length) return { word: "NOT YET", reasons };
   return {
     word: "VERIFIED",
-    reasons: ["every criterion has a passing check on the current code, and the lead ran one end to end"],
+    reasons: ["every criterion has a passing check on the current code, the lead ran one end to end, and no serious review finding is open"],
   };
 }
 
