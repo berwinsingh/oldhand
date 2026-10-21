@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  validate:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -22,3 +22,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: ./scripts/smoke-test.sh
+
+  # main's branch protection requires a check named "validate". This job
+  # reports the whole matrix under that name; it runs even when a matrix leg
+  # fails, because a skipped required check would count as passing.
+  validate:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.test.result }}" = success
