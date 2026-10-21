@@ -52,12 +52,24 @@ export function loadAnalytics(win, doc) {
   d.head.appendChild(script);
 }
 
+// Expire the cookies Google Analytics sets (_ga and _ga_<id>) on this host.
+export function clearAnalyticsCookies(doc) {
+  const d = doc || document;
+  const names = (d.cookie || "")
+    .split(";")
+    .map((part) => part.split("=")[0].trim())
+    .filter((name) => name === "_ga" || name.startsWith("_ga_"));
+  for (const name of names) d.cookie = `${name}=; Max-Age=0; path=/`;
+  return names;
+}
+
 // Apply a choice: only "granted" loads anything; "denied" tells an already
-// loaded gtag to stop; null (no choice yet) does nothing.
+// loaded gtag to stop and removes its cookies; null (no choice yet) does nothing.
 export function applyAnalyticsChoice(choice, win, doc) {
   const w = win || window;
   if (choice === "granted") loadAnalytics(w, doc);
-  else if (choice === "denied" && typeof w.gtag === "function") {
-    w.gtag("consent", "update", { analytics_storage: "denied" });
+  else if (choice === "denied") {
+    if (typeof w.gtag === "function") w.gtag("consent", "update", { analytics_storage: "denied" });
+    clearAnalyticsCookies(doc);
   }
 }

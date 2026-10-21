@@ -1,6 +1,6 @@
 {
   "name": "oldhand",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A pack of 11 Agent Skills that take a ticket, doc or prompt to a verified change: a conductor plus contract, trace, rca, research, plan, build, review, qa, ship and learn. Small scripts compute the verdict, not the model.",
   "author": {
     "name": "Berwin Singh",

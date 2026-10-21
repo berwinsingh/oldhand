@@ -54,6 +54,15 @@ export function columns(tbl, names) {
   return { header: names, rows: tbl.rows.map((row) => index.map((i) => row[i] || "")) };
 }
 
+// The paragraph that starts with `start`, joined onto one line, without `start`.
+function paragraph(text, start) {
+  const i = text.indexOf(start);
+  if (i < 0) return null;
+  const rest = text.slice(i + start.length);
+  const end = rest.search(/\n\s*\n/);
+  return (end < 0 ? rest : rest.slice(0, end)).replace(/\s+/g, " ").trim() || null;
+}
+
 function line(text, re) {
   const m = text.match(re);
   return m ? m[1] : null;
@@ -76,6 +85,7 @@ export function pageData({ skill, report, orchestration, plugin }) {
     computed: line(report, /^(Computed by ledger\.py .+)$/m),
     modelsDate: models ? line(models.heading, /\((as of [^)]+)\)/) : null,
     models: models ? columns(table(models.body, "| host"), ["host", "lead", "worker", "scout"]) : null,
+    substitutionRule: paragraph(orchestration, "Substitution rule:"),
   };
 }
 

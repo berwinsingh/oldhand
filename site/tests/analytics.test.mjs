@@ -58,6 +58,17 @@ test("denied after a load updates consent to denied", () => {
   assert.deepEqual(last, ["consent", "update", { analytics_storage: "denied" }]);
 });
 
+test("denied expires the Google Analytics cookies and nothing else", () => {
+  const { win } = fakeDom();
+  const writes = [];
+  const doc = {
+    get cookie() { return "_ga=GA1.1.1; theme=dark; _ga_75YW6HE9FT=GS1.1.2"; },
+    set cookie(value) { writes.push(value); },
+  };
+  applyAnalyticsChoice("denied", win, doc);
+  assert.deepEqual(writes, ["_ga=; Max-Age=0; path=/", "_ga_75YW6HE9FT=; Max-Age=0; path=/"]);
+});
+
 test("stored choice round-trips and junk or a throwing store reads as null", () => {
   const store = fakeStorage();
   saveAnalyticsChoice("granted", store);
