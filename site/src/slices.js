@@ -65,13 +65,24 @@ export function pageData({ skill, report, orchestration, plugin }) {
   const stopsList = stops ? list(stops.body) : { intro: null, items: [] };
   const notVerified = section(report, "## Not verified");
   const models = section(orchestration, "## Current models per host");
+  const proof = section(report, "## Proof");
+  const proofItems = proof ? list(proof.body).items : [];
   return {
     version: plugin.version,
     hardStopsIntro: stopsList.intro,
     hardStops: stopsList.items,
     verdict: line(report, /^### (Verdict: .+)$/m),
     criteria: columns(table(report, "| criterion"), ["criterion", "outcome", "proof", "status", "by"]),
+    findings: columns(table(report, "| id"), ["id", "sev", "lens", "status"]),
+    asked: section(report, "## Asked")?.body || null,
     rootCause: section(report, "## Root cause")?.body || null,
+    // The Proof bullets with their "observed:" prefix dropped; "observed, lead's own run:" keeps the "lead's own run".
+    proof: proofItems.map((item) => item.replace(/^observed(?:,\s*([^:]+))?:\s*/, (m, who) => (who ? who + ": " : ""))),
+    qaScore: line(proofItems.join("\n"), /QA (\d+\/\d+) pass/),
+    unitScore: line(proofItems.join("\n"), /unit suite (\d+\/\d+) OK/),
+    mutation: line(proofItems.join("\n"), /\b(KILLED)\b/),
+    leadRun: line(proofItems.join("\n"), /lead's own run:\s*([^:]+):/),
+    diffStat: line(report, /Diff: (\d+ insertions?, \d+ deletions? in \d+ files?)/),
     notVerified: notVerified ? list(notVerified.body).items : [],
     computed: line(report, /^(Computed by ledger\.py .+)$/m),
     modelsDate: models ? line(models.heading, /\((as of [^)]+)\)/) : null,

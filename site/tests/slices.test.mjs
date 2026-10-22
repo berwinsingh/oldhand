@@ -41,6 +41,11 @@ test("the committed sources slice completely", () => {
   assert.equal(data.criteria.header.join(), "criterion,outcome,proof,status,by");
   assert.match(data.modelsDate, /^as of /);
   assert.ok(data.models.rows.length >= 4);
+  assert.equal(data.findings.header.join(), "id,sev,lens,status");
+  assert.match(data.qaScore, /^\d+\/\d+$/);
+  assert.equal(data.mutation, "KILLED");
+  assert.match(data.leadRun, /^S\d/);
+  assert.ok(data.proof.every((item) => !item.startsWith("observed")));
 });
 
 test("a moved heading is reported, not silently empty", () => {
@@ -50,5 +55,5 @@ test("a moved heading is reported, not silently empty", () => {
     orchestration: "## Models\n",
     plugin: { version: "2.0.0" },
   });
-  assert.deepEqual(missing(data).sort(), ["hardStops", "hardStopsIntro", "models", "modelsDate", "notVerified", "rootCause"]);
+  assert.deepEqual(missing(data).sort(), ["asked", "diffStat", "findings", "hardStops", "hardStopsIntro", "leadRun", "models", "modelsDate", "mutation", "notVerified", "proof", "qaScore", "rootCause", "unitScore"]);
 });
