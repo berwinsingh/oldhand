@@ -8,6 +8,10 @@
   --line: #e6e6e6;
   --soft: #f6f6f6;
   --ok: #15803d;
+  --grid-line: rgba(0, 0, 0, 0.11);
+  --shadow: rgba(15, 23, 42, 0.28);
+  --plate: rgba(255, 255, 255, 0.82);
+  --plate-edge: #d4d4d4;
   --sans: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light dark;
@@ -22,6 +26,17 @@
     --line: #262626;
     --soft: #161616;
     --ok: #4ade80;
+    --grid-line: rgba(255, 255, 255, 0.08);
+    --shadow: rgba(0, 0, 0, 0.8);
+    --plate: rgba(23, 23, 23, 0.85);
+    --plate-edge: #333333;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .plate {
+    transition: none;
   }
 }
 
@@ -166,8 +181,48 @@ footer {
 
 /* hero */
 .hero {
+  position: relative;
   text-align: center;
-  padding: 88px 0 40px;
+  padding: 88px 0 170px;
+  isolation: isolate;
+}
+
+/* the command and its note sit on the page colour, so no dot runs through them */
+.hero .command,
+.alt {
+  position: relative;
+}
+
+.alt {
+  display: inline-block;
+  background: var(--bg);
+  padding: 2px 10px;
+  border-radius: 6px;
+}
+
+/* the dot wave (DotField): full bleed behind the hero, fading out at the
+   edges and under the headline so the text stays clean */
+.dots {
+  position: absolute;
+  z-index: -1;
+  bottom: -190px;
+  left: 50%;
+  width: 100vw;
+  height: 460px;
+  transform: translateX(-50%);
+  color: var(--text);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 55% 90% at 50% 40%, #000 40%, transparent 85%),
+    linear-gradient(transparent 0%, #000 30%);
+  -webkit-mask-composite: source-in;
+  mask-image: radial-gradient(ellipse 55% 90% at 50% 40%, #000 40%, transparent 85%),
+    linear-gradient(transparent 0%, #000 30%);
+  mask-composite: intersect;
+}
+
+/* the dot wave is wider than main; clip it at the page, not the column */
+body {
+  overflow-x: clip;
 }
 
 .eyebrow {
@@ -241,15 +296,27 @@ h1 {
   color: var(--text);
 }
 
-/* the run card */
+/* the run card, tilted back in 3D; useTilt stands it up on scroll */
 .shot {
   padding: 32px 0 0;
+  perspective: 1400px;
+  --rx: 0deg;
+  --ry: 0deg;
 }
 
 .card {
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: hidden;
+  background: var(--bg);
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-origin: 50% 0;
+  transition: transform 0.12s linear;
+  box-shadow:
+    0 1px 0 var(--line),
+    0 30px 60px -30px var(--shadow),
+    0 60px 120px -60px var(--shadow);
+  will-change: transform;
 }
 
 .card-head {
@@ -386,6 +453,66 @@ section {
 
 .shot {
   padding-top: 32px;
+}
+
+/* the stack: ten plates in isometric 3D, contract at the bottom */
+.stack {
+  height: 440px;
+  display: grid;
+  place-items: center;
+  margin: 8px 0 0;
+  perspective: 1800px;
+}
+
+.stack-scene {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  transform-style: preserve-3d;
+  transform: translateY(70px) rotateX(58deg) rotateZ(-38deg);
+}
+
+.plate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px solid var(--plate-edge);
+  border-radius: 14px;
+  background: var(--plate);
+  box-shadow: 0 0 0 1px var(--bg) inset;
+  transform: translateZ(calc(var(--i) * 26px));
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, border-color 0.2s ease;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.plate-n {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.plate-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.plate.is-ship {
+  border-color: var(--ok);
+}
+
+.plate.is-active {
+  transform: translateZ(calc(var(--i) * 26px + 18px)) translateX(-46px);
+  background: var(--text);
+  border-color: var(--text);
+}
+
+.plate.is-active .plate-name,
+.plate.is-active .plate-n {
+  color: var(--bg);
 }
 
 .stages {
@@ -787,10 +914,32 @@ button.link {
   .stages {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  /* a tilted card grows past a phone's edge; on phones it stays flat */
+  .card {
+    transform: none;
+  }
+
+  .stack {
+    height: 300px;
+  }
+
+  .stack-scene {
+    width: 170px;
+    height: 170px;
+    transform: translateY(50px) rotateX(58deg) rotateZ(-38deg);
+  }
+
+  .plate {
+    transform: translateZ(calc(var(--i) * 20px));
+    font-size: 13px;
+    padding: 10px 12px;
+  }
 }
 
 /* The Pages workflow screenshots ?social-preview=1 at 1200 x 627. */
 html.social-preview .top nav,
+html.social-preview .dots,
 html.social-preview .alt,
 html.social-preview .shot,
 html.social-preview main > section:not(.hero),

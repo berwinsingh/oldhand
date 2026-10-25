@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import skillText from "../../skills/oldhand/SKILL.md?raw";
 import reportText from "../../examples/csv-import-dupes/oldhand/report.md?raw";
 import orchestrationText from "../../skills/oldhand/references/orchestration.md?raw";
@@ -241,8 +241,158 @@ function InstallSwitcher() {
   );
 }
 
+// The ten stages as a stack of plates in 3D, contract at the bottom. The
+// plate whose row is hovered in the list below lifts out of the stack.
+function Stack({ active }) {
+  return (
+    <div className="stack" aria-hidden="true">
+      <div className="stack-scene">
+        {stages.map(([name], i) => (
+          <div
+            key={name}
+            className={`plate${i === active ? " is-active" : ""}${name === "ship" ? " is-ship" : ""}`}
+            style={{ "--i": i }}
+          >
+            <span className="plate-n">{String(i + 1).padStart(2, "0")}</span>
+            <span className="plate-name">{name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// A field of dots on a slow 3D wave behind the hero, drawn on a canvas in
+// perspective. One still frame when the reader asks for less motion; it
+// stops drawing while it is off screen.
+function DotField() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas.getContext("2d");
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const cols = 64;
+    const rows = 26;
+    let w = 0;
+    let h = 0;
+    let color = "0,0,0";
+    let frame = 0;
+    let visible = true;
+
+    function resize() {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      w = canvas.clientWidth;
+      h = canvas.clientHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const rgb = getComputedStyle(canvas).color.match(/\d+/g) || [0, 0, 0];
+      color = rgb.slice(0, 3).join(",");
+    }
+
+    function draw(t) {
+      ctx.clearRect(0, 0, w, h);
+      const focal = h * 1.1;
+      const horizon = h * 0.02;
+      for (let r = 0; r < rows; r++) {
+        // rows run from far (r = 0) to near (r = rows - 1)
+        const z = 2.6 - (r / (rows - 1)) * 2.2;
+        for (let c = 0; c < cols; c++) {
+          const x = (c / (cols - 1) - 0.5) * 6;
+          const y = Math.sin(x * 1.3 + t * 0.6) * 0.18 + Math.cos(z * 2.2 - t * 0.8) * 0.16;
+          const scale = focal / (z + 0.6);
+          const sx = w / 2 + x * scale * 0.55;
+          const sy = horizon + (0.9 - y) * scale * 0.42;
+          if (sx < -4 || sx > w + 4 || sy > h + 4) continue;
+          const near = 1 - z / 2.6;
+          ctx.fillStyle = `rgba(${color},${(0.08 + near * 0.32 + y * 0.4).toFixed(3)})`;
+          ctx.beginPath();
+          ctx.arc(sx, sy, 0.6 + near * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function loop(now) {
+      frame = 0;
+      draw(now / 1000);
+      if (visible) frame = requestAnimationFrame(loop);
+    }
+
+    resize();
+    draw(0);
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible && !still && !frame) frame = requestAnimationFrame(loop);
+    });
+    observer.observe(canvas);
+    const onResize = () => {
+      resize();
+      if (still) draw(0);
+    };
+    addEventListener("resize", onResize);
+    const scheme = matchMedia("(prefers-color-scheme: dark)");
+    scheme.addEventListener("change", onResize);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      removeEventListener("resize", onResize);
+      scheme.removeEventListener("change", onResize);
+    };
+  }, []);
+  return <canvas className="dots" ref={ref} aria-hidden="true" />;
+}
+
+// Tilts the run card back in 3D and stands it up as it scrolls into view;
+// the pointer adds a small lean. Off when the reader asks for less motion.
+function useTilt(ref) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let px = 0;
+    let py = 0;
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
+      const box = el.getBoundingClientRect();
+      const progress = Math.min(1, Math.max(0, (innerHeight - box.top) / (innerHeight * 0.75)));
+      el.style.setProperty("--rx", `${(1 - progress) * 22 + py * -4}deg`);
+      el.style.setProperty("--ry", `${px * 5}deg`);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
+    const move = (event) => {
+      const box = el.getBoundingClientRect();
+      px = (event.clientX - box.left) / box.width - 0.5;
+      py = (event.clientY - box.top) / box.height - 0.5;
+      schedule();
+    };
+    const leave = () => {
+      px = 0;
+      py = 0;
+      schedule();
+    };
+    paint();
+    addEventListener("scroll", schedule, { passive: true });
+    addEventListener("resize", schedule);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerleave", leave);
+    return () => {
+      cancelAnimationFrame(frame);
+      removeEventListener("scroll", schedule);
+      removeEventListener("resize", schedule);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerleave", leave);
+    };
+  }, [ref]);
+}
+
 export function App() {
   const [analytics, setAnalytics] = useState(readAnalyticsChoice);
+  const [active, setActive] = useState(-1);
+  const shotRef = useRef(null);
+  useTilt(shotRef);
   useEffect(() => {
     applyAnalyticsChoice(analytics);
   }, [analytics]);
@@ -267,6 +417,7 @@ export function App() {
 
       <main id="top">
         <section className="hero">
+          <DotField />
           <p className="eyebrow">v{data.version} · MIT · eleven agent skills</p>
           <h1>Make your coding agent prove it is done.</h1>
           <p className="sub">
@@ -281,7 +432,7 @@ export function App() {
           </p>
         </section>
 
-        <section className="shot" aria-labelledby="shot-title">
+        <section className="shot" aria-labelledby="shot-title" ref={shotRef}>
           <div className="card">
             <div className="card-head">
               <span id="shot-title">One run, from its report</span>
@@ -322,9 +473,10 @@ export function App() {
             <code>research</code> only when something new is built. Each stage writes its file into{" "}
             <code>.oldhand/&lt;task&gt;/</code> and can run alone.
           </p>
-          <ol className="stages">
+          <Stack active={active} />
+          <ol className="stages" onMouseLeave={() => setActive(-1)}>
             {stages.map(([name, text], i) => (
-              <li key={name}>
+              <li key={name} onMouseEnter={() => setActive(i)} onFocus={() => setActive(i)}>
                 <span className="n">{String(i + 1).padStart(2, "0")}</span>
                 <a href={`${BLOB}skills/oldhand-${name}/SKILL.md`}>{name}</a>
                 <span className="t">{text}</span>
