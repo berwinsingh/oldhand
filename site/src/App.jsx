@@ -4,7 +4,11 @@ import reportText from "../../examples/csv-import-dupes/oldhand/report.md?raw";
 import orchestrationText from "../../skills/oldhand/references/orchestration.md?raw";
 import plugin from "../../.claude-plugin/plugin.json";
 import { applyAnalyticsChoice, readAnalyticsChoice, saveAnalyticsChoice } from "./analytics.js";
-import { pageData } from "./slices.js";
+import { BENCH_RUN } from "./bench-run.js";
+import { benchData, pageData } from "./slices.js";
+
+const benchRuns = import.meta.glob("../../bench/results/*/runs.jsonl", { query: "?raw", import: "default", eager: true });
+const benchTasks = import.meta.glob("../../bench/tasks/*/task.json", { import: "default", eager: true });
 
 const REPO = "https://github.com/berwinsingh/oldhand";
 const BLOB = `${REPO}/blob/main/`;
@@ -82,6 +86,13 @@ const tools = [
 ];
 
 const data = pageData({ skill: skillText, report: reportText, orchestration: orchestrationText, plugin });
+const bench = benchData(
+  benchRuns[`../../bench/results/${BENCH_RUN}/runs.jsonl`],
+  Object.fromEntries(Object.values(benchTasks).map((t) => [t.id, t.tier])),
+);
+const [benchDate, benchModel] = [BENCH_RUN.slice(0, 10), BENCH_RUN.slice(11)];
+const maxTokens = Math.max(...bench.arms.map((a) => a.tokens));
+const plainArm = bench.arms.find((a) => a.key === "plain");
 const verdictWord = (data.verdict || "").replace(/^Verdict:\s*/, "");
 const criteriaIds = data.criteria.rows.map((row) => row[0]);
 const criteriaPassed = data.criteria.rows.filter((row) => row[3] === "pass").length;
@@ -410,6 +421,7 @@ export function App() {
         <nav aria-label="Sections">
           <a href="#how">How it works</a>
           <a href="#example">Example</a>
+          <a href="#benchmark">Benchmark</a>
           <a href="#install">Install</a>
           <a href={REPO}>GitHub</a>
         </nav>
@@ -427,7 +439,8 @@ export function App() {
           </p>
           <Command text={NPX} index={1} />
           <p className="alt">
-            Then type <code>/oldhand</code> and describe the work. Also as a{" "}
+            Then type <code>/oldhand</code> and describe the work, or <code>/oldhand --lean</code> for
+            one agent. Also as a{" "}
             <a href="#install">Claude Code or Codex plugin</a>.
           </p>
         </section>
@@ -528,6 +541,57 @@ export function App() {
             <h3>Not verified</h3>
             <ul>{data.notVerified.map((item, i) => <li key={i}>{inline(item)}</li>)}</ul>
           </details>
+        </section>
+
+        <section id="benchmark">
+          <h2>Benchmark</h2>
+          <p>
+            {bench.runs} headless Claude Code runs on {bench.tasks} small bug-fix tasks, {bench.hard} of
+            them harder multi-file ones, one run per task and route. A hidden check drives the real
+            program and decides whether the work was really done; the agent never sees it.
+          </p>
+          <div className="bench" role="table" aria-label="Benchmark results, medians per run">
+            <div className="bench-row bench-head" role="row">
+              <span role="columnheader">Route</span>
+              <span role="columnheader">Hidden check passed</span>
+              <span role="columnheader">False DONE</span>
+              <span role="columnheader">Tokens and cost per run</span>
+            </div>
+            {bench.arms.map((a) => (
+              <div key={a.key} className="bench-row" role="row">
+                <span role="cell" className="bench-arm">{a.key === "plain" ? a.label : <code>{a.label}</code>}</span>
+                <span role="cell" data-label="Passed"><b>{a.passed}</b> of {a.runs}</span>
+                <span role="cell" data-label="False DONE" className={a.falseDone ? "bench-bad" : ""}><b>{a.falseDone}</b></span>
+                <span role="cell" className="bench-cost">
+                  <span className="bench-bar" aria-hidden="true"><i style={{ width: `${(a.tokens / maxTokens) * 100}%` }} /></span>
+                  <span>
+                    {Math.floor(a.tokens).toLocaleString("en-US")}, ${a.cost.toFixed(2)}
+                    {a.key !== "plain" && plainArm ? `, ${(a.cost / plainArm.cost).toFixed(1)}x` : ""}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="small">
+            Medians per run. Cost at API prices as Claude Code reports it: ${bench.totalCost.toFixed(2)} for
+            all {bench.runs} runs, {benchDate}, model alias <code>{benchModel}</code>.
+          </p>
+          {bench.falseDone.map((f) => (
+            <p key={f.task + f.arm}>
+              The false DONE ({f.arm} agent, <code>{f.task}</code>): it tested its change by writing its
+              own fixture over the project's <code>config.json</code>, deleted it, shipped a program that
+              crashes, and reported done. Both Oldhand runs of that task passed.
+            </p>
+          ))}
+          <ul className="plain">
+            <li>On small, clearly specified fixes the model is already good, and Oldhand costs several times as much. Use <code>--lean</code> or plain prompting for small, low-risk changes.</li>
+            <li>One run per task and route is too few to call a rate. Read it as a cost measurement with one example of the failure Oldhand exists for.</li>
+            <li>Every task was small, so <code>/oldhand</code> chose the lean route each time: the full chain with review and QA sub-agents is not measured here yet.</li>
+          </ul>
+          <p>
+            Tasks, method, every run and how to re-run it:{" "}
+            <a href={`${BLOB}bench/README.md`}>bench/README.md</a>.
+          </p>
         </section>
 
         <section id="install">

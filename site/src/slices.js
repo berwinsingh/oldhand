@@ -101,3 +101,43 @@ export function missing(data) {
     })
     .map(([key]) => key);
 }
+
+// The published benchmark, from bench/results/<run>/runs.jsonl (one JSON object per line) and
+// each task's tier ("basic" or "hard", from bench/tasks/*/task.json). Medians per arm.
+export const BENCH_ARMS = [
+  ["plain", "Plain agent"],
+  ["lean", "/oldhand --lean"],
+  ["auto", "/oldhand"],
+];
+
+export function benchData(runsText, tiers) {
+  const runs = runsText.split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
+  const median = (xs) => {
+    const s = [...xs].sort((a, b) => a - b);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  };
+  const arms = BENCH_ARMS.map(([key, label]) => {
+    const rs = runs.filter((r) => r.arm === key);
+    return {
+      key,
+      label,
+      runs: rs.length,
+      passed: rs.filter((r) => r.hidden_check === "pass").length,
+      falseDone: rs.filter((r) => r.false_done).length,
+      tokens: median(rs.map((r) => r.tokens)),
+      cost: median(rs.map((r) => r.cost_usd || 0)),
+      minutes: median(rs.map((r) => r.minutes)),
+      subagents: rs.reduce((n, r) => n + (r.subagents || 0), 0),
+    };
+  }).filter((a) => a.runs);
+  const tasks = [...new Set(runs.map((r) => r.task))];
+  return {
+    runs: runs.length,
+    tasks: tasks.length,
+    hard: tasks.filter((t) => tiers[t] === "hard").length,
+    totalCost: runs.reduce((n, r) => n + (r.cost_usd || 0), 0),
+    falseDone: runs.filter((r) => r.false_done).map((r) => ({ task: r.task, arm: r.arm })),
+    arms,
+  };
+}

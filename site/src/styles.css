@@ -8,6 +8,7 @@
   --line: #e6e6e6;
   --soft: #f6f6f6;
   --ok: #15803d;
+  --bad: #b42318;
   --grid-line: rgba(0, 0, 0, 0.11);
   --shadow: rgba(15, 23, 42, 0.28);
   --plate: rgba(255, 255, 255, 0.82);
@@ -26,6 +27,7 @@
     --line: #262626;
     --soft: #161616;
     --ok: #4ade80;
+    --bad: #f87171;
     --grid-line: rgba(255, 255, 255, 0.08);
     --shadow: rgba(0, 0, 0, 0.8);
     --plate: rgba(23, 23, 23, 0.85);
@@ -652,6 +654,58 @@ td[data-col="status"] {
   font-weight: 500;
 }
 
+/* benchmark */
+.bench {
+  margin: 20px 0 12px;
+  border-top: 1px solid var(--line);
+}
+
+.bench-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 2fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+}
+
+.bench-head {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 8px 0;
+}
+
+.bench-arm code {
+  font-size: 13px;
+}
+
+.bench-bad b {
+  color: var(--bad);
+}
+
+.bench-cost {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.bench-bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--soft);
+  overflow: hidden;
+}
+
+.bench-bar i {
+  display: block;
+  height: 100%;
+  background: var(--text);
+  border-radius: 3px;
+}
+
 /* folded prose */
 details {
   border-top: 1px solid var(--line);
@@ -913,6 +967,38 @@ button.link {
 
   .stages {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bench-head {
+    display: none;
+  }
+
+  .bench-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "arm arm" "pass false" "cost cost";
+    row-gap: 6px;
+  }
+
+  .bench-row > :nth-child(1) {
+    grid-area: arm;
+    font-weight: 500;
+  }
+
+  .bench-row > :nth-child(2) {
+    grid-area: pass;
+  }
+
+  .bench-row > :nth-child(3) {
+    grid-area: false;
+  }
+
+  .bench-row > :nth-child(4) {
+    grid-area: cost;
+  }
+
+  .bench-row > [data-label]::before {
+    content: attr(data-label) " ";
+    color: var(--muted);
   }
 
   /* a tilted card grows past a phone's edge; on phones it stays flat */

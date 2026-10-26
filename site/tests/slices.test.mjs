@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
-import { columns, list, missing, pageData, section, table } from "../src/slices.js";
+import { BENCH_RUN } from "../src/bench-run.js";
+import { benchData, columns, list, missing, pageData, section, table } from "../src/slices.js";
 
 const root = new URL("../../", import.meta.url);
 const read = (rel) => readFileSync(new URL(rel, root), "utf8");
@@ -56,4 +57,27 @@ test("a moved heading is reported, not silently empty", () => {
     plugin: { version: "2.0.0" },
   });
   assert.deepEqual(missing(data).sort(), ["asked", "diffStat", "findings", "hardStops", "hardStopsIntro", "leadRun", "models", "modelsDate", "mutation", "notVerified", "proof", "qaScore", "rootCause", "unitScore"]);
+});
+
+test("benchData takes medians per route and lists the false DONE runs", () => {
+  const row = (task, arm, pass, falseDone, tokens, cost) =>
+    JSON.stringify({ task, arm, hidden_check: pass ? "pass" : "fail", false_done: falseDone, tokens, cost_usd: cost, minutes: 1, subagents: 0 });
+  const text = [
+    row("a", "plain", true, false, 100, 0.1), row("b", "plain", false, true, 300, 0.3),
+    row("a", "lean", true, false, 1000, 1), row("b", "lean", true, false, 2000, 2),
+  ].join("\n") + "\n";
+  const b = benchData(text, { a: "basic", b: "hard" });
+  assert.equal(b.runs, 4);
+  assert.equal(b.tasks, 2);
+  assert.equal(b.hard, 1);
+  assert.deepEqual(b.falseDone, [{ task: "b", arm: "plain" }]);
+  assert.deepEqual(b.arms.map((a) => [a.key, a.passed, a.falseDone, a.tokens]), [["plain", 1, 1, 200], ["lean", 2, 0, 1500]]);
+});
+
+test("the published benchmark slices", () => {
+  const tiers = {};
+  for (const t of readdirSync(new URL("bench/tasks", root))) tiers[t] = JSON.parse(read(`bench/tasks/${t}/task.json`)).tier;
+  const b = benchData(read(`bench/results/${BENCH_RUN}/runs.jsonl`), tiers);
+  assert.equal(b.arms.length, 3);
+  assert.ok(b.arms.every((a) => a.runs > 0 && a.tokens > 0));
 });
