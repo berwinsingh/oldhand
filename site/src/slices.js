@@ -65,13 +65,24 @@ export function pageData({ skill, report, orchestration, plugin }) {
   const stopsList = stops ? list(stops.body) : { intro: null, items: [] };
   const notVerified = section(report, "## Not verified");
   const models = section(orchestration, "## Current models per host");
+  const proof = section(report, "## Proof");
+  const proofItems = proof ? list(proof.body).items : [];
   return {
     version: plugin.version,
     hardStopsIntro: stopsList.intro,
     hardStops: stopsList.items,
     verdict: line(report, /^### (Verdict: .+)$/m),
     criteria: columns(table(report, "| criterion"), ["criterion", "outcome", "proof", "status", "by"]),
+    findings: columns(table(report, "| id"), ["id", "sev", "lens", "status"]),
+    asked: section(report, "## Asked")?.body || null,
     rootCause: section(report, "## Root cause")?.body || null,
+    // The Proof bullets with their "observed:" prefix dropped; "observed, lead's own run:" keeps the "lead's own run".
+    proof: proofItems.map((item) => item.replace(/^observed(?:,\s*([^:]+))?:\s*/, (m, who) => (who ? who + ": " : ""))),
+    qaScore: line(proofItems.join("\n"), /QA (\d+\/\d+) pass/),
+    unitScore: line(proofItems.join("\n"), /unit suite (\d+\/\d+) OK/),
+    mutation: line(proofItems.join("\n"), /\b(KILLED)\b/),
+    leadRun: line(proofItems.join("\n"), /lead's own run:\s*([^:]+):/),
+    diffStat: line(report, /Diff: (\d+ insertions?, \d+ deletions? in \d+ files?)/),
     notVerified: notVerified ? list(notVerified.body).items : [],
     computed: line(report, /^(Computed by ledger\.py .+)$/m),
     modelsDate: models ? line(models.heading, /\((as of [^)]+)\)/) : null,
@@ -89,4 +100,44 @@ export function missing(data) {
       return false;
     })
     .map(([key]) => key);
+}
+
+// The published benchmark, from bench/results/<run>/runs.jsonl (one JSON object per line) and
+// each task's tier ("basic" or "hard", from bench/tasks/*/task.json). Medians per arm.
+export const BENCH_ARMS = [
+  ["plain", "Plain agent"],
+  ["lean", "/oldhand --lean"],
+  ["auto", "/oldhand"],
+];
+
+export function benchData(runsText, tiers) {
+  const runs = runsText.split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
+  const median = (xs) => {
+    const s = [...xs].sort((a, b) => a - b);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  };
+  const arms = BENCH_ARMS.map(([key, label]) => {
+    const rs = runs.filter((r) => r.arm === key);
+    return {
+      key,
+      label,
+      runs: rs.length,
+      passed: rs.filter((r) => r.hidden_check === "pass").length,
+      falseDone: rs.filter((r) => r.false_done).length,
+      tokens: median(rs.map((r) => r.tokens)),
+      cost: median(rs.map((r) => r.cost_usd || 0)),
+      minutes: median(rs.map((r) => r.minutes)),
+      subagents: rs.reduce((n, r) => n + (r.subagents || 0), 0),
+    };
+  }).filter((a) => a.runs);
+  const tasks = [...new Set(runs.map((r) => r.task))];
+  return {
+    runs: runs.length,
+    tasks: tasks.length,
+    hard: tasks.filter((t) => tiers[t] === "hard").length,
+    totalCost: runs.reduce((n, r) => n + (r.cost_usd || 0), 0),
+    falseDone: runs.filter((r) => r.false_done).map((r) => ({ task: r.task, arm: r.arm })),
+    arms,
+  };
 }

@@ -11,6 +11,8 @@ on:
       - "skills/oldhand/references/orchestration.md"
       - "examples/**"
       - ".claude-plugin/plugin.json"
+      - "bench/results/**"
+      - "bench/tasks/*/task.json"
   workflow_dispatch:
 
 permissions:

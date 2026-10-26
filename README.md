@@ -280,10 +280,10 @@ decides whether the work was really done.
 | `/oldhand --lean` | 10 of 10 | 0 | 2,381,328 | $0.87 |
 | `/oldhand` | 10 of 10 | 0 | 2,741,416 | $1.01 |
 
-The plain agent's miss: it overwrote the project's `config.json` while testing,
-deleted it, and still said DONE. On small, clearly specified fixes the model is
-already good, and Oldhand costs about 3.5 to 4 times as much; one run per cell is
-too few to call a rate. Method, every run, the tasks and how to re-run it:
+On its one miss, the plain agent overwrote the project's `config.json` while
+testing, deleted it, and still said DONE. On small, clearly specified fixes the
+model is already good, and Oldhand costs about 3.5 to 4 times as much. One run per
+cell is too few to measure a failure rate. Method, every run, the tasks and how to re-run it:
 [bench/README.md](bench/README.md).
 
 ## Works well with
