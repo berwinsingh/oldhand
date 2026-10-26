@@ -1,8 +1,8 @@
 # Benchmark
 
-Does Oldhand stop a coding agent from saying "done" when it is not, and what does
-that cost? This folder holds the tasks, the harness and the published results, so
-anyone can re-run it.
+This benchmark measures whether Oldhand stops a coding agent from saying "done"
+when the work isn't done, and what that costs. The folder holds the tasks, the
+harness and the published results, so anyone can re-run it.
 
 ## Results: 26 October 2026, Claude Code, `sonnet`
 
@@ -26,15 +26,15 @@ shipped a repository where `python3 -m appcfg show` crashes, and ended with
 `RESULT: DONE`. Both Oldhand runs of the same task passed the hidden check and
 recorded a computed VERIFIED.
 
-### What this shows, and what it does not
+### What this shows and doesn't
 
-- On small, clearly specified bugs the current model is already good: the plain
+- On small, clearly specified bugs the current model is already good. The plain
   agent met every stated rule in 9 of 10 tasks, including all four harder ones.
-  Oldhand's edge here is one caught failure, not a pattern. One run per cell is
-  far too few to call a rate: read this as a cost measurement with one example of
-  the failure Oldhand exists for.
-- The cost is real: about 5.6 to 6.5 times the tokens, 3.5 to 4 times the money
-  and 4 times the wall-clock time on tasks this size. Use `--lean` or plain
+  Oldhand's edge here is one caught failure, and one run per cell is far too few
+  to measure a failure rate. The run measures cost well and shows one real case of
+  the failure Oldhand is built for.
+- On tasks this size Oldhand takes about 5.6 to 6.5 times the tokens, 3.5 to 4
+  times the money and 4 times the wall-clock time. Use `--lean` or plain
   prompting for small, low-risk changes.
 - The auto arm never started a sub-agent: every task is a one- or two-file fix,
   so `/oldhand` routed itself to the lean route each time. The full chain with

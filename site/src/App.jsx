@@ -70,9 +70,9 @@ const stages = [
   ["contract", "The request becomes numbered criteria, each with the proof it needs."],
   ["trace", "The real code path, and every caller of what will change."],
   ["rca", "Root cause for bugs, with refuters trying to break it first."],
-  ["research", "The codebase, the standard library, the platform, then dependencies."],
+  ["research", "Looks for something to reuse in the codebase, the standard library, the platform, then dependencies."],
   ["plan", "The smallest complete change, with blast radius and rollback."],
-  ["build", "One focused test, proven by mutation: break the fix, the test fails."],
+  ["build", "The fix and one focused test, proven by breaking the fix on purpose and watching the test fail."],
   ["review", "Read-only reviewers, one lens each; the chair refutes every finding."],
   ["qa", "A sub-agent per scenario drives the real app and brings back evidence."],
   ["ship", "A script computes the verdict from the ledger."],
@@ -434,8 +434,8 @@ export function App() {
           <h1>Make your coding agent prove it is done.</h1>
           <p className="sub">
             For Claude Code, Codex, Cursor, Copilot, Gemini CLI and any agent that reads{" "}
-            <code>SKILL.md</code>. One request runs through ten stages, and a script, not the
-            model, says VERIFIED.
+            <code>SKILL.md</code>. One request runs through ten stages, and a small script reads the
+            recorded evidence and prints the verdict, so the model can't declare itself done.
           </p>
           <Command text={NPX} index={1} />
           <p className="alt">
@@ -506,8 +506,8 @@ export function App() {
         <section id="example">
           <h2>Example run</h2>
           <p>
-            A seeded bug in a small Python importer: a transient write failure plus a retry stored a
-            CSV batch twice. The project and the task folder the pack wrote are in{" "}
+            The example is a seeded bug in a small Python importer. A transient write failure plus a
+            retry stored a CSV batch twice. The project and the task folder the pack wrote are in{" "}
             <a href={EXAMPLE_DIR}>examples/csv-import-dupes</a>; the table is read from its{" "}
             <a href={REPORT}>report.md</a> at build time.
           </p>
@@ -585,8 +585,8 @@ export function App() {
           ))}
           <ul className="plain">
             <li>On small, clearly specified fixes the model is already good, and Oldhand costs several times as much. Use <code>--lean</code> or plain prompting for small, low-risk changes.</li>
-            <li>One run per task and route is too few to call a rate. Read it as a cost measurement with one example of the failure Oldhand exists for.</li>
-            <li>Every task was small, so <code>/oldhand</code> chose the lean route each time: the full chain with review and QA sub-agents is not measured here yet.</li>
+            <li>One run per task and route is too few to measure a failure rate. It does measure cost, and it caught one real case of the failure Oldhand is built for.</li>
+            <li>Every task was small, so <code>/oldhand</code> chose the lean route each time, and the full chain with review and QA sub-agents hasn't been measured yet.</li>
           </ul>
           <p>
             Tasks, method, every run and how to re-run it:{" "}
@@ -612,19 +612,19 @@ export function App() {
         <section id="models">
           <h2>Models</h2>
           <p>
-            The skills name roles, not models: the lead owns the contract, the review chair, the final
-            check and the release decision; workers implement, investigate, review and drive QA;
-            scouts sweep files, read logs and run read-only checks.{" "}
-            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a> maps
-            the roles to current models ({data.modelsDate}).
+            The skills name roles, and one dated file maps them to models. The lead owns the contract,
+            the review chair, the final check and the release decision. Workers implement,
+            investigate, review and drive QA. Scouts sweep files, read logs and run read-only checks.{" "}
+            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a> has the
+            current models ({data.modelsDate}).
           </p>
           <Table data={data.models} />
         </section>
 
         <section id="scope">
-          <h2>Honest scope</h2>
+          <h2>Limits</h2>
           <ul className="plain">
-            <li>Instructions plus three small scripts, not a runtime. An agent can still ignore it; the ledger only refuses to print VERIFIED without evidence on the current tree.</li>
+            <li>It is instructions plus three small scripts, so an agent can still ignore it. The ledger only refuses to print VERIFIED without evidence on the current tree.</li>
             <li>It costs turns and tokens. Review lenses and QA scenarios are sub-agents; the conductor tells you the count before spawning more than ten.</li>
             <li>Browser and desktop QA need a browser or computer-use tool on your host. Without one, UI scenarios are reported as blocked, never as passed.</li>
             <li>Skip it for typos, lookups and one-line edits. The skill says so itself.</li>
