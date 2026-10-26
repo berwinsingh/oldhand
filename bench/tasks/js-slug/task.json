@@ -1,0 +1,1 @@
+{"id": "js-slug", "lang": "javascript", "test": "node --test", "summary": "Accent-folding, always-unique URL slugs", "tier": "basic"}

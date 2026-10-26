@@ -8,3 +8,6 @@ site/implementation-desktop-v2.png
 site/implementation-mobile.png
 .oldhand/
 __pycache__/
+.runs/
+bench/results/*/work/
+bench/results/*/streams/

@@ -1,0 +1,1 @@
+{"id": "py-search-ties", "lang": "python", "test": "python3 -m unittest discover -s tests", "summary": "Stable pagination when scores tie, natural id order", "tier": "hard"}

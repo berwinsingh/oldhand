@@ -15,7 +15,7 @@ description: >-
   fixes, lookups or explaining code.
 license: MIT
 metadata:
-  version: "2.0.1"
+  version: "2.1.0"
   homepage: "https://berwinsingh.github.io/oldhand/"
 ---
 
@@ -80,6 +80,7 @@ variable is not expanded on your host, use this skill's own folder.
 | --- | --- |
 | `references/orchestration.md` | before any delegation: role tiers and current models, the brief template, read-only per host, browser and computer-use QA delegation, round caps, live-run budget, cost |
 | `references/hosts.md` | you need the tool for a capability on this host (sub-agents, browser, computer use, dev server, tracker, library docs), the instruction file name, or how to invoke a stage |
+| `references/lean.md` | the request asks for lean or is small: the one-agent route and when to leave it |
 
 ## Step 1: route the request
 
@@ -93,10 +94,9 @@ Pick the mode and the stages from what was asked:
 | plan-only: "plan first", "do not edit" | plan-only | contract, trace, rca (bugs), research (new things), plan, then stop |
 | verify: "make sure X works", "QA this" | verify | contract, trace, qa, ship, learn |
 | review-only: "review this diff or PR" | investigate | contract, review, ship |
-| small: one or two files, the cause shown by a failing test | implement | contract (short form), build, review (lead alone, contract and correctness lenses), qa (lead runs the acceptance and failing-case), ship |
+| lean: `--lean`, "quick", "no sub-agents"; or small (one or two files, the cause shown by a failing test) | implement | read `references/lean.md` now and run its five steps. No sub-agents, but still contract.md and LEDGER, a test proven by mutate.py, your own e2e records, and LEDGER verdict |
 
-`rca` runs only for bugs, incidents and "why" questions; `research` only when
-something new is built or added. Review-only criteria use `(proof: review)`.
+`rca` runs only for bugs, incidents and "why" questions; `research` only when something new is built or added. Review-only criteria use `(proof: review)`.
 
 Exit: the mode and the stage list, announced in one line.
 

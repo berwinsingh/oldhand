@@ -1,0 +1,1 @@
+{"id": "js-cart", "lang": "javascript", "test": "node --test", "summary": "Cent-exact cart totals with half-up rounding and discount rules", "tier": "basic"}
