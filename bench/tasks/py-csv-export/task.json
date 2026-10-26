@@ -1,0 +1,1 @@
+{"id": "py-csv-export", "lang": "python", "test": "python3 -m unittest discover -s tests", "summary": "RFC 4180 CSV export with formula-injection guard", "tier": "basic"}

@@ -1,0 +1,14 @@
+[
+  {"id": 1041, "date": "2026-09-03", "customer": "Ana", "lines": [
+    {"sku": "APPLE-KG", "name": "Apples", "price": 2.345, "qty": 3},
+    {"sku": "MILK", "name": "Milk 1L", "price": 1.19, "qty": 2}]},
+  {"id": 1042, "date": "2026-09-14", "customer": "Ben", "lines": [
+    {"sku": "CHEESE-KG", "name": "Cheddar", "price": 14.995, "qty": 3},
+    {"sku": "BREAD", "name": "Sourdough", "price": 4.5, "qty": 1},
+    {"sku": "OLIVE-KG", "name": "Olives", "price": 11.335, "qty": 4},
+    {"sku": "EGGS", "name": "Eggs x12", "price": 3.99, "qty": 2}]},
+  {"id": 1043, "date": "2026-09-30", "customer": "Cai", "lines": [
+    {"sku": "TEA", "name": "Green tea", "price": 6.25, "qty": 1}]},
+  {"id": 1044, "date": "2026-10-01", "customer": "Dee", "lines": [
+    {"sku": "RICE-KG", "name": "Rice", "price": 3.125, "qty": 5}]}
+]

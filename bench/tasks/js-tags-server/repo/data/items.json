@@ -1,0 +1,8 @@
+[
+  {"id": 1, "name": "Tee, red, S", "tags": ["Red", "small", "cotton"]},
+  {"id": 2, "name": "Tee, red, L", "tags": ["Red", "Large", "cotton"]},
+  {"id": 3, "name": "Tee, blue, L", "tags": ["blue", "large", "cotton"]},
+  {"id": 4, "name": "Hoodie, red, L", "tags": ["red", "large", "fleece"]},
+  {"id": 5, "name": "Cap, green", "tags": ["green", "one-size"]},
+  {"id": 6, "name": "Socks, red, S", "tags": ["RED", "Small", "wool"]}
+]

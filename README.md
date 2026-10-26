@@ -110,6 +110,12 @@ Start the conductor and describe the work. A ticket key is optional.
 | Copilot CLI | `Use the /oldhand skill to fix DOCQ-123 and prove it end to end` |
 | Gemini CLI, OpenCode, Roo Code, Amp, Goose | `Use the oldhand skill to fix DOCQ-123 and prove it end to end` |
 
+Add `--lean` for one agent and no sub-agents
+(`/oldhand:oldhand --lean Fix DOCQ-123`). It keeps the criteria, a test proven to
+catch a break, its own end-to-end run and the computed verdict, and drops the
+review and QA panels. It switches back to the full route, and says why, when the
+change turns out bigger or riskier than it looked.
+
 Each stage also runs on its own: replace `oldhand` with `oldhand-review`,
 `oldhand-qa`, `oldhand-rca` and so on (`/oldhand:oldhand-qa` with the Claude
 Code plugin). Per-agent details are in
@@ -147,7 +153,7 @@ The ticket is stale: use OAuth instead of API keys, and mobile is out of scope.
 | --- | --- |
 | Build or change something | contract, trace, research, plan, build, review, qa, ship, learn |
 | Fix a bug | contract, trace, rca, plan, build, review, qa, ship, learn (and research if the fix adds something new) |
-| A small fix: one or two files, the cause shown by a failing test | a short contract, build, a review by the lead alone, the lead's own test run, ship |
+| `--lean`, or a small fix (one or two files, the cause shown by a failing test) | one agent, no sub-agents: a short contract, the fix and one test proven by mutation, the lead's own review and end-to-end run, and the computed verdict ([lean.md](skills/oldhand/references/lean.md)) |
 | Why does X happen | contract, trace, rca, ship, learn |
 | Plan first, do not edit | contract, trace, rca (bugs) or research (new things), plan; then it stops for your go-ahead |
 | Make sure X works | contract, trace, qa, ship, learn |
@@ -262,6 +268,24 @@ the newest one in the same role and records which model actually ran.
 [examples/README.md](examples/README.md) says what to read first in each, and
 what each run could not verify.
 
+## Benchmark
+
+30 headless Claude Code runs on 10 small seeded-bug tasks (`sonnet`, one run per
+task and arm, 26 October 2026). A hidden check that drives the real entry point
+decides whether the work was really done.
+
+| arm | hidden check passed | false DONE | median tokens | median cost |
+| --- | ---: | ---: | ---: | ---: |
+| plain agent | 9 of 10 | 1 | 423,671 | $0.25 |
+| `/oldhand --lean` | 10 of 10 | 0 | 2,381,328 | $0.87 |
+| `/oldhand` | 10 of 10 | 0 | 2,741,416 | $1.01 |
+
+The plain agent's miss: it overwrote the project's `config.json` while testing,
+deleted it, and still said DONE. On small, clearly specified fixes the model is
+already good, and Oldhand costs about 3.5 to 4 times as much; one run per cell is
+too few to call a rate. Method, every run, the tasks and how to re-run it:
+[bench/README.md](bench/README.md).
+
 ## Works well with
 
 None of these are required. Add the one that gives your agent access to the
@@ -289,6 +313,8 @@ No tracker connected? Paste the ticket text, or just describe the work.
   current code.
 - It costs turns and tokens: reviews and tests run as separate agents. Before
   starting more than ten, it tells you the count and offers a quick run.
+  `--lean` runs everything in one agent; the [benchmark](#benchmark) shows what
+  each route costs.
 - Browser and desktop tests need a browser or computer-use tool in your agent.
   Without one, those tests are reported as blocked, never as passed.
 - Codex starts sub-agents only when asked. The skills ask, so this works as long

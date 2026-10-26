@@ -1,0 +1,1 @@
+{"id": "js-remember-me", "lang": "javascript", "test": "node --test", "summary": "Remember-me sessions that survive refresh, cookie and server side", "tier": "hard"}
