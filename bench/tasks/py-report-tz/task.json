@@ -1,0 +1,1 @@
+{"id": "py-report-tz", "lang": "python", "test": "python3 -m unittest discover -s tests", "summary": "Inclusive date range in the configured timezone", "tier": "basic"}

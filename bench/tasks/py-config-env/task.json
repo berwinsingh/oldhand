@@ -1,0 +1,1 @@
+{"id": "py-config-env", "lang": "python", "test": "python3 -m unittest discover -s tests", "summary": "Nested, typed environment overrides for a JSON config", "tier": "basic"}

@@ -1,0 +1,1 @@
+{"id": "py-order-totals", "lang": "python", "test": "python3 -m unittest discover -s tests", "summary": "One money rule across three separately written commands", "tier": "hard"}
