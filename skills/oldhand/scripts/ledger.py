@@ -8,7 +8,7 @@ restamps. The verdict is computed from that file, never written by hand.
     python3 ledger.py init --dir .oldhand/<task> --title "<title>" [--mode implement]
     python3 ledger.py sync [--dir D]
     python3 ledger.py record --id AC1 --kind e2e --status pass --evidence qa/results/S1.json \\
-        --by "lead:fable" --cmd "qa.py scenario S1" [--lead] [--dir D]
+        --by "lead:fable" --cmd "qa.py scenario S1" [--lead] [--live [--max-age 24h]] [--dir D]
     python3 ledger.py finding add --sev high --lens security --where src/x.py:42 --text "<defect>" [--dir D]
     python3 ledger.py finding resolve --id F3 --how fixed|refuted|deferred --note "<why>" [--accepted-by user] [--dir D]
     python3 ledger.py restamp --check C7 --reason "<why the change since cannot affect it>" [--dir D]
@@ -35,8 +35,23 @@ Every record stamps the working-tree fingerprint: git HEAD, a hash of
 5 MB by name and size; nested repos and submodules by their own state). .oldhand/
 itself is left out. A check recorded on another fingerprint is stale until it is
 re-run or restamped with a reason. Outside git the fingerprint is "no-git" and
-staleness is not tracked; the verdict says so. If git fails where git was in use,
+file changes are not tracked; the verdict says so. If git fails where git was in use,
 that is an error, never "no-git".
+
+Three more things make a check stale; each is stamped only when it applies, so a repo
+with none of them records and decides exactly as before:
+  runtime  A pin file at the project root (.nvmrc, .node-version, .python-version,
+           .ruby-version, .tool-versions, rust-toolchain, rust-toolchain.toml) is hashed,
+           ignored by git or not, and the pinned runtime's version is read from the project
+           root (`node --version`, `python --version`, ...). A changed, added or removed pin
+           file, or a different version now, makes the check stale.
+  env      `.oldhand-env-names` at the project root lists env var NAMES, one per line. Each
+           record stores a salted PBKDF2 digest of every listed var (or "unset"), never the
+           value. A changed value, a var set or unset, or a name added or removed makes the
+           check stale. Values are never written, printed or put in the report.
+  live     `record --live [--max-age 24h]` marks a check that hit a real external service.
+           Older than its max age (default 24h), it is stale. Only timestamps are compared.
+restamp clears file changes only; the other three need a re-run.
 
 Verdict, in this order:
   INCOMPLETE  no contract or criteria, or a live criterion has no counted check of its proof kind
@@ -65,6 +80,7 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 import tempfile
@@ -91,6 +107,31 @@ MODE_LINE = re.compile(r"^(?:Source:.*?\s)?Mode:\s*([A-Za-z-]+)", re.M)
 PATHISH = re.compile(r"[/\\]|\.[A-Za-z][A-Za-z0-9]{0,4}$")
 BIG = 5 * 1024 * 1024
 EXCLUDE = ":(exclude,glob)**/.oldhand/**"
+
+# Runtime pins: the file, the runtime it pins (.tool-versions names its tools inside), and how to read a version.
+PIN_FILES = (".nvmrc", ".node-version", ".python-version", ".ruby-version", ".tool-versions",
+             "rust-toolchain", "rust-toolchain.toml")
+PIN_RUNTIME = {".nvmrc": "node", ".node-version": "node", ".python-version": "python", ".ruby-version": "ruby",
+               "rust-toolchain": "rust", "rust-toolchain.toml": "rust"}
+TOOL_VERSIONS_RUNTIME = {"nodejs": "node", "node": "node", "python": "python", "ruby": "ruby", "golang": "go",
+                         "go": "go", "rust": "rust", "java": "java"}
+# Each runtime: commands tried in order; a later one only when the earlier one is not installed.
+PROBES = {"node": [["node", "--version"]], "python": [["python", "--version"], ["python3", "--version"]],
+          "ruby": [["ruby", "--version"]], "go": [["go", "version"]], "rust": [["rustc", "--version"]],
+          "java": [["java", "-version"]]}
+PROBE_TIMEOUT = 10
+# A JVM echoes these before its version ("Picked up JAVA_TOOL_OPTIONS: ..."); they can hold secrets.
+PROBE_DROP = ("JAVA_TOOL_OPTIONS", "_JAVA_OPTIONS", "JDK_JAVA_OPTIONS")
+# The version token only (20.11.0, 3.13.0rc1, 1.8.0_392), never the rest of a probe's output.
+VERSION = re.compile(r"\d+(?:\.\d+)+(?:[-+_]?[0-9A-Za-z][0-9A-Za-z.]*)?")
+QUOTED_VERSION = re.compile(r'version "(\d[0-9A-Za-z.+_-]*)"')  # java: version "21", "17-ea"
+# Env var names a project's checks depend on. At the project root, not in .oldhand/, which git ignores.
+ENV_NAMES_FILE = ".oldhand-env-names"
+ENV_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+ENV_ROUNDS = 100000
+LIVE_MAX_AGE = 24 * 3600
+DURATION = re.compile(r"^(\d+)([smhd]?)$")
+UNIT = {"": 1, "s": 1, "m": 60, "h": 3600, "d": 86400}
 
 
 class LedgerError(Exception):
@@ -228,6 +269,124 @@ def exclude_oldhand(d):
     except OSError as e:
         return None, "could not add .oldhand/ to %s (%s); .oldhand/.gitignore keeps it out of git" % (path, e)
     return path, None
+
+
+# --- what a check depends on outside the tree: runtime pins, listed env vars, live services ---
+def pin_files(root):
+    """{pin file name: content hash} for the runtime pin files at the project root, ignored by git or not."""
+    out = {}
+    for name in PIN_FILES:
+        path = os.path.join(root, name) if root else None
+        if path and os.path.isfile(path):
+            try:
+                with open(path, "rb") as fh:
+                    out[name] = hashlib.sha256(fh.read()).hexdigest()[:16]
+            except OSError:
+                out[name] = "unreadable"
+    return out
+
+
+def pinned_runtimes(root, pins):
+    """The runtimes the pin files name. .tool-versions lists `tool version` lines; tools not in
+    TOOL_VERSIONS_RUNTIME are covered by the file's hash only."""
+    names = {PIN_RUNTIME[p] for p in pins if p in PIN_RUNTIME}
+    if ".tool-versions" in pins:
+        with contextlib.suppress(OSError):
+            with open(os.path.join(root, ".tool-versions"), encoding="utf-8", errors="replace") as fh:
+                for line in fh:
+                    tool = line.split("#", 1)[0].split()
+                    if tool and tool[0] in TOOL_VERSIONS_RUNTIME:
+                        names.add(TOOL_VERSIONS_RUNTIME[tool[0]])
+    return names
+
+
+def probe(runtime, root):
+    """The version the runtime reports from the project root, so version-manager shims honour the pin. Only the
+    version token is kept: a JVM prints JAVA_TOOL_OPTIONS and friends before its version, and they can hold
+    secrets, so those vars are also kept from the probe. GOTOOLCHAIN=local and RUSTUP_AUTO_INSTALL=0 stop go and
+    rustup downloading a toolchain; shims that ignore them (rustup 1.27 and older, Volta, mise) may still."""
+    env = {k: v for k, v in os.environ.items() if k not in PROBE_DROP}
+    env.update(RUSTUP_AUTO_INSTALL="0", GOTOOLCHAIN="local")
+    for cmd in PROBES.get(runtime, []):
+        try:
+            p = subprocess.run(cmd, cwd=root, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, env=env, timeout=PROBE_TIMEOUT)
+        except FileNotFoundError:
+            continue
+        except subprocess.TimeoutExpired:
+            return "unavailable (%s timed out)" % cmd[0]
+        except OSError as e:
+            return "unavailable (%s: %s)" % (cmd[0], e.strerror or e)
+        if p.returncode != 0:
+            return "unavailable (%s exited %d)" % (cmd[0], p.returncode)
+        for line in (p.stdout + b"\n" + p.stderr).decode("utf-8", "replace").split("\n"):
+            if "Picked up " in line:
+                continue
+            m = QUOTED_VERSION.search(line)
+            v = m.group(1) if m else (VERSION.search(line) or [None])[0]
+            if v:
+                return v[:40]
+        return "unavailable (no version in its output)"
+    return "unavailable (%s not found)" % " or ".join(c[0] for c in PROBES.get(runtime, [])) if runtime in PROBES \
+        else "unavailable (no probe for %s)" % runtime
+
+
+def env_names(root):
+    """The names listed in .oldhand-env-names, or None when the project has no such file. A line that is not a
+    plain name is an error that cites its number only: it may hold a value."""
+    path = os.path.join(root, ENV_NAMES_FILE) if root else None
+    if not path or not os.path.isfile(path):
+        return None
+    try:
+        with open(path, "rb") as fh:
+            raw = fh.read()
+        # Windows editors and PowerShell 5 redirection write a byte order mark (UTF-8 or UTF-16).
+        lines = raw.decode("utf-16" if raw[:2] in (b"\xff\xfe", b"\xfe\xff") else "utf-8-sig",
+                           "replace").splitlines()
+    except OSError as e:
+        raise LedgerError("could not read %s (%s): fix its permissions or remove it" % (path, e.strerror or e))
+    names = []
+    for n, line in enumerate(lines, 1):
+        name = line.split("#", 1)[0].strip()
+        if not name:
+            continue
+        if not ENV_NAME.match(name):
+            raise LedgerError("line %d of %s is not an env var name: list names only, one per line, never values "
+                              "(the line is not shown in case it holds a value)" % (n, path))
+        if name not in names:
+            names.append(name)
+    return names
+
+
+def env_digests(names, salt):
+    """{name: salted digest, or "unset"}. The value goes into the hash and nowhere else."""
+    out = {}
+    for name in names:
+        value = os.environ.get(name)
+        out[name] = "unset" if value is None else hashlib.pbkdf2_hmac(
+            "sha256", value.encode("utf-8", "surrogateescape"), bytes.fromhex(salt), ENV_ROUNDS).hex()[:16]
+    return out
+
+
+def parse_duration(s):
+    """Seconds from 90m, 24h, 7d or a plain number of seconds."""
+    m = DURATION.match(str(s).strip().lower())
+    if not m or int(m.group(1)) == 0:
+        raise LedgerError("--max-age %r is not a duration: use a whole number with s, m, h or d, for example "
+                          "90m, 24h or 7d" % s)
+    return int(m.group(1)) * UNIT[m.group(2)]
+
+
+def human(secs):
+    """A short duration: whole days (from 2d), hours or minutes when exact, else hours or minutes rounded down."""
+    secs = int(secs)
+    for unit, size in (("d", 86400), ("h", 3600), ("m", 60)):
+        if secs >= max(size, 2 * 86400 if unit == "d" else 0) and secs % size == 0:
+            return "%d%s" % (secs // size, unit)
+    for unit, size in (("h", 3600), ("m", 60)):
+        if secs >= size:
+            return "%d%s" % (secs // size, unit)
+    return "%ds" % secs
 
 
 # --- the ledger file ---
@@ -442,9 +601,12 @@ def evidence_missing(d, root, ev):
     return not any(os.path.exists(os.path.join(base, p)) for base in (d, root) if base)
 
 
-def record(d, cid, kind, status, evidence, by, cmd=None, lead=False):
+def record(d, cid, kind, status, evidence, by, cmd=None, lead=False, live=False, max_age=None):
     """Append a check. Returns (check, warning or None)."""
     d = os.path.abspath(d)
+    if max_age is not None and not live:
+        raise LedgerError("--max-age only applies to a live check: add --live, or drop --max-age")
+    max_age = parse_duration(max_age) if max_age is not None else LIVE_MAX_AGE
     if kind not in KINDS:
         raise LedgerError("--kind %r is not one of %s" % (kind, ", ".join(KINDS)))
     if status not in STATUSES:
@@ -456,19 +618,33 @@ def record(d, cid, kind, status, evidence, by, cmd=None, lead=False):
     if not (cmd or "").strip():
         raise LedgerError('--cmd is empty: name the check (the test command, "qa.py scenario S1", "rca.md"). A re-run '
                           'with the same --cmd replaces its earlier run; different checks never hide each other')
+    root = project_root(d)
+    pins = pin_files(root)
+    runtime = {r: probe(r, root) for r in sorted(pinned_runtimes(root, pins))}
+    names = env_names(root)
     with _locked(d):
         led = load(d)
         criterion(led, cid)
         check = {"id": "C%d" % (len(led["checks"]) + 1), "criterion": cid, "kind": kind, "status": status,
                  "evidence": evidence.strip(), "by": by.strip(), "cmd": cmd.strip(), "lead": bool(lead),
                  "fingerprint": fingerprint(d, led), "time": now()}
+        # Stamped only when they apply, so a project without pins, env names or live checks records as before.
+        if pins:
+            check.update(pins=pins, runtime=runtime)
+        if names is not None:
+            led.setdefault("env_salt", secrets.token_hex(16))
+            check["env"] = env_digests(names, led["env_salt"])
+        if live:
+            check["live"] = {"max_age": max_age}
         led["checks"].append(check)
         save(d, led)
-    warning = None
-    if evidence_missing(d, project_root(d), evidence):
-        warning = ("evidence %s was not found under the task folder or the repo: this check will not count "
-                   "until the file exists" % evidence.strip())
-    return check, warning
+    warnings = []
+    if evidence_missing(d, root, evidence):
+        warnings.append("evidence %s was not found under the task folder or the repo: this check will not count "
+                        "until the file exists" % evidence.strip())
+    warnings += ["could not read the %s version (%s): recorded as unavailable, so a working %s later makes this "
+                 "check stale" % (r, v[len("unavailable ("):-1], r) for r, v in runtime.items() if v.startswith("unavailable")]
+    return check, "\n".join(warnings) or None
 
 
 def finding_add(d, sev, lens, where_, text):
@@ -565,9 +741,60 @@ def evaluate(d):
     order = {ch["id"]: i for i, ch in enumerate(led["checks"])}
     live = [c for c in led["criteria"] if c["status"] == "live"]
     since = {c["id"]: c.get("since_check", 0) for c in live}
+    pins = pin_files(root)
+    names = env_names(root)
+    salt = led.get("env_salt")
+    # Without a salt no check stored env digests, so only the names are compared.
+    env_now = {} if names is None else env_digests(names, salt) if salt else dict.fromkeys(names)
+    versions = {}  # runtime -> version now, probed once per verdict and only for runtimes a check recorded
+    clock = datetime.datetime.now(datetime.timezone.utc)
+    beyond = {}
+
+    def version_now(rt):
+        if rt not in versions:
+            versions[rt] = probe(rt, root)
+        return versions[rt]
+
+    def files_fresh(ch):
+        return not git or ch["fingerprint"] == fp or (ch["id"], fp) in restamped
+
+    def other_stale(ch):
+        """Why the check is stale beyond the files: runtime, env vars, live expiry. Restamp clears none of these."""
+        if ch["id"] in beyond:
+            return beyond[ch["id"]]
+        why = []
+        was = ch.get("pins") or {}
+        for p in sorted(set(was) | set(pins)):
+            if was.get(p) != pins.get(p):
+                why.append("runtime pin file %s %s" % (p, "added" if p not in was else "removed" if p not in pins
+                                                       else "changed"))
+        for rt, then in sorted((ch.get("runtime") or {}).items()):
+            if version_now(rt) != then:
+                why.append("runtime %s changed: %s -> %s" % (rt, then, version_now(rt)))
+        was = ch.get("env") or {}
+        for n in sorted(set(was) | set(env_now)):
+            if n not in env_now:
+                why.append("env var %s removed from %s" % (n, ENV_NAMES_FILE))
+            elif n not in was:
+                why.append("env var %s added to %s" % (n, ENV_NAMES_FILE))
+            elif was[n] != env_now[n]:
+                why.append("env var %s %s" % (n, "was set" if was[n] == "unset" else "was unset"
+                                              if env_now[n] == "unset" else "changed"))
+        if ch.get("live"):
+            max_age = ch["live"].get("max_age", LIVE_MAX_AGE)
+            try:
+                age = (clock - datetime.datetime.fromisoformat(ch["time"])).total_seconds()
+            except (TypeError, ValueError):
+                age = None
+            if age is None:
+                why.append("live check has an unreadable time (%s)" % ch["time"])
+            elif age > max_age:
+                why.append("live check expired (recorded %s ago, max %s)" % (human(age), human(max_age)))
+        beyond[ch["id"]] = why
+        return why
 
     def fresh(ch):
-        return not git or ch["fingerprint"] == fp or (ch["id"], fp) in restamped
+        return files_fresh(ch) and not other_stale(ch)
 
     def missing(ch):
         return evidence_missing(d, root, ch["evidence"])
@@ -616,11 +843,14 @@ def evaluate(d):
                 continue
             if ch["status"] == "fail":
                 notyet.append("%s fails (%s %s by %s): fix it and record a new run" % (c["id"], ch["id"], ch["kind"], ch["by"]))
-            if not fresh(ch):
+            if not files_fresh(ch):
                 notyet.append("%s: %s was recorded on an older tree (%s, now %s): re-run it and record again, or "
                               "`ledger.py restamp --check %s --reason ...` if the change cannot affect it"
                               % (c["id"], ch["id"], short_fp(ch["fingerprint"]), short_fp(fp), ch["id"]))
-            elif ch["status"] == "blocked":
+            if other_stale(ch):
+                notyet.append("%s: %s is stale: %s: re-run it and record again (restamp clears file changes only)"
+                              % (c["id"], ch["id"], "; ".join(other_stale(ch))))
+            if fresh(ch) and ch["status"] == "blocked":
                 blocked.append("%s is blocked (%s): %s" % (c["id"], ch["id"], ch["evidence"]))
         statuses = [ch["status"] for ch in counted]
         row["status"] = next(s for s in ("fail", "blocked", "pass") if s in statuses)
@@ -659,7 +889,9 @@ def evaluate(d):
             word = {"pass": "KILLED", "fail": "SURVIVED", "blocked": "ERROR"}.get(ch["status"], ch["status"])
             notes.append("%s mutation check on %s: %s" % (ch["id"], ch["criterion"], word))
     if not git:
-        notes.append("no git here: staleness is not tracked, so a check may describe an older version of the files")
+        notes.append("no git here: %s is not tracked, so a check may describe an older version of the files"
+                     % ("staleness" if not (pins or names is not None or any(ch.get("live") for ch in led["checks"]))
+                        else "file staleness"))
 
     if incomplete:
         verdict, reasons = "INCOMPLETE", incomplete + notyet + blocked
@@ -717,7 +949,8 @@ def status_text(d):
                                                          for c in led["criteria"]]) if led["criteria"] else "  none yet")
     out += ["", "Checks:"]
     out.append(_table(["id", "criterion", "kind", "status", "lead", "by", "tree", "evidence"],
-                      [[c["id"], c["criterion"], c["kind"], c["status"] + (" (void)" if c.get("void") else ""),
+                      [[c["id"], c["criterion"], c["kind"], c["status"] + (" (void)" if c.get("void") else "")
+                        + (" (live %s)" % human(c["live"].get("max_age", LIVE_MAX_AGE)) if c.get("live") else ""),
                         "yes" if c["lead"] else "", c["by"],
                         short_fp(c["fingerprint"]), _cut(c["evidence"], 50)] for c in led["checks"]])
                if led["checks"] else "  none yet")
@@ -784,6 +1017,9 @@ def main(argv=None):
     p.add_argument("--by", required=True)
     p.add_argument("--cmd", required=True, help="names the check; a re-run with the same --cmd replaces its last run")
     p.add_argument("--lead", action="store_true")
+    p.add_argument("--live", action="store_true",
+                   help="the check hit a real external service; it goes stale after --max-age")
+    p.add_argument("--max-age", help="with --live: how long it stays fresh, for example 90m, 24h, 7d (default 24h)")
     fp_ = sub.add_parser("finding", help="add or resolve a review finding")
     fsub = fp_.add_subparsers(dest="fcmd", required=True)
     p = fsub.add_parser("add", parents=[dir_opt])
@@ -834,11 +1070,12 @@ def main(argv=None):
             if any(x.startswith(("updated", "restored")) for x in changes):
                 print("Checks recorded before an update or restore no longer count for that criterion: re-run them.")
         elif a.command == "record":
-            check, warning = record(d, a.id, a.kind, a.status, a.evidence, a.by, a.cmd, a.lead)
-            print("%s recorded: %s %s %s%s (tree %s)" % (check["id"], a.id, a.kind, a.status,
-                                                        " by the lead" if a.lead else "", short_fp(check["fingerprint"])))
-            if warning:
-                print("warning: " + warning, file=sys.stderr)
+            check, warning = record(d, a.id, a.kind, a.status, a.evidence, a.by, a.cmd, a.lead, a.live, a.max_age)
+            print("%s recorded: %s %s %s%s%s (tree %s)" % (
+                check["id"], a.id, a.kind, a.status, " by the lead" if a.lead else "",
+                ", live for %s" % human(check["live"]["max_age"]) if a.live else "", short_fp(check["fingerprint"])))
+            for line in (warning or "").splitlines():
+                print("warning: " + line, file=sys.stderr)
         elif a.command == "finding" and a.fcmd == "add":
             f = finding_add(d, a.sev, a.lens, a.where, a.text)
             print("%s added (%s, %s)." % (f["id"], f["sev"], f["lens"]))

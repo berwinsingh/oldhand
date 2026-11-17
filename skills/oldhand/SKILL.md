@@ -158,12 +158,12 @@ INCOMPLETE). Read its reason and act:
 - INCOMPLETE: a criterion has no check of its required kind. Run the stage that
   makes it: qa for e2e, build for unit or integration, review for review (rca
   in investigate mode).
-- NOT YET: a failing check, a STALE check (the code changed after it ran), an
-  open high or medium, or no lead e2e pass. Implement mode: fix failures and
-  findings in build, then re-run only the affected checks; a missing lead pass
-  is yours to run in qa. Other modes: NOT YET is the answer; report it and
-  offer an implement run. `LEDGER restamp --check C<n> --reason "..."` only
-  when the change provably cannot affect that check.
+- NOT YET: a failing check, a STALE check (code, pinned runtime or listed env
+  var changed, or a live check expired), an open high or medium, or no lead e2e
+  pass. Implement mode: fix failures and findings in build, then re-run only the
+  affected checks; a missing lead pass is yours to run in qa. Other modes: report
+  NOT YET and offer an implement run. `LEDGER restamp --check C<n> --reason "..."`
+  only when a file change provably cannot affect that check.
 - BLOCKED: name each blocker: what, where, and what would unblock it.
 - VERIFIED: ship publishes only what the authorized actions allow; if the user
   asked for a thumbs-up first, stop and ask.
