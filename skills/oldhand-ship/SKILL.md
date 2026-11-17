@@ -63,7 +63,9 @@ Exit 0 is VERIFIED, 1 NOT YET, 2 BLOCKED, 3 INCOMPLETE. Act on the printed reaso
   oldhand-qa for e2e, oldhand-build for unit or integration, oldhand-review for review
   (oldhand-rca in investigate mode).
 - NOT YET: a failing check, a STALE check, an open high or medium finding, a deferred high or
-  medium the user has not accepted, or no lead e2e pass. Re-run a STALE check. Use
+  medium the user has not accepted, or no lead e2e pass. Re-run a STALE check; its reason says
+  why: files changed, a runtime pin file or version changed, a var in `.oldhand-env-names`
+  changed, or a live check passed its max age. Restamp clears file changes only. Use
   `LEDGER restamp --check C7 --reason "<why>"` only when the change since then provably cannot
   affect that check (for example, only notes or instruction files changed), and say why. Record
   a deferral as accepted only on the user's own words:

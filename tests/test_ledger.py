@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import shutil
@@ -441,6 +442,279 @@ class Stale(Base):
         with open(os.path.join(self.root, "a.txt"), "a") as fh:
             fh.write("two\n")
         self.assertNotEqual(ledger.fingerprint(self.d), fp)
+
+
+OLD_CHECK_KEYS = {"id", "criterion", "kind", "status", "evidence", "by", "cmd", "lead", "fingerprint", "time"}
+
+
+class Beyond(Base):
+    """Shared helpers for the runtime, env and live rules."""
+    use_git = True
+
+    def write(self, name, text):
+        with open(os.path.join(self.root, name), "w", encoding="utf-8") as fh:
+            fh.write(text)
+
+    def stale_text(self, res=None):
+        return "\n".join((res or self.verdict())["reasons"])
+
+
+class RuntimePins(Beyond):
+    def setUp(self):
+        super().setUp()
+        self.saved_probes = ledger.PROBES
+        self.ver = os.path.join(tempfile.mkdtemp(), "version")
+        self.set_version("Python 3.11.9")
+        reader = "import sys; print(open(sys.argv[1]).read())"
+        ledger.PROBES = dict(ledger.PROBES, python=[[sys.executable, "-c", reader, self.ver]])
+
+    def tearDown(self):
+        ledger.PROBES = self.saved_probes
+        shutil.rmtree(os.path.dirname(self.ver))
+        super().tearDown()
+
+    def set_version(self, v):
+        with open(self.ver, "w") as fh:
+            fh.write(v + "\n")
+
+    def test_no_pin_file_and_no_env_names_record_and_decide_as_before(self):
+        self.all_pass()
+        led = ledger.load(self.d)
+        self.assertEqual({k for ch in led["checks"] for k in ch}, OLD_CHECK_KEYS)
+        self.assertNotIn("env_salt", led)
+        res = self.verdict()
+        self.assertEqual(res["verdict"], "VERIFIED")
+        with open(os.path.join(self.root, "a.txt"), "a") as fh:
+            fh.write("two\n")
+        reasons = self.verdict()["reasons"]
+        self.assertTrue(reasons and all("recorded on an older tree" in r or "--lead" in r for r in reasons), reasons)
+
+    def test_an_ignored_pin_file_that_changes_makes_checks_stale_and_names_it(self):
+        self.write(".gitignore", ".python-version\n")
+        self.write(".python-version", "3.11\n")
+        self.all_pass()
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        fp = ledger.fingerprint(self.d)
+        self.write(".python-version", "3.12\n")
+        self.assertEqual(ledger.fingerprint(self.d), fp, "git ignores the file, so only the pin stamp sees it")
+        res = self.verdict()
+        self.assertEqual(res["verdict"], "NOT YET")
+        self.assertIn("stale", self.row(res, "R1")["flags"])
+        self.assertIn("runtime pin file .python-version changed", self.stale_text(res))
+        self.assertIsNone(ledger.restamp(self.d, "C1", "restamp clears files only"))
+        self.assertEqual(self.verdict()["verdict"], "NOT YET")
+
+    def test_a_different_runtime_version_now_makes_checks_stale(self):
+        self.write(".python-version", "3.11\n")
+        self.all_pass()
+        self.assertEqual(ledger.load(self.d)["checks"][0]["runtime"], {"python": "3.11.9"})
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        self.set_version("Python 3.12.1")
+        res = self.verdict()
+        self.assertEqual(res["verdict"], "NOT YET")
+        self.assertIn("runtime python changed: 3.11.9 -> 3.12.1", self.stale_text(res))
+        self.all_pass()
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+
+    def test_a_pin_file_added_or_removed_after_a_check_is_a_change(self):
+        self.all_pass()
+        self.write(".nvmrc", "20\n")
+        self.assertIn("runtime pin file .nvmrc added", self.stale_text())
+        self.all_pass()
+        os.remove(os.path.join(self.root, ".nvmrc"))
+        self.assertIn("runtime pin file .nvmrc removed", self.stale_text())
+
+    def fake(self, runtime, code):
+        """Point a runtime's probe at a small Python script."""
+        path = os.path.join(os.path.dirname(self.ver), runtime + ".py")
+        with open(path, "w") as fh:
+            fh.write("import os, sys\n" + code)
+        ledger.PROBES = dict(ledger.PROBES, **{runtime: [[sys.executable, path]]})
+
+    def test_only_the_version_token_is_kept_and_java_option_vars_never_reach_the_probe(self):
+        os.environ["JAVA_TOOL_OPTIONS"] = "-Dtoken=" + SECRET + "-9.9.9"
+        try:
+            # A JVM prints the option var's value before its version; with the var stripped it prints nothing.
+            self.fake("java", "v = os.environ.get('JAVA_TOOL_OPTIONS')\n"
+                              "v and print('opts ' + v, file=sys.stderr)\n"
+                              "print('openjdk version \"21.0.2\" 2024-01-16', file=sys.stderr)\n")
+            self.assertEqual(ledger.probe("java", self.root), "21.0.2")
+        finally:
+            os.environ.pop("JAVA_TOOL_OPTIONS")
+        self.fake("java", "print('Picked up SOME_FUTURE_OPTIONS: 9.9.9-" + SECRET + "', file=sys.stderr)\n"
+                          "print('java version \"1.8.0_392\"', file=sys.stderr)\n")
+        self.assertEqual(ledger.probe("java", self.root), "1.8.0_392")
+        self.fake("node", "print('no version here')\n")
+        self.assertEqual(ledger.probe("node", self.root), "unavailable (no version in its output)")
+        for out, want in (("v20.11.0", "20.11.0"), ("Python 3.13.0rc1", "3.13.0rc1"),
+                          ("rustc 1.75.0 (82e1608df 2023-12-21)", "1.75.0"), ("go version go1.22.1 linux/amd64", "1.22.1"),
+                          ("ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-linux]", "3.2.2")):
+            self.fake("node", "print(%r)\n" % out)
+            self.assertEqual(ledger.probe("node", self.root), want)
+
+    def test_a_jdk_that_prints_a_dotless_version_is_read_and_a_switch_is_stale(self):
+        for out, want in (('openjdk version "21" 2023-09-19', "21"), ('openjdk version "17-ea" 2021-09-14', "17-ea"),
+                          ('openjdk version "11.0.22" 2024-01-16', "11.0.22")):
+            self.fake("java", "print(%r, file=sys.stderr)\nprint('OpenJDK Runtime Environment (build 21+35)')\n" % out)
+            self.assertEqual(ledger.probe("java", self.root), want)
+        self.write(".tool-versions", "java openjdk-17\n")
+        self.fake("java", "print('openjdk version \"17\" 2021-09-14', file=sys.stderr)\n")
+        self.all_pass()
+        self.fake("java", "print('openjdk version \"21\" 2023-09-19', file=sys.stderr)\n")
+        self.assertIn("runtime java changed: 17 -> 21", self.stale_text())
+
+    def test_no_part_of_a_picked_up_line_is_read_as_the_version(self):
+        # A value holding a vertical tab, or a Picked up line that does not start the line, is skipped whole.
+        self.fake("java", "print('Picked up JAVA_TOOL_OPTIONS: -Dx=' + %r + '\\x0b9.9.9-tail', file=sys.stderr)\n"
+                          "print('[0.1s] Picked up _JAVA_OPTIONS: 8.8.8-' + %r, file=sys.stderr)\n"
+                          "print('openjdk version \"21\"', file=sys.stderr)\n" % (SECRET, SECRET))
+        self.assertEqual(ledger.probe("java", self.root), "21")
+
+    def test_probes_run_with_toolchain_downloads_switched_off(self):
+        self.fake("go", "print('go version go1.22.1-' + os.environ.get('GOTOOLCHAIN', 'auto'))\n")
+        self.assertEqual(ledger.probe("go", self.root), "1.22.1-local")
+        self.fake("rust", "print('rustc 1.75.0-' + os.environ.get('RUSTUP_AUTO_INSTALL', 'x'))\n")
+        self.assertEqual(ledger.probe("rust", self.root), "1.75.0-0")
+
+    def test_tool_versions_names_its_runtimes_and_a_missing_one_is_unavailable(self):
+        self.write(".tool-versions", "nodejs 20.1.0\npython 3.11  # pinned\nterraform 1.5\n")
+        self.assertEqual(ledger.pinned_runtimes(self.root, ledger.pin_files(self.root)), {"node", "python"})
+        ledger.PROBES = dict(ledger.PROBES, node=[["oldhand-no-such-runtime", "--version"]])
+        check, warning = ledger.record(self.d, "AC1", "e2e", "pass", self.evidence(), "lead:x", cmd="c")
+        self.assertEqual(check["runtime"]["node"], "unavailable (oldhand-no-such-runtime not found)")
+        self.assertIn("could not read the node version", warning)
+
+
+SECRET = "s3cr3t-VALUE-xyz"
+TOKEN, MODE = "OLDHAND_TEST_TOKEN", "OLDHAND_TEST_MODE"
+
+
+class EnvManifest(Beyond):
+    def setUp(self):
+        super().setUp()
+        self.write(ledger.ENV_NAMES_FILE, "# names only\r\n%s\r\n\r\n%s  # optional\r\n%s\r\n" % (TOKEN, MODE, TOKEN))
+        os.environ[TOKEN] = SECRET
+        os.environ.pop(MODE, None)
+
+    def tearDown(self):
+        for k in (TOKEN, MODE, "OLDHAND_TEST_NEW"):
+            os.environ.pop(k, None)
+        super().tearDown()
+
+    def test_a_changed_value_makes_checks_stale_and_the_same_value_is_fresh_again(self):
+        self.all_pass()
+        self.assertEqual(sorted(ledger.load(self.d)["checks"][0]["env"]), [MODE, TOKEN])
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        os.environ[TOKEN] = SECRET + "-rotated"
+        res = self.verdict()
+        self.assertEqual(res["verdict"], "NOT YET")
+        self.assertIn("env var %s changed" % TOKEN, self.stale_text(res))
+        os.environ[TOKEN] = SECRET
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+
+    def test_a_var_that_becomes_set_or_unset_is_a_change(self):
+        self.all_pass()
+        os.environ[MODE] = "fast"
+        self.assertIn("env var %s was set" % MODE, self.stale_text())
+        os.environ.pop(MODE)
+        os.environ.pop(TOKEN)
+        self.assertIn("env var %s was unset" % TOKEN, self.stale_text())
+
+    def test_a_name_added_or_removed_in_the_manifest_is_a_change(self):
+        self.all_pass()
+        self.write(ledger.ENV_NAMES_FILE, "%s\n%s\nOLDHAND_TEST_NEW\n" % (TOKEN, MODE))
+        self.assertIn("env var OLDHAND_TEST_NEW added to .oldhand-env-names", self.stale_text())
+        self.all_pass()
+        self.write(ledger.ENV_NAMES_FILE, "%s\n" % TOKEN)
+        self.assertIn("env var %s removed from .oldhand-env-names" % MODE, self.stale_text())
+
+    def test_a_manifest_saved_with_a_byte_order_mark_reads_the_same(self):
+        for enc in ("utf-8-sig", "utf-16"):
+            with open(os.path.join(self.root, ledger.ENV_NAMES_FILE), "w", encoding=enc) as fh:
+                fh.write("%s\r\n%s\r\n" % (TOKEN, MODE))
+            self.assertEqual(ledger.env_names(self.root), [TOKEN, MODE], enc)
+
+    def test_a_value_never_reaches_the_ledger_the_output_or_an_error(self):
+        self.all_pass()
+        os.environ[TOKEN] = "other-" + SECRET
+        with open(os.path.join(self.d, "ledger.json"), encoding="utf-8") as fh:
+            raw = fh.read()
+        outputs = [raw, json.dumps(self.verdict()), ledger.verdict_text(self.verdict()),
+                   ledger.status_text(self.d), ledger.report_md(self.d)]
+        for cmd in ("verdict", "status", "report"):
+            outputs += list(cli("oldhand", "ledger", cmd, "--dir", self.d)[1:])
+        import hashlib
+        plain = hashlib.sha256(SECRET.encode()).hexdigest()[:16]
+        for text in outputs:
+            self.assertNotIn(SECRET, text)
+            self.assertNotIn(plain, text)
+        self.write(ledger.ENV_NAMES_FILE, "%s=%s\n" % (TOKEN, SECRET))
+        with self.assertRaises(ledger.LedgerError) as e:
+            ledger.evaluate(self.d)
+        self.assertIn("line 1", str(e.exception))
+        self.assertNotIn(SECRET, str(e.exception))
+        code, out, err = cli("oldhand", "ledger", "record", "--id", "AC1", "--kind", "e2e", "--status", "pass",
+                             "--evidence", "seen", "--by", "x", "--cmd", "c", "--dir", self.d)
+        self.assertEqual(code, 4)
+        self.assertNotIn(SECRET, out + err)
+
+
+class LiveExpiry(Beyond):
+    def live(self, cid="AC1", max_age=None, lead=True):
+        return ledger.record(self.d, cid, "e2e", "pass", self.evidence(), "lead:x", cmd=cid + " live",
+                             lead=lead, live=True, max_age=max_age)[0]
+
+    def age(self, check_id, hours):
+        led = ledger.load(self.d)
+        for ch in led["checks"]:
+            if ch["id"] == check_id:
+                t = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=hours)
+                ch["time"] = t.isoformat(timespec="seconds")
+        ledger.save(self.d, led)
+
+    def test_a_live_check_expires_after_24h_and_a_plain_check_never_does(self):
+        live = self.live()
+        self.assertEqual(live["live"], {"max_age": 86400})
+        self.rec("AC2", "integration")
+        self.rec("R1")
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        self.age("C2", 24 * 30)
+        self.age("C3", 24 * 30)
+        self.age(live["id"], 23)
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        self.age(live["id"], 25)
+        res = self.verdict()
+        self.assertEqual(res["verdict"], "NOT YET")
+        self.assertIn("live check expired (recorded 25h ago, max 24h)", self.stale_text(res))
+        self.assertEqual(self.row(res, "R1")["flags"], [])
+
+    def test_max_age_is_per_check(self):
+        live = self.live(max_age="48h")
+        self.rec("AC2", "integration")
+        self.rec("R1")
+        self.age(live["id"], 25)
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        self.age(live["id"], 49)
+        self.assertIn("max 2d", self.stale_text())
+        self.assertIn("(live 2d)", ledger.status_text(self.d))
+
+    def test_bad_max_age_and_max_age_without_live_are_errors(self):
+        for bad in ("0", "abc", "1w", "-5h", ""):
+            with self.assertRaises(ledger.LedgerError):
+                ledger.parse_duration(bad)
+        self.assertEqual([ledger.parse_duration(s) for s in ("90m", "24H", "7d", "45", "30s")],
+                         [5400, 86400, 604800, 45, 30])
+        with self.assertRaises(ledger.LedgerError):
+            ledger.record(self.d, "AC1", "e2e", "pass", "seen", "x", cmd="c", max_age="1h")
+        code, _, err = cli("oldhand", "ledger", "record", "--id", "AC1", "--kind", "e2e", "--status", "pass",
+                           "--evidence", "seen", "--by", "x", "--cmd", "c", "--max-age", "1h", "--dir", self.d)
+        self.assertEqual(code, 4)
+        self.assertIn("--live", err)
+        code, out, err = cli("oldhand", "ledger", "record", "--id", "AC1", "--kind", "e2e", "--status", "pass",
+                             "--evidence", "seen", "--by", "x", "--cmd", "c", "--live", "--max-age", "90m",
+                             "--dir", self.d)
+        self.assertEqual(code, 0, err)
+        self.assertIn("live for 90m", out)
 
 
 class Where(unittest.TestCase):

@@ -181,7 +181,7 @@ order and the first one that matches wins:
 | Verdict | Means |
 | --- | --- |
 | INCOMPLETE | There is no contract yet, or a criterion has no check of the kind it needs (an e2e criterion with only a unit test, or a check whose evidence file is missing) |
-| NOT YET | A check failed or is older than the code; a high or medium review finding is open, or deferred without your yes; or, when code was changed or checked, the lead has no end-to-end pass of its own on the current code |
+| NOT YET | A check failed or is stale (the code, a pinned runtime or a listed env var changed after it ran, or a live check passed its max age); a high or medium review finding is open, or deferred without your yes; or, when code was changed or checked, the lead has no end-to-end pass of its own on the current code |
 | BLOCKED | Nothing above, but something outside the work stops a check; the report names it and what would unblock it |
 | VERIFIED | None of the above |
 
@@ -214,9 +214,9 @@ accident.
 All standard-library Python, no network.
 
 - [`ledger.py`](skills/oldhand/scripts/ledger.py) records every check against a
-  fingerprint of your working tree. Change a file after a check passed and that
-  check goes stale until it runs again. `ledger.py verdict` prints the verdict
-  and its reasons.
+  fingerprint of your working tree, plus the runtime and env vars it depended on.
+  Change a file after a check passed and that check goes stale until it runs
+  again. `ledger.py verdict` prints the verdict and its reasons.
 - [`qa.py`](skills/oldhand-qa/scripts/qa.py) turns test scenarios into one
   stand-alone brief per agent, schedules them (browser and desktop scenarios
   one at a time, API and CLI ones in parallel), checks the results and tallies
@@ -224,6 +224,55 @@ All standard-library Python, no network.
 - [`mutate.py`](skills/oldhand-build/scripts/mutate.py) breaks one line of the
   fix, runs your test, and puts the file back byte for byte. If the test still
   passes, it does not guard the fix.
+
+### What makes a check stale
+
+A passing check stops counting, and the verdict is NOT YET, when any of these
+changes after it ran. The reason names which one.
+
+| Cause | What ledger.py compares | Reason in the verdict |
+| --- | --- | --- |
+| Files | git HEAD, the diff against it, and untracked files that git does not ignore | `recorded on an older tree` |
+| Runtime | Pin files at the repo root (`.nvmrc`, `.node-version`, `.python-version`, `.ruby-version`, `.tool-versions`, `rust-toolchain`, `rust-toolchain.toml`), even when git ignores them, and the version the pinned runtime reports from the repo root (`node --version`, `python --version`, ...) | `runtime pin file .nvmrc changed`, `runtime node changed: 18.19.0 -> 20.11.0` |
+| Env vars | The vars named in `.oldhand-env-names` | `env var API_TOKEN changed`, `was set`, `was unset`, `added to` or `removed from .oldhand-env-names` |
+| Live checks | The age of a check recorded with `--live` | `live check expired (recorded 25h ago, max 24h)` |
+
+Each cause only applies when you opt in: a repo with no pin file, no
+`.oldhand-env-names` and no `--live` checks works exactly as before. A repo
+that does have a pin file sees its existing checks go stale once after the
+upgrade, because no pins were recorded for them yet.
+
+- **Env vars.** List the names your checks read, one per line, in
+  `.oldhand-env-names` at the repo root and commit it. It holds names only;
+  a line like `NAME=value` is an error, and the error never shows the line.
+  ```text
+  # env vars the tests read
+  DATABASE_URL
+  STRIPE_API_KEY
+  ```
+  Each record stores a salted PBKDF2 hash of each value (or that it is unset),
+  never the value, and nothing prints a value or a hash. Anyone who holds
+  `ledger.json` can still confirm a guess of a short, guessable value such as
+  `production`; `.oldhand/` stays local and out of git.
+- **Live checks.** A check that hit a real external service is recorded with
+  `--live`, and it goes stale after 24 hours or after `--max-age` (`90m`,
+  `2h`, `7d`):
+  ```sh
+  ledger.py record --id AC1 --kind e2e --status pass --evidence qa/evidence/S1/lead-1.png \
+    --by "lead:<model>" --cmd "qa.py scenario S1" --lead --live --max-age 2h
+  ```
+  Only timestamps are compared; ledger.py makes no network call.
+- **Runtime versions** are read with each tool's own `--version`, from the
+  repo root so nvm, pyenv, asdf and rustup honour the pin, with a 10 second
+  timeout. Only the version number is kept (`20.11.0`, or `21` for a JDK),
+  never the rest of the output, and `JAVA_TOOL_OPTIONS`, `_JAVA_OPTIONS` and
+  `JDK_JAVA_OPTIONS` are kept from the probe because a JVM prints them. `GOTOOLCHAIN=local` and
+  `RUSTUP_AUTO_INSTALL=0` stop go and rustup downloading a toolchain; rustup
+  1.27 and older, Volta and mise may still fetch a missing pinned version, as
+  they would when the tests run. A runtime that cannot be read is recorded as
+  unavailable, and a warning says so.
+- `ledger.py restamp` clears file changes only. A changed runtime, a changed
+  env var or an expired live check needs the check to run again.
 
 ## What it will not do
 
@@ -330,6 +379,8 @@ No tracker connected? Paste the ticket text, or just describe the work.
 | `python3: command not found`, or a shim refuses to run it | The scripts need Python 3.8+. Tell your agent to run them with `py -3` on Windows, or with `/usr/bin/python3` (or your system Python) elsewhere. |
 | `.oldhand/` shows in `git status` | The folder's own `.gitignore` is missing (a task started before 2.0, or the file was deleted). Add `.oldhand/` to `.git/info/exclude`. |
 | A check keeps going stale | A file in the repo changes on every run (a log, a tool's state file). If git does not track it, move it under `.oldhand/` or add it to `.git/info/exclude`; if git tracks it, commit or undo that change, then re-run the check. |
+| A check went stale though no file changed | The reason says why: a runtime version or pin file changed, a var in `.oldhand-env-names` changed or was unset in this shell, or a `--live` check passed its max age. Run the verdict in the shell the checks ran in, or re-run the check. |
+| `could not read the node version` | The pinned runtime is not on PATH where ledger.py runs. Start the session the way you run the tests (nvm, pyenv, asdf), or the check stays recorded as unavailable. |
 
 ## Develop and test the pack
 

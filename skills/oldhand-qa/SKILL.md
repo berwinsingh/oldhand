@@ -132,11 +132,12 @@ LEDGER record --id AC1 --kind e2e --status pass --evidence qa/evidence/S1/lead-1
 ```
 
 Record every re-run of a scenario this way, with `fail` or `blocked` when that is what happened (a
-blocked record names what blocked you). The same `--cmd` makes it the latest run of that scenario; the
-verdict counts the latest run of every scenario, so one scenario's pass never hides another's fail. A
-unit test never stands in for a blocked e2e. After a fix, earlier records are STALE: move the affected
-`qa/results/<id>.json` into `qa/results/round-<n>/` (never delete), then repeat Steps 5 and 6;
-`QA prompts` rebriefs exactly those.
+blocked record names what blocked you). A run against a real external service adds `--live` (stale
+after 24h, or `--max-age 2h`), so an old pass never vouches for today's service. The same `--cmd` makes
+it the latest run of that scenario; the verdict counts the latest run of every scenario, so one
+scenario's pass never hides another's fail. A unit test never stands in for a blocked e2e. After a fix,
+earlier records are STALE: move the affected `qa/results/<id>.json` into `qa/results/round-<n>/` (never
+delete), then repeat Steps 5 and 6; `QA prompts` rebriefs exactly those.
 Exit: every FAIL is classified and a lead e2e record exists on the current tree.
 
 ## Sub-agents
