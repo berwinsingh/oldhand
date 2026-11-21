@@ -15,7 +15,7 @@ description: >-
   fixes, lookups or explaining code.
 license: MIT
 metadata:
-  version: "2.1.1"
+  version: "2.2.0"
   homepage: "https://berwinsingh.github.io/oldhand/"
 ---
 
@@ -155,13 +155,13 @@ Exit: every routed stage met its exit criterion or is reported blocked.
 Ship runs `LEDGER verdict` (exit 0 VERIFIED, 1 NOT YET, 2 BLOCKED, 3
 INCOMPLETE). Read its reason and act:
 
-- INCOMPLETE: a criterion has no check of its required kind. Run the stage that
-  makes it: qa for e2e, build for unit or integration, review for review (rca
-  in investigate mode).
-- NOT YET: a failing check, a STALE check (code, pinned runtime or listed env
+- INCOMPLETE: a criterion has no counted check of its kind (none yet, or its
+  evidence file is missing or changed after the record). Run the stage that makes
+  it: qa for e2e, build for unit or integration, review (rca in investigate mode).
+- NOT YET: a failing check, a STALE check (files, pinned runtime or listed env
   var changed, or a live check expired), an open high or medium, or no lead e2e
-  pass. Implement mode: fix failures and findings in build, then re-run only the
-  affected checks; a missing lead pass is yours to run in qa. Other modes: report
+  pass. Implement mode: fix in build, then `LEDGER rerun --stale` and repeat the
+  checks it lists; a missing lead pass is yours to run in qa. Other modes: report
   NOT YET and offer an implement run. `LEDGER restamp --check C<n> --reason "..."`
   only when a file change provably cannot affect that check.
 - BLOCKED: name each blocker: what, where, and what would unblock it.

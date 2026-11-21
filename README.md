@@ -180,8 +180,8 @@ order and the first one that matches wins:
 
 | Verdict | Means |
 | --- | --- |
-| INCOMPLETE | There is no contract yet, or a criterion has no check of the kind it needs (an e2e criterion with only a unit test, or a check whose evidence file is missing) |
-| NOT YET | A check failed or is stale (the code, a pinned runtime or a listed env var changed after it ran, or a live check passed its max age); a high or medium review finding is open, or deferred without your yes; or, when code was changed or checked, the lead has no end-to-end pass of its own on the current code |
+| INCOMPLETE | There is no contract yet, or a criterion has no check of the kind it needs (an e2e criterion with only a unit test, or a check whose evidence file is missing, was empty, or changed after the check was recorded) |
+| NOT YET | A check failed or is stale (a file, a pinned runtime or a listed env var changed after it ran, or a live check passed its max age); a high or medium review finding is open, or deferred without your yes; or, when code was changed or checked, the lead has no end-to-end pass of its own on the current code |
 | BLOCKED | Nothing above, but something outside the work stops a check; the report names it and what would unblock it |
 | VERIFIED | None of the above |
 
@@ -213,10 +213,11 @@ accident.
 
 All standard-library Python, no network.
 
-- [`ledger.py`](skills/oldhand/scripts/ledger.py) records every check against a
-  fingerprint of your working tree, plus the runtime and env vars it depended on.
-  Change a file after a check passed and that check goes stale until it runs
-  again. `ledger.py verdict` prints the verdict and its reasons.
+- [`ledger.py`](skills/oldhand/scripts/ledger.py) runs your test commands and
+  records every check against a fingerprint of the files on disk, plus the
+  runtime and env vars it depended on. Change a file after a check passed and
+  that check goes stale until it runs again. `ledger.py verdict` prints the
+  verdict and its reasons.
 - [`qa.py`](skills/oldhand-qa/scripts/qa.py) turns test scenarios into one
   stand-alone brief per agent, schedules them (browser and desktop scenarios
   one at a time, API and CLI ones in parallel), checks the results and tallies
@@ -232,15 +233,26 @@ changes after it ran. The reason names which one.
 
 | Cause | What ledger.py compares | Reason in the verdict |
 | --- | --- | --- |
-| Files | git HEAD, the diff against it, and untracked files that git does not ignore | `recorded on an older tree` |
+| Files | The git tree of the files as they are on disk: tracked files and untracked files that git does not ignore. The commit is not part of it | `recorded on an older tree (...; changed: src/cart.py, README.md)` |
 | Runtime | Pin files at the repo root (`.nvmrc`, `.node-version`, `.python-version`, `.ruby-version`, `.tool-versions`, `rust-toolchain`, `rust-toolchain.toml`), even when git ignores them, and the version the pinned runtime reports from the repo root (`node --version`, `python --version`, ...) | `runtime pin file .nvmrc changed`, `runtime node changed: 18.19.0 -> 20.11.0` |
 | Env vars | The vars named in `.oldhand-env-names` | `env var API_TOKEN changed`, `was set`, `was unset`, `added to` or `removed from .oldhand-env-names` |
 | Live checks | The age of a check recorded with `--live` | `live check expired (recorded 25h ago, max 24h)` |
 
-Each cause only applies when you opt in: a repo with no pin file, no
-`.oldhand-env-names` and no `--live` checks works exactly as before. A repo
-that does have a pin file sees its existing checks go stale once after the
-upgrade, because no pins were recorded for them yet.
+The last three only apply when you opt in: a repo with no pin file, no
+`.oldhand-env-names` and no `--live` checks is judged on its files alone.
+
+- **Files, not commits.** The fingerprint is the id git would give the tree if
+  you committed everything now. Committing the verified files, an empty commit,
+  an amend or another branch with the same files keep every check fresh, and
+  the verdict's `Tree:` line says whether the tree is exactly the HEAD commit
+  (`the files of commit 32b48046f9`) or has uncommitted changes on top. It is
+  computed with a copy of the index and a temporary object folder, so nothing
+  is written into your repository. A tracked file you edited while it was
+  marked `assume-unchanged` or `skip-worktree` counts too. Checks recorded by
+  2.1 or earlier keep their old fingerprint and are judged the old way.
+- **Evidence.** A record stores a hash of its evidence file. If the file is
+  changed or emptied afterwards, or was empty when recorded, the check stops
+  counting and the reason says which. Run the check again and record it.
 
 - **Env vars.** List the names your checks read, one per line, in
   `.oldhand-env-names` at the repo root and commit it. It holds names only;
@@ -273,6 +285,50 @@ upgrade, because no pins were recorded for them yet.
   unavailable, and a warning says so.
 - `ledger.py restamp` clears file changes only. A changed runtime, a changed
   env var or an expired live check needs the check to run again.
+
+### Checks the ledger runs itself
+
+For anything a command can decide, the ledger runs the command, so the result
+is the exit code and not what the model typed:
+
+```bash
+ledger.py run --id AC2 --kind unit --by "lead:<model>" -- python3 -m pytest tests -q
+ledger.py rerun --stale
+```
+
+- `run` takes `--kind unit`, `integration` or `e2e`. Exit 0 is a pass. Any
+  other exit code, a timeout (`--timeout`, 600 seconds by default) or exit 0
+  with output that says no tests ran is a fail. A command that cannot start
+  records nothing. Whatever the command leaves running is ended, also when
+  the host stops ledger.py itself.
+- The check is recorded on the files as they were when the command started.
+  If a file changes while it runs, the check is stale at once and a warning
+  names the file. If the command writes that file itself (a cache, a report),
+  add it to `.gitignore` or `.git/info/exclude`.
+- The output is saved under `.oldhand/<task>/runs/` and is the check's
+  evidence. Exact values of the vars in `.oldhand-env-names` that are 8
+  characters or longer are replaced by `<NAME>`. An encoded or shortened form
+  of a value, and anything else the command prints, is saved as it is, in the
+  task folder that git ignores.
+- The command line is stored in the ledger, so a command line that holds a
+  listed value is refused. Put the variable's name in single quotes instead
+  (`'curl -H "Authorization: Bearer $API_TOKEN" ...'`), so the shell that
+  ledger.py starts fills it in.
+- `rerun --stale` runs every stale check that `run` recorded again and records
+  the new results, then lists the stale checks it did not run (a scenario an
+  agent drove, a mutation run) and exits 1 if there are any. `rerun --check C7`
+  runs one.
+- `rerun` executes commands stored in `ledger.json`, so it runs only commands
+  that `run` recorded for you, in this project folder, on this machine. Each
+  one is signed with a random key kept outside every project:
+  `~/.local/state/oldhand/rerun-key` (or `$XDG_STATE_HOME`, `%LOCALAPPDATA%` on
+  Windows), or a private folder in the temp folder when that cannot be
+  written, as in a sandbox. A `ledger.json` that came with a repository or an
+  archive has no valid signature, so `rerun` lists its checks without showing
+  their commands and runs nothing. The same happens to your own checks after
+  you move the project folder or lose the key: record them again with `run`.
+- `record` is still there for what a command cannot decide: a review, a manual
+  check, a screenshot the lead looked at.
 
 ## What it will not do
 
@@ -379,6 +435,7 @@ No tracker connected? Paste the ticket text, or just describe the work.
 | `python3: command not found`, or a shim refuses to run it | The scripts need Python 3.8+. Tell your agent to run them with `py -3` on Windows, or with `/usr/bin/python3` (or your system Python) elsewhere. |
 | `.oldhand/` shows in `git status` | The folder's own `.gitignore` is missing (a task started before 2.0, or the file was deleted). Add `.oldhand/` to `.git/info/exclude`. |
 | A check keeps going stale | A file in the repo changes on every run (a log, a tool's state file). If git does not track it, move it under `.oldhand/` or add it to `.git/info/exclude`; if git tracks it, commit or undo that change, then re-run the check. |
+| `the evidence of C7 ... changed after the check was recorded` | The evidence file was edited or overwritten after the record (a later run wrote to the same path, or a note was added to it). Run the check again and record it; give each run its own output file, or use `ledger.py run`, which does. |
 | A check went stale though no file changed | The reason says why: a runtime version or pin file changed, a var in `.oldhand-env-names` changed or was unset in this shell, or a `--live` check passed its max age. Run the verdict in the shell the checks ran in, or re-run the check. |
 | `could not read the node version` | The pinned runtime is not on PATH where ledger.py runs. Start the session the way you run the tests (nvm, pyenv, asdf), or the check stays recorded as unavailable. |
 

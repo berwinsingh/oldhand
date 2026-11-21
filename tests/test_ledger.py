@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 from _load import GIT_ENV, cli, git, git_repo, load, script
@@ -24,12 +25,18 @@ Source: prompt  ·  Mode: {mode}
 
 
 def setUpModule():
-    for k, v in GIT_ENV.items():
+    # The rerun key lives outside every project: here in a folder of its own, never the user's real one.
+    _saved_env["state"] = tempfile.mkdtemp()
+    _saved_env["folders"] = ledger._key_folders
+    ledger._key_folders = lambda: [os.path.join(_saved_env["state"], "oldhand")]
+    for k, v in dict(GIT_ENV, XDG_STATE_HOME=_saved_env["state"]).items():
         _saved_env[k] = os.environ.get(k)
         os.environ[k] = v
 
 
 def tearDownModule():
+    ledger._key_folders = _saved_env.pop("folders")
+    shutil.rmtree(_saved_env.pop("state"))
     for k, v in _saved_env.items():
         if v is None:
             os.environ.pop(k, None)
@@ -444,7 +451,8 @@ class Stale(Base):
         self.assertNotEqual(ledger.fingerprint(self.d), fp)
 
 
-OLD_CHECK_KEYS = {"id", "criterion", "kind", "status", "evidence", "by", "cmd", "lead", "fingerprint", "time"}
+OLD_CHECK_KEYS = {"id", "criterion", "kind", "status", "evidence", "by", "cmd", "lead", "fingerprint", "time",
+                  "evidence_hash"}
 
 
 class Beyond(Base):
@@ -717,6 +725,20 @@ class LiveExpiry(Beyond):
         self.assertIn("live for 90m", out)
 
 
+    def test_a_live_check_dated_in_the_future_is_stale(self):
+        self.all_pass()
+        ledger.record(self.d, "R1", "e2e", "pass", self.evidence(), "qa:worker", cmd="R1 e2e", live=True)
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        led = ledger.load(self.d)
+        ahead = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+        led["checks"][-1]["time"] = ahead.isoformat(timespec="seconds")
+        ledger.save(self.d, led)
+        self.assertIn("live check is dated in the future", self.stale_text())
+        led["checks"][-1]["time"] = (ahead - datetime.timedelta(days=30, seconds=-30)).isoformat(timespec="seconds")
+        ledger.save(self.d, led)
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED", "half a minute of clock difference is not the future")
+
+
 class Where(unittest.TestCase):
     def setUp(self):
         self.root = os.path.realpath(tempfile.mkdtemp())
@@ -824,6 +846,691 @@ class CommandLine(Base):
         code, _, err = cli("oldhand", "ledger", "sync", "--dir", os.path.join(self.root, "nowhere"))
         self.assertEqual(code, 4)
         self.assertIn("ledger.py init", err)
+
+
+def git_out(cwd, *args):
+    return subprocess.run(["git"] + list(args), cwd=cwd, env=dict(os.environ, **GIT_ENV), check=True,
+                          stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
+
+
+class ContentTree(Beyond):
+    """The fingerprint names the files on disk, not the commit they sit on."""
+
+    def edit(self, name="a.txt", text="two\n"):
+        with open(os.path.join(self.root, name), "a") as fh:
+            fh.write(text)
+
+    def commit(self, *args):
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-q", *(args or ("-m", "change")))
+
+    def test_the_fingerprint_is_the_commits_tree_id_and_the_verdict_says_so(self):
+        head = git_out(self.root, "rev-parse", "HEAD")
+        self.assertEqual(ledger.fingerprint(self.d),
+                         "tree:%s:%s" % (git_out(self.root, "rev-parse", "HEAD^{tree}"), ledger.NO_EXTRAS))
+        res = self.verdict()
+        self.assertEqual((res["head"], res["committed"]), (head, True))
+        self.assertIn("the files of commit " + head[:10], ledger.verdict_text(res))
+        self.edit()
+        dirty = ledger.fingerprint(self.d)
+        res = self.verdict()
+        self.assertFalse(res["committed"])
+        self.assertIn("commit %s plus uncommitted changes" % head[:10], ledger.verdict_text(res))
+        self.commit()
+        self.assertEqual(ledger.fingerprint(self.d), dirty, "committing the files does not change what they are")
+        self.assertEqual(dirty.split(":")[1], git_out(self.root, "rev-parse", "HEAD^{tree}"))
+        self.assertTrue(self.verdict()["committed"])
+
+    def test_a_commit_an_amend_or_another_branch_with_the_same_files_keeps_checks_fresh(self):
+        self.edit()
+        self.write("new.py", "x = 1\n")
+        self.all_pass()
+        for step in (lambda: self.commit(), lambda: git(self.root, "commit", "-q", "--amend", "-m", "reworded"),
+                     lambda: git(self.root, "commit", "-q", "--allow-empty", "-m", "empty"),
+                     lambda: git(self.root, "checkout", "-q", "-b", "other")):
+            step()
+            self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        self.edit()
+        self.assertEqual(self.verdict()["verdict"], "NOT YET")
+
+    def test_git_diff_settings_do_not_change_the_fingerprint(self):
+        self.edit()
+        fp = ledger.fingerprint(self.d)
+        for key, value in (("diff.noprefix", "true"), ("diff.external", "true"), ("diff.algorithm", "histogram"),
+                           ("core.quotepath", "false")):
+            git(self.root, "config", key, value)
+            self.assertEqual(ledger.fingerprint(self.d), fp, key)
+
+    def test_strict_line_ending_settings_do_not_break_the_fingerprint(self):
+        git(self.root, "config", "core.autocrlf", "true")
+        git(self.root, "config", "core.safecrlf", "true")
+        self.all_pass()
+        self.edit(text="unix line\n")  # with safecrlf, `git add` itself refuses this file
+        self.assertIn("; changed: a.txt)", self.stale_text())
+
+    def test_the_stale_reason_names_the_files_that_changed(self):
+        self.all_pass()
+        self.edit()
+        self.write("new.py", "x = 1\n")
+        self.assertIn("; changed: a.txt, new.py)", self.stale_text())
+        self.all_pass()
+        self.commit()  # the tree the checks ran on is now a commit: only what differs from it is named
+        self.write("b.txt", "b\n")
+        self.assertIn("; changed: b.txt)", self.stale_text())
+        self.all_pass()
+        os.remove(os.path.join(self.root, "a.txt"))
+        for n in range(7):
+            self.write("f%d.txt" % n, "f\n")
+        self.assertIn("; changed: a.txt, f0.txt, f1.txt, f2.txt, f3.txt and 3 more)", self.stale_text())
+        self.all_pass()
+        self.commit()  # a.txt was already gone when the checks ran: committing that is no change
+        self.write("z.txt", "z\n")
+        self.assertIn("; changed: z.txt)", self.stale_text())
+
+    def test_a_reason_without_names_when_too_many_paths_differ_or_the_commit_is_gone(self):
+        info = ledger.tree_info(self.d)[1]
+        self.assertEqual(ledger.changed_files(self.root, info, dict(info, delta={"x": "100644 abc"})), ["x"])
+        self.assertIsNone(ledger.changed_files(self.root, None, info))
+        self.assertIsNone(ledger.changed_files(self.root, dict(info, delta=None), info))
+        self.assertIsNone(ledger.changed_files(self.root, dict(info, head="0" * 40), info), "that commit is gone")
+        ledger.TREE_DELTA_MAX, kept = 2, ledger.TREE_DELTA_MAX
+        try:
+            for n in range(3):
+                self.write("f%d.txt" % n, "f\n")
+            self.all_pass()
+            self.assertIsNone(ledger.load(self.d)["trees"][ledger.fingerprint(self.d)]["delta"])
+            self.edit()
+            self.assertIn("recorded on an older tree", self.stale_text())
+            self.assertNotIn("changed:", self.stale_text())
+        finally:
+            ledger.TREE_DELTA_MAX = kept
+
+    def test_only_the_trees_checks_still_use_are_kept(self):
+        self.all_pass()
+        first = ledger.fingerprint(self.d)
+        self.edit()
+        self.all_pass()
+        self.assertEqual(set(ledger.load(self.d)["trees"]), {first, ledger.fingerprint(self.d)})
+
+    def test_a_file_edited_while_marked_assume_unchanged_or_skip_worktree_counts(self):
+        self.write("b.txt", "b\n")
+        self.commit()
+        for mark in ("assume-unchanged", "skip-worktree"):
+            self.all_pass()
+            git(self.root, "update-index", "--" + mark, "b.txt")
+            self.assertEqual(self.verdict()["verdict"], "VERIFIED", "the mark alone changes no file")
+            self.edit("b.txt", mark + "\n")
+            self.assertEqual(git_out(self.root, "status", "--porcelain"), "", "git itself does not show the edit")
+            self.assertIn("; changed: b.txt)", self.stale_text())
+            git(self.root, "update-index", "--no-" + mark, "b.txt")
+        git(self.root, "update-index", "--assume-unchanged", "a.txt")
+        self.all_pass()
+        os.remove(os.path.join(self.root, "a.txt"))
+        self.assertIn("a.txt", self.stale_text())
+
+    def test_a_fingerprint_writes_nothing_into_the_repository(self):
+        def snapshot():
+            out = {}
+            for folder, _, files in os.walk(os.path.join(self.root, ".git")):
+                for name in files:
+                    with open(os.path.join(folder, name), "rb") as fh:
+                        out[os.path.join(folder, name)] = fh.read()
+            return out
+        if os.name == "posix":  # a hook the repo has for index writes must not fire for the copy
+            hook = os.path.join(self.root, ".git", "hooks", "post-index-change")
+            with open(hook, "w") as fh:
+                fh.write("#!/bin/sh\ntouch '%s'\n" % os.path.join(self.root, ".git", "hook-ran"))
+            os.chmod(hook, 0o755)
+        for split in (False, True):
+            if split:  # a split index keeps its shared part in .git
+                git(self.root, "config", "core.splitIndex", "true")
+                git(self.root, "update-index", "--split-index")
+                if os.path.exists(os.path.join(self.root, ".git", "hook-ran")):
+                    os.remove(os.path.join(self.root, ".git", "hook-ran"))  # that was our own update-index
+            self.edit()
+            self.write("new%s.py" % split, "x = 1\n")
+            before = snapshot()
+            self.all_pass()
+            self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+            self.assertEqual(sorted(snapshot()), sorted(before), "split index: %s" % split)
+            self.assertEqual(snapshot(), before)
+        self.assertEqual([n for n in os.listdir(tempfile.gettempdir()) if n.startswith("oldhand-tree-")], [])
+
+    def test_an_edit_in_the_same_second_that_keeps_the_size_is_seen(self):
+        # git re-reads a file that is not older than its index; the copy of the index must keep that time.
+        for attempt in range(20):
+            self.write("r.txt", "aaaa\n")
+            git(self.root, "add", "r.txt")
+            fp = ledger.fingerprint(self.d)
+            self.write("r.txt", "bbbb\n")
+            index, edited = (os.stat(os.path.join(self.root, x)) for x in (os.path.join(".git", "index"), "r.txt"))
+            if int(index.st_mtime) == int(edited.st_mtime):  # the case that matters: same second, same size
+                time.sleep(1.1)  # and looked at later, when a fresh copy of the index would be newer than the file
+                self.assertNotEqual(ledger.fingerprint(self.d), fp)
+                return
+        self.fail("could not write within one second in 20 tries")
+
+    @unittest.skipIf(os.name != "posix", "a colon, a quote or a line break in a folder name")
+    def test_a_repo_path_with_a_colon_a_quote_or_a_line_break(self):
+        for name in ("odd:name here", 'with "quotes" \\ and\na line break', '"quoted"'):
+            root = os.path.join(self.root, name)
+            os.makedirs(root)
+            git_repo(root)
+            d = os.path.join(root, ".oldhand", "t")
+            ledger.init(d, "Odd")
+            self.assertEqual(ledger.fingerprint(d).split(":")[1], git_out(root, "rev-parse", "HEAD^{tree}"), name)
+
+    def test_big_files_and_a_nested_repo_without_a_commit_still_count(self):
+        with open(os.path.join(self.root, "big.bin"), "wb") as fh:
+            fh.truncate(ledger.BIG + 1)
+        fp, info = ledger.tree_info(self.d)
+        self.assertEqual(info["extras"], {"big.bin": "size:%d" % (ledger.BIG + 1)})
+        self.assertNotIn("big.bin", info["delta"], "a big file is not copied into the temporary object folder")
+        with open(os.path.join(self.root, "big.bin"), "wb") as fh:
+            fh.truncate(ledger.BIG + 2)
+        self.assertNotEqual(ledger.fingerprint(self.d), fp)
+        nested = os.path.join(self.root, "vendor", "new")
+        os.makedirs(nested)
+        git(nested, "init", "-q")
+        fp = ledger.fingerprint(self.d)  # git add fails on a repo with no commit; it is fingerprinted on its own
+        with open(os.path.join(nested, "x.txt"), "w") as fh:
+            fh.write("x\n")
+        self.all_pass()
+        self.assertNotEqual(ledger.fingerprint(self.d), fp)
+        with open(os.path.join(nested, "x.txt"), "a") as fh:
+            fh.write("more\n")
+        self.assertIn("; changed: vendor/new/)", self.stale_text())
+
+    @unittest.skipIf(os.name != "posix" or os.geteuid() == 0, "needs a file the user cannot read")
+    def test_an_unreadable_untracked_file_is_counted_by_name(self):
+        fp = ledger.fingerprint(self.d)
+        self.write("locked.txt", "x\n")
+        os.chmod(os.path.join(self.root, "locked.txt"), 0)
+        self.assertEqual(ledger.tree_info(self.d)[1]["extras"], {"locked.txt": "unreadable"})
+        self.assertNotEqual(ledger.fingerprint(self.d), fp)
+
+    def test_a_repo_with_no_commit_yet(self):
+        root = os.path.join(self.root, "fresh")
+        os.makedirs(root)
+        git(root, "init", "-q")
+        with open(os.path.join(root, "a.txt"), "w") as fh:
+            fh.write("one\n")
+        d = os.path.join(root, ".oldhand", "t")
+        ledger.init(d, "Fresh")
+        with open(os.path.join(d, "contract.md"), "w") as fh:
+            fh.write("Mode: implement\n- AC1: it works (proof: e2e)\n")
+        ledger.sync(d)
+        with open(os.path.join(d, "ev.txt"), "w") as fh:
+            fh.write("saw it\n")
+        ledger.record(d, "AC1", "e2e", "pass", "ev.txt", "lead:x", cmd="c", lead=True)
+        res = ledger.evaluate(d)
+        self.assertEqual((res["verdict"], res["head"], res["committed"]), ("VERIFIED", None, False))
+        self.assertIn("no commit yet", ledger.verdict_text(res))
+        for args in (("config", "user.name", "T"), ("config", "user.email", "t@example.test"), ("add", "-A"),
+                     ("commit", "-qm", "first")):
+            git(root, *args)
+        res = ledger.evaluate(d)
+        self.assertEqual((res["verdict"], res["committed"]), ("VERIFIED", True))
+        with open(os.path.join(root, "a.txt"), "a") as fh:
+            fh.write("two\n")
+        self.assertIn("; changed: a.txt)", "\n".join(ledger.evaluate(d)["reasons"]))
+
+    def test_a_check_recorded_by_2_1_is_judged_by_its_old_fingerprint(self):
+        self.all_pass()
+        led = ledger.load(self.d)
+        old = ledger._legacy_tree_state(self.root)
+        self.assertTrue(ledger.legacy(old) and not ledger.legacy(led["checks"][0]["fingerprint"]))
+        for ch in led["checks"]:
+            ch["fingerprint"] = old
+            del ch["evidence_hash"]
+        del led["trees"]
+        ledger.save(self.d, led)
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        self.assertIsNone(ledger.restamp(self.d, "C1", "nothing changed"))
+        git(self.root, "commit", "-q", "--allow-empty", "-m", "empty")
+        self.assertEqual(self.verdict()["verdict"], "NOT YET", "the old fingerprint holds the commit id")
+        git(self.root, "reset", "-q", "--soft", "HEAD~1")
+        self.edit()
+        now = ledger._legacy_tree_state(self.root)
+        self.assertIn("C1 was recorded on an older tree (%s, now %s): re-run" % (ledger.short_fp(old), ledger.short_fp(now)),
+                      self.stale_text())
+        led = ledger.load(self.d)  # a restamp 2.1 wrote carries an old-style fingerprint too
+        led["restamps"] = [{"check": ch["id"], "reason": "a fixture", "from": old, "fingerprint": now,
+                            "time": ledger.now()} for ch in led["checks"]]
+        ledger.save(self.d, led)
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        self.edit()
+        self.assertEqual(self.verdict()["verdict"], "NOT YET")
+        for ch in led["checks"]:
+            self.assertIsNotNone(ledger.restamp(self.d, ch["id"], "a.txt is a fixture"))
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+
+
+class Evidence(Base):
+    """A record remembers what its evidence file held."""
+
+    def overwrite(self, text, name="ev.txt"):
+        with open(os.path.join(self.d, name), "w") as fh:
+            fh.write(text)
+
+    def test_evidence_that_changed_after_the_record_does_not_count(self):
+        self.all_pass()
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        for text in ("FAILED\n", ""):
+            self.overwrite(text)
+            res = self.verdict()
+            self.assertEqual(res["verdict"], "INCOMPLETE")
+            self.assertIn("evidence changed", self.row(res, "AC1")["flags"])
+            self.assertIn("AC1: the evidence of C1 (ev.txt) changed after the check was recorded", "\n".join(res["reasons"]))
+            self.assertTrue(any("--lead" in r for r in res["reasons"]), "the lead's pass does not count either")
+        self.overwrite("saw it\n")
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED", "the same content again is the same evidence")
+
+    def test_evidence_that_was_empty_when_recorded_does_not_count(self):
+        self.all_pass()
+        self.overwrite("", "blank.txt")
+        check, warning = ledger.record(self.d, "R1", "e2e", "pass", "blank.txt", "qa:worker", cmd="blank")
+        self.assertEqual(check["evidence_hash"], "empty")
+        self.assertIn("empty file", warning)
+        res = self.verdict()
+        self.assertEqual(res["verdict"], "INCOMPLETE")
+        self.assertIn("R1: the evidence of C4 (blank.txt) was an empty file when the check was recorded", "\n".join(res["reasons"]))
+        self.overwrite("now it has text\n", "blank.txt")
+        self.assertEqual(self.verdict()["verdict"], "INCOMPLETE", "filling it in later proves nothing about the run")
+
+    def test_a_check_without_a_stored_hash_is_only_asked_to_exist(self):
+        self.all_pass()
+        led = ledger.load(self.d)
+        for ch in led["checks"]:
+            del ch["evidence_hash"]  # as 2.1 recorded it
+        ledger.save(self.d, led)
+        self.overwrite("something else\n")
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+
+    def test_what_is_hashed(self):
+        os.makedirs(os.path.join(self.d, "shots"))
+        with open(os.path.join(self.d, "big.log"), "wb") as fh:
+            fh.truncate(ledger.BIG + 1)
+        log = self.evidence(os.path.join("shots", "console.log"))
+        for ev, want in (("pytest -q: 12 passed", None), ("https://example.test/run/3", None), ("shots/", None),
+                         ("big.log", "size:%d" % (ledger.BIG + 1)),
+                         (log + ":3", ledger.evidence_hash(os.path.join(self.d, log)))):
+            self.assertEqual(self.rec("AC1", ev=ev, cmd=ev).get("evidence_hash"), want, ev)
+        self.assertEqual(len(want), 16)
+
+
+PY = sys.executable
+
+
+class Run(Beyond):
+    """`run` executes the command itself: the exit code is the status and the output is the evidence."""
+
+    def setUp(self):
+        super().setUp()
+        self.cwd = os.getcwd()
+        os.chdir(self.root)
+
+    def tearDown(self):
+        os.chdir(self.cwd)
+        super().tearDown()
+
+    def py(self, cid, code, kind="e2e", **kw):
+        return ledger.run(self.d, cid, kind, "lead:x", [PY, "-c", code], **kw)
+
+    def saved(self, check):
+        with open(os.path.join(self.d, check["evidence"]), encoding="utf-8") as fh:
+            return fh.read()
+
+    def test_the_exit_code_decides_and_the_output_is_the_evidence(self):
+        check, warning, tail = self.py("AC1", "print('guest signed up')", lead=True)
+        self.assertEqual((check["status"], check["run"]["exit"], check["lead"], warning), ("pass", 0, True, None))
+        self.assertTrue(check["evidence"].startswith("runs/") and len(check["evidence_hash"]) == 16)
+        self.assertIn("guest signed up", self.saved(check))
+        self.assertIn("exit 0: pass", self.saved(check))
+        self.assertEqual(tail, ["guest signed up"])
+        flaky = "import os, sys; print('boom'); sys.exit(0 if os.path.exists('.oldhand/fixed') else 3)"
+        check, _, tail = self.py("AC2", flaky, "integration")
+        self.assertEqual((check["status"], check["run"]["exit"], check["run"]["result"]), ("fail", 3, "exit 3"))
+        self.assertIn("exit 3: fail", self.saved(check))
+        self.py("R1", "print('members sign in')")
+        self.assertEqual(self.verdict()["verdict"], "NOT YET")
+        open(os.path.join(".oldhand", "fixed"), "w").close()
+        self.assertEqual(self.py("AC2", flaky, "integration")[0]["status"], "pass")
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED", "a new run of the same command replaces the old one")
+        self.assertFalse([n for n in os.listdir(os.path.join(self.d, "runs")) if n.endswith(".tmp")])
+
+    def test_a_command_that_cannot_start_records_nothing(self):
+        with self.assertRaises(ledger.LedgerError) as e:
+            ledger.run(self.d, "AC1", "e2e", "lead:x", ["oldhand-no-such-command", "--flag"])
+        self.assertIn("could not start", str(e.exception))
+        self.assertEqual(ledger.load(self.d)["checks"], [])
+        self.assertFalse(os.path.exists(os.path.join(self.d, "runs")))
+
+    def test_exit_0_with_no_tests_ran_is_a_fail(self):
+        for said in ("Ran 0 tests in 0.000s", "no tests ran in 0.01s"):
+            check, _, _ = self.py("AC2", "print(%r)" % said, "unit")
+            self.assertEqual((check["status"], check["run"]["result"]),
+                             ("fail", "exit 0, but the output says no tests ran"))
+        self.assertEqual(self.py("AC2", "print('Ran 10 tests in 0.2s')", "unit")[0]["status"], "pass")
+
+    def test_a_timeout_is_a_fail_and_the_command_is_ended(self):
+        code = "import time; open('started', 'w').close(); time.sleep(20); open('finished', 'w').close()"
+        started = datetime.datetime.now()
+        check, _, _ = self.py("AC1", code, timeout=1)
+        self.assertEqual((check["status"], check["run"]["exit"], check["run"]["result"]), ("fail", None, "timed out after 1s"))
+        self.assertLess((datetime.datetime.now() - started).total_seconds(), 15)
+        self.assertTrue(os.path.exists("started") and not os.path.exists("finished"))
+
+    def test_a_run_from_a_sub_folder_is_stored_from_the_root(self):
+        os.makedirs("pkg/api")
+        os.chdir("pkg/api")
+        check, _, tail = self.py("AC1", "import os; print(os.path.basename(os.getcwd()))")
+        self.assertEqual(tail, ["api"])
+        self.assertTrue(check["cmd"].startswith("cd ./pkg/api && "), check["cmd"])
+        os.chdir(self.root)
+        self.assertEqual(ledger.rerun(self.d, check=check["id"])[0][0][3], ["api"])
+        one = ledger.run(self.d, "AC1", "e2e", "lead:x", ["echo one && echo two"])
+        self.assertEqual((one[0]["cmd"], one[2]), ("echo one && echo two", ["one", "two"]))
+
+    def test_bad_input_stops_before_the_command_runs(self):
+        code = "open('ran', 'w').close()"
+        for cid, kind, kw in (("AC1", "review", {}), ("AC9", "e2e", {}), ("AC1", "e2e", {"max_age": "1h"}),
+                              ("AC1", "e2e", {"live": True, "max_age": "soon"}), ("AC1", "e2e", {"timeout": 0})):
+            with self.assertRaises(ledger.LedgerError):
+                self.py(cid, code, kind, **kw)
+        for argv in ([], ["--"], ["--", " "]):
+            with self.assertRaises(ledger.LedgerError):
+                ledger.run(self.d, "AC1", "e2e", "lead:x", argv)
+        self.write(".oldhand-env-names", "TOKEN=%s\n" % SECRET)
+        with self.assertRaises(ledger.LedgerError):
+            self.py("AC1", code)
+        self.assertFalse(os.path.exists("ran"))
+        self.assertEqual(ledger.load(self.d)["checks"], [])
+
+    def test_listed_env_values_are_kept_out_of_the_saved_output(self):
+        self.write(".oldhand-env-names", "%s\n%s\n" % (TOKEN, MODE))
+        os.environ[TOKEN], os.environ[MODE] = SECRET, "dev"
+        kept, ledger.RUN_KEEP = ledger.RUN_KEEP, 1500000
+        try:
+            # The value at the start, across the 1 MB boundary the output is read in, and at the end.
+            code = ("import os, sys; t = os.environ[%r]; sys.stdout.write(t + '\\n' + 'x' * ((1 << 20) - len(t) - 6) + t "
+                    "+ '\\n' + 'y' * 3000000 + '\\nmode ' + os.environ[%r] + ' ' + t + '\\n')" % (TOKEN, MODE))
+            check, _, tail = self.py("AC1", code)
+        finally:
+            ledger.RUN_KEEP = kept
+            del os.environ[TOKEN], os.environ[MODE]
+        text = self.saved(check)
+        self.assertEqual(text.count("<%s>" % TOKEN), 3)
+        self.assertIn("mode dev <%s>" % TOKEN, text, "a short value is not treated as a secret")
+        self.assertIn("bytes left out", text)
+        self.assertLess(len(text), 3001000)
+        for folder, _, files in os.walk(os.path.join(self.root, ".oldhand")):
+            for name in files:
+                with open(os.path.join(folder, name), "rb") as fh:
+                    self.assertNotIn(SECRET.encode(), fh.read(), name)
+        self.assertNotIn(SECRET, "\n".join(tail) + ledger.status_text(self.d) + ledger.report_md(self.d))
+
+    def test_rerun_stale_runs_the_stale_checks_again_and_lists_the_rest(self):
+        self.py("AC1", "print(open('a.txt').read())", lead=True)
+        self.py("AC2", "print('api up')", "integration", live=True, max_age="2h")
+        self.rec("R1")  # recorded by hand: there is no command to run again
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+        self.assertEqual(ledger.rerun(self.d, stale=True), ([], []))
+        with open("a.txt", "a") as fh:
+            fh.write("a second line\n")
+        self.assertEqual(self.verdict()["stale"], ["C1", "C2", "C3"])
+        done, left = ledger.rerun(self.d, stale=True)
+        self.assertEqual([(old["id"], new["id"], new["status"]) for old, new, _, _ in done],
+                         [("C1", "C4", "pass"), ("C2", "C5", "pass")])
+        self.assertEqual([(ch["id"], why[:10]) for ch, why in left], [("C3", "no command")])
+        first, second = done[0][1], done[1][1]
+        self.assertEqual((first["criterion"], first["kind"], first["lead"], first["by"]), ("AC1", "e2e", True, "lead:x"))
+        self.assertEqual((second["kind"], second["live"]), ("integration", {"max_age": 7200}))
+        self.assertIn("a second line", self.saved(first))
+        res = self.verdict()
+        self.assertEqual((res["stale"], [r["counted"] for r in res["criteria"]]), (["C3"], [["C4"], ["C5"], ["C3"]]))
+        code, out, _ = cli("oldhand", "ledger", "rerun", "--stale", "--dir", self.d, cwd=self.root)
+        self.assertEqual((code, "C3  R1 e2e" in out), (1, True), "nothing failed, but a stale check is left")
+        self.rec("R1")
+        self.assertEqual(self.verdict()["verdict"], "VERIFIED")
+
+    def test_rerun_one_check_and_what_it_refuses(self):
+        check, _, _ = self.py("AC2", "import os, sys; sys.exit(0 if os.path.exists('fixed') else 1)", "unit")
+        self.assertEqual(check["status"], "fail")
+        open("fixed", "w").close()
+        done, left = ledger.rerun(self.d, check="C1", by="lead:y")
+        self.assertEqual((done[0][1]["status"], done[0][1]["by"], left), ("pass", "lead:y", []))
+        self.rec("R1")
+        for kw, said in (({"check": "C3"}, "was not recorded by"), ({"check": "C9"}, "no check C9"), ({}, "--stale")):
+            with self.assertRaises(ledger.LedgerError) as e:
+                ledger.rerun(self.d, **kw)
+            self.assertIn(said, str(e.exception))
+
+    def test_rerun_executes_only_commands_this_user_recorded_here(self):
+        check, _, _ = self.py("AC1", "open('ran-again', 'w').close()")
+        self.assertEqual(len(check["run"]["signed"]), 64)
+        os.remove("ran-again")
+        good = ledger.load(self.d)
+
+        def refused(change, said="not recorded by this user in this project on this machine"):
+            led = json.loads(json.dumps(good))
+            change(led["checks"][0])
+            ledger.save(self.d, led)
+            with self.assertRaises(ledger.LedgerError) as e:
+                ledger.rerun(self.d, check="C1")
+            self.assertIn(said, str(e.exception))
+            done, left = ledger.rerun(self.d, stale=True)
+            self.assertEqual((done, [ch["id"] for ch, _ in left]), ([], ["C1"]))
+            self.assertFalse(os.path.exists("ran-again"), "the command must not have run")
+        with open("a.txt", "a") as fh:
+            fh.write("two\n")  # C1 is stale now, so rerun --stale would pick it up
+        refused(lambda ch: ch.update(cmd="touch ran-again"))              # another command under an old signature
+        refused(lambda ch: ch.update(criterion="AC2"))                    # the same command for another criterion
+        refused(lambda ch: ch["run"].pop("signed"))                       # no signature at all
+        refused(lambda ch: ch["run"].update(signed=True))                 # not even a string
+        refused(lambda ch: ch["run"].update(signed="\u00e9" * 64))         # nor one a signature could be
+        other = tempfile.mkdtemp()                                        # a ledger from another machine or user:
+        folders, ledger._key_folders = ledger._key_folders, lambda: [os.path.join(other, "oldhand")]
+        try:
+            refused(lambda ch: None)                                      # there is no key here at all
+            ledger._rerun_key(create=True)
+            refused(lambda ch: None)                                      # and this machine's key is another one
+            ledger._key_folders = lambda: []
+            unsigned, warning, _ = self.py("AC1", "print('no place for a key')")
+            self.assertNotIn("signed", unsigned["run"])
+            self.assertIn("no folder for the rerun key", warning)
+        finally:
+            ledger._key_folders = folders
+        self.addCleanup(shutil.rmtree, other)
+        ledger.save(self.d, good)
+        elsewhere = os.path.join(self.root, "another-project")  # our own signed check, copied into another project
+        os.makedirs(elsewhere)
+        git_repo(elsewhere)
+        d2 = os.path.join(elsewhere, ".oldhand", "t")
+        ledger.init(d2, "Other")
+        shutil.copy(os.path.join(self.d, "contract.md"), d2)
+        shutil.copy(os.path.join(self.d, "ledger.json"), d2)
+        with self.assertRaises(ledger.LedgerError):
+            ledger.rerun(d2, check="C1")
+        self.assertFalse(os.path.exists(os.path.join(elsewhere, "ran-again")) or os.path.exists("ran-again"))
+        shutil.rmtree(elsewhere)
+        code, out, _ = cli("oldhand", "ledger", "rerun", "--stale", "--dir", self.d, cwd=self.root,
+                           env=dict(os.environ, XDG_STATE_HOME=other, TMPDIR=other))
+        self.assertEqual(code, 1)
+        self.assertIn("not shown; run it only if the user asks for it", out)
+        self.assertNotIn("ran-again", out, "a command that was not recorded here is not printed for anyone to copy")
+        git(self.root, "add", "-f", os.path.join(".oldhand", "t", "ledger.json"))  # our own ledger, tracked or not
+        self.assertEqual(ledger.rerun(self.d, stale=True)[0][0][1]["status"], "pass")
+        self.assertTrue(os.path.exists("ran-again"))
+
+    @unittest.skipIf(os.name != "posix", "file modes")
+    def test_the_rerun_key_is_private_and_a_key_others_could_replace_is_not_used(self):
+        folder = ledger._key_folders()[0]
+        key = ledger._rerun_key(create=True)
+        self.assertEqual((len(key), ledger._rerun_key()), (32, key))
+        self.assertEqual(os.stat(os.path.join(folder, "rerun-key")).st_mode & 0o777, 0o600)
+        for target, mode in ((folder, 0o777), (os.path.join(folder, "rerun-key"), 0o666),
+                             (os.path.join(folder, "rerun-key"), 0o644)):
+            kept = os.stat(target).st_mode & 0o777
+            os.chmod(target, mode)
+            try:
+                self.assertIsNone(ledger._rerun_key(), "%s is writable by others" % target)
+            finally:
+                os.chmod(target, kept)
+        self.assertEqual(ledger._rerun_key(), key)
+        self.assertEqual(os.listdir(folder), ["rerun-key"], "the key is written whole, with nothing left beside it")
+        state, os.environ["XDG_STATE_HOME"] = os.environ["XDG_STATE_HOME"], "relative/state"
+        try:  # a relative state folder would land inside the project: only the temp folder is left
+            self.assertEqual(len(_saved_env["folders"]()), 1)
+        finally:
+            os.environ["XDG_STATE_HOME"] = state
+
+    def test_a_listed_value_in_the_command_line_is_refused(self):
+        self.write(".oldhand-env-names", TOKEN + "\n")
+        os.environ[TOKEN] = SECRET
+        try:
+            with self.assertRaises(ledger.LedgerError) as e:
+                ledger.run(self.d, "AC1", "e2e", "lead:x", ["echo %s > ran" % SECRET])
+            self.assertIn("holds the value of " + TOKEN, str(e.exception))
+            self.assertNotIn(SECRET, str(e.exception))
+            self.assertFalse(os.path.exists("ran"))
+            self.assertEqual(ledger.load(self.d)["checks"], [])
+            check, _, _ = self.py("AC1", "import os; print('token is', os.environ[%r])" % TOKEN)
+        finally:
+            del os.environ[TOKEN]
+        self.assertIn("token is <%s>" % TOKEN, self.saved(check))
+
+    def test_no_part_of_a_value_is_left_where_long_output_is_cut(self):
+        import io
+        long, short = b"AAAA-SECRET-ONE-and-its-longer-TAIL", b"AAAA-SECRET-ONE"  # one listed value inside another
+        hidden = [("LONG", long), ("SHORT", short)]
+        kept, ledger.RUN_KEEP = ledger.RUN_KEEP, 1000
+        try:
+            for shift in range(-len(long) - 2, len(long) + 3):  # the value slides across both cuts
+                for cut in (1000, 9000):
+                    data = bytearray(b"x" * 10000)
+                    at = cut + shift
+                    data[at:at + len(long)] = long
+                    out = ledger._output(io.BytesIO(bytes(data)), hidden)
+                    for piece in (b"SECRET", b"TAIL", b"longer", b"AAAA"):
+                        self.assertNotIn(piece, out, (shift, cut))
+            self.assertEqual(ledger._output(io.BytesIO(short + b" and " + long), hidden), b"<SHORT> and <LONG>")
+            # Values that overlap each other: every stretch any of them covers goes.
+            self.assertEqual(ledger._output(io.BytesIO(b"dceeadgdggfdceeadgdggf."),
+                                            [("N0", b"dceeadgdggfdc"), ("N1", b"dceeadgdggf")]), b"<N0>.")
+            self.assertEqual(ledger._output(io.BytesIO(b"abcXYZdef abcXYZ"), [("A", b"abcXYZ"), ("B", b"XYZdef")]), b"<A> <A>")
+            self.assertEqual(ledger._output(io.BytesIO(b"plain"), []), b"plain")
+        finally:
+            ledger.RUN_KEEP = kept
+
+    def test_a_file_changed_while_the_command_ran_leaves_the_check_stale(self):
+        check, warning, _ = self.py("AC1", "open('a.txt', 'a').write('edited during the run\\n')", lead=True)
+        self.assertEqual(check["status"], "pass")
+        self.assertIn("files changed while the command ran: a.txt", warning)
+        res = self.verdict()
+        self.assertEqual(res["stale"], ["C1"])
+        self.assertIn("; changed: a.txt)", self.stale_text(res))
+        check, warning, _ = self.py("AC1", "open('.oldhand/scratch', 'w').close()", lead=True)
+        self.assertEqual((warning, self.verdict()["stale"]), (None, ["C1"]), "a file git ignores is not a change")
+
+    @unittest.skipIf(os.name != "posix", "signals")
+    def test_a_stop_signal_ends_the_command_and_leaves_nothing_behind(self):
+        import signal
+        code = "import os, time; open('pid', 'w').write(str(os.getpid())); time.sleep(60)"
+        proc = subprocess.Popen([sys.executable, script("oldhand", "ledger"), "run", "--id", "AC1", "--kind", "e2e", "--by", "x",
+                                 "--dir", self.d, "--", PY, "-c", code], cwd=self.root, stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE, universal_newlines=True)
+        self.addCleanup(proc.kill)
+        child = ""
+        for _ in range(100):
+            if os.path.exists("pid"):
+                with open("pid") as fh:
+                    child = fh.read()
+            if child:
+                break
+            time.sleep(0.1)
+        child = int(child)
+        proc.send_signal(signal.SIGTERM)
+        _, err = proc.communicate(timeout=30)
+        self.assertEqual(proc.returncode, 4)
+        self.assertIn("interrupted", err)
+        self.assertEqual(ledger.load(self.d)["checks"], [])
+        self.assertFalse(os.path.exists(os.path.join(self.d, "runs")), "no raw output is left on disk")
+        with self.assertRaises(ProcessLookupError, msg="the command was ended too"):
+            for _ in range(50):
+                os.kill(child, 0)
+                time.sleep(0.1)
+
+    def test_the_command_line(self):
+        def call(*args):
+            return cli("oldhand", "ledger", *args, cwd=self.root)
+        code, out, err = call("run", "--id", "AC1", "--kind", "e2e", "--by", "lead:x", "--lead", "--dir", self.d,
+                              "--", PY, "-c", "print(open('a.txt').read())")
+        self.assertEqual((code, err), (0, ""))
+        self.assertIn("C1 recorded: AC1 e2e pass (exit 0,", out)
+        code, out, err = call("run", "--id", "AC2", "--kind", "integration", "--by", "lead:x", "--dir", self.d,
+                              "--", "%s -c \"import sys; print('boom'); sys.exit(2)\"" % PY)
+        self.assertEqual(code, 1)
+        self.assertIn("AC2 integration fail (exit 2,", out)
+        self.assertIn("  | boom", out)
+        code, out, err = call("run", "--id", "AC2", "--kind", "unit", "--by", "lead:x", "--dir", self.d,
+                              "--", "oldhand-no-such-command")
+        self.assertEqual(code, 4)
+        self.assertIn("could not start", err)
+        self.assertEqual(call("run", "--id", "AC2", "--kind", "mutation", "--by", "x", "--dir", self.d, "--", "true")[0], 4)
+        self.assertEqual(call("rerun", "--dir", self.d)[0], 4)
+        with open("a.txt", "a") as fh:
+            fh.write("two\n")
+        code, out, err = call("rerun", "--stale", "--dir", self.d)
+        self.assertEqual(code, 1, "AC2's command still fails")
+        self.assertIn("C1 -> C3 recorded: AC1 e2e pass", out)
+        self.assertIn("C2 -> C4 recorded: AC2 integration fail", out)
+        self.rec("R1")
+        with open("a.txt", "a") as fh:
+            fh.write("three\n")
+        code, out, _ = call("rerun", "--stale", "--dir", self.d)
+        self.assertEqual(code, 1, "a stale check it could not run is left")
+        self.assertIn("Still stale and not run again", out)
+        self.assertIn("  C5  R1 e2e by qa:worker (no command: it was not recorded by `ledger.py run`): R1 e2e", out)
+        code, out, _ = call("rerun", "--check", "C3", "--dir", self.d)
+        self.assertEqual(code, 0)
+
+
+class Shape(Base):
+    """A hand-edited check with a field of the wrong type is an error that names the check and the field."""
+
+    def test_a_wrong_typed_field_names_the_check_and_never_quotes_the_value(self):
+        self.all_pass()
+        good = ledger.load(self.d)
+        for field, value, said in (("live", True, "`live` that is a bool, not a dict"),
+                                   ("live", {"max_age": "1h"}, "live `max_age`"), ("live", {"max_age": True}, "live `max_age`"),
+                                   ("pins", ["x"], "`pins` that is a list"), ("evidence", 5, "`evidence` that is a int"),
+                                   ("env", "s3cr3t-typed-here", "`env` that is a str"), ("time", None, "`time`")):
+            led = json.loads(json.dumps(good))
+            led["checks"][1][field] = value
+            ledger.save(self.d, led)
+            with self.assertRaises(ledger.LedgerError) as e:
+                self.verdict()
+            self.assertIn("check C2 in", str(e.exception))
+            self.assertIn(said, str(e.exception))
+            self.assertNotIn("s3cr3t", str(e.exception))
+        led = json.loads(json.dumps(good))
+        del led["checks"][0]["by"]
+        led["checks"][2] = "C3"
+        ledger.save(self.d, led)
+        with self.assertRaises(ledger.LedgerError) as e:
+            self.verdict()
+        self.assertIn("check C1 in", str(e.exception))
+        self.assertIn("has no `by`", str(e.exception))
+        code, _, err = cli("oldhand", "ledger", "status", "--dir", self.d)
+        self.assertEqual(code, 4)
+        self.assertNotIn("unexpected problem", err)
+        led["checks"][0]["by"] = "qa:worker"
+        led["trees"] = []
+        ledger.save(self.d, led)
+        with self.assertRaises(ledger.LedgerError) as e:
+            self.verdict()
+        self.assertIn("check number 3", str(e.exception))
 
 
 if __name__ == "__main__":

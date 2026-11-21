@@ -124,17 +124,17 @@ Exit: a KILLED mutation is recorded for every fix point.
 ## Step 6: Checks against the baseline
 
 Rerun the baseline commands and save each as `D/build/after-<name>.txt`. Compare the failure sets: a
-failure missing from the baseline is yours until a rerun on its own shows it is flaky. Then record each
-check against the criteria it proves:
+failure missing from the baseline is yours until a rerun on its own shows it is flaky. Then have the
+ledger run each check against the criteria it proves. It saves the output and decides pass or fail from
+the exit code, so nobody types the result:
 
 ```bash
-LEDGER record --dir D --id AC1 --kind unit --status pass \
-  --evidence D/build/after-unit.txt --by "lead:<model>" --cmd "<the command>"
+LEDGER run --dir D --id AC1 --kind unit --by "lead:<model>" -- <the command>
 ```
 
 `--kind integration` when the check crosses a real boundary (database, HTTP, queue). A check that
-failed on the baseline and still fails is `--status baseline-fail`, never a pass. No `e2e` here: that
-is `oldhand-qa`. Record after the last edit; any later edit makes earlier records stale.
+failed on the baseline and still fails is `LEDGER record` with `--status baseline-fail`, never a pass.
+No `e2e` here: that is `oldhand-qa`. After a later edit, `LEDGER rerun --stale` runs the stale ones again.
 
 Exit: no new failures, and every criterion the plan proves at unit or integration level has a record.
 
