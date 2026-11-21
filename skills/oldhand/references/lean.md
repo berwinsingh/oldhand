@@ -33,16 +33,18 @@ LEDGER is `python3 "${CLAUDE_SKILL_DIR}/scripts/ledger.py"` and MUTATE is
    change. Make the smallest change at the shared point. Write one focused regression
    check that fails without the fix, run the project's tests, and run MUTATE on the
    fixed line with that check (`--ledger .oldhand/<task> --id <criterion>`). Record the
-   test runs with `LEDGER record --kind unit` (or `integration`) and the real command.
+   test runs with `LEDGER run --id <criterion> --kind unit --by lead:<model> -- <the real
+   command>` (or `--kind integration`): the ledger runs it and sets pass or fail itself.
 3. **Review, by you.** Read the whole diff once against every criterion and ask: which
    input would still break it, did any caller's behaviour change, is every stated rule
    covered. Record a high or medium problem with `LEDGER finding add`, fix it, and
    resolve it; list lows in the report.
 4. **QA, by you.** Run every criterion through the real entry point (the CLI, the HTTP
    endpoint, the page) with the input the request names plus one edge case the request
-   states, and record each one: `LEDGER record --id <AC> --kind e2e --status pass|fail
-   --evidence <file or output> --by lead:<model> --cmd "<the exact command>" --lead`.
-   Save the output you relied on under `.oldhand/<task>/qa/`.
+   states, and record each one: `LEDGER run --id <AC> --kind e2e --by lead:<model> --lead
+   -- <the exact command>` when the command's exit code decides it, else `LEDGER record
+   --id <AC> --kind e2e --status pass|fail --evidence <file> --by lead:<model> --cmd
+   "<what you did>" --lead` with the output you relied on saved under `.oldhand/<task>/qa/`.
 5. **Verdict.** Run `LEDGER verdict`. NOT YET goes back to step 2 for the named
    criterion, inside the round caps. Write a short `report.md` from `LEDGER report`
    (verdict, criteria, what was not verified) and end with the verdict line it printed.

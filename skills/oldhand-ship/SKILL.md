@@ -63,9 +63,10 @@ Exit 0 is VERIFIED, 1 NOT YET, 2 BLOCKED, 3 INCOMPLETE. Act on the printed reaso
   oldhand-qa for e2e, oldhand-build for unit or integration, oldhand-review for review
   (oldhand-rca in investigate mode).
 - NOT YET: a failing check, a STALE check, an open high or medium finding, a deferred high or
-  medium the user has not accepted, or no lead e2e pass. Re-run a STALE check; its reason says
-  why: files changed, a runtime pin file or version changed, a var in `.oldhand-env-names`
-  changed, or a live check passed its max age. Restamp clears file changes only. Use
+  medium the user has not accepted, or no lead e2e pass. Re-run a STALE check (`LEDGER rerun
+  --stale` runs the ones `LEDGER run` recorded); its reason says why: the named files changed, a
+  runtime pin file or version changed, a var in `.oldhand-env-names` changed, or a live check
+  passed its max age. A commit of the verified files changes nothing. Restamp clears file changes only. Use
   `LEDGER restamp --check C7 --reason "<why>"` only when the change since then provably cannot
   affect that check (for example, only notes or instruction files changed), and say why. Record
   a deferral as accepted only on the user's own words:
@@ -149,7 +150,8 @@ Exit: every authorized action has run, or has a stated reason why it did not.
 
 Check each action by its URL or id, not by a command's exit code: the PR exists and its head
 commit equals your local HEAD (`gh pr view <n> --json url,state,headRefOid` or the host's
-equivalent); the branch tip on the remote matches (`git ls-remote origin <branch>`); the tracker
+equivalent), and `LEDGER verdict` still prints the same verdict with "Tree: ... the files of commit
+<that head>", which shows the commit holds exactly the verified files; the branch tip on the remote matches (`git ls-remote origin <branch>`); the tracker
 comment is visible; the deployed build id is the one you meant. Add each to "Published".
 Exit: `report.md` lists every remote result with its URL or id.
 
