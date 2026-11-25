@@ -1,0 +1,110 @@
+{
+  "name": "oldhand",
+  "like": "neutral",
+  "mode": "both",
+  "settings": [
+    {
+      "thing": "accent",
+      "value": "#D4410F",
+      "source": "dial"
+    },
+    {
+      "thing": "neutral",
+      "value": "#7A7064",
+      "source": "dial"
+    },
+    {
+      "thing": "corners",
+      "value": "small",
+      "source": "dial"
+    },
+    {
+      "thing": "surfaces",
+      "value": "outlined",
+      "source": "dial"
+    },
+    {
+      "thing": "type",
+      "value": "editorial",
+      "source": "dial"
+    },
+    {
+      "thing": "font",
+      "value": "Instrument Serif",
+      "source": "dial",
+      "on": "heading"
+    },
+    {
+      "thing": "font",
+      "value": "ibm-plex-sans",
+      "source": "dial",
+      "on": "body"
+    },
+    {
+      "thing": "font",
+      "value": "ibm-plex-mono",
+      "source": "dial",
+      "on": "code"
+    },
+    {
+      "thing": "--color-background-body",
+      "value": "#F3EFE6",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-background-body",
+      "value": "#11100D",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-text-primary",
+      "value": "#17150F",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-text-primary",
+      "value": "#EDE7DA",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-background-surface",
+      "value": "#FBF9F4",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-background-surface",
+      "value": "#1A1814",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-background-card",
+      "value": "#FBF9F4",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-background-card",
+      "value": "#1A1814",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "success",
+      "value": "#5E6B2C",
+      "source": "dial"
+    },
+    {
+      "thing": "danger",
+      "value": "#C2380C",
+      "source": "dial"
+    }
+  ],
+  "lifted": [],
+  "palette": "5fa54896ff49ecbcd83856035012e955cb371aca6e08f9b06b2b2a8fb809bddd"
+}
