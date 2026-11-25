@@ -1,4 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Button } from "@astryxdesign/core/Button";
+import { Code } from "@astryxdesign/core/Code";
+import { CodeBlock } from "@astryxdesign/core/CodeBlock";
+import { Collapsible } from "@astryxdesign/core/Collapsible";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Link } from "@astryxdesign/core/Link";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
+import { Table, proportional } from "@astryxdesign/core/Table";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 import skillText from "../../skills/oldhand/SKILL.md?raw";
 import reportText from "../../examples/csv-import-dupes/oldhand/report.md?raw";
 import orchestrationText from "../../skills/oldhand/references/orchestration.md?raw";
@@ -115,16 +127,18 @@ const run = [
 
 function inline(text) {
   return text.split(/(`[^`]*`)/g).map((part, i) =>
-    part.startsWith("`") ? <code key={i}>{part.slice(1, -1)}</code> : part,
+    part.startsWith("`") ? <Code key={i} size="inherit">{part.slice(1, -1)}</Code> : part,
   );
 }
 
+const pad = (n) => String(n).padStart(2, "0");
+
 // The mark: an open hand, the old hand that signs the work off.
-function Mark({ size = 22 }) {
+function Mark({ size = 26 }) {
   return (
     <svg className="mark" width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
       <circle cx="32" cy="32" r="31" fill="currentColor" />
-      <g fill="var(--bg)">
+      <g className="mark-hand">
         <rect x="21" y="30" width="25" height="22" rx="7" />
         <rect x="21" y="17" width="5.6" height="20" rx="2.8" />
         <rect x="27.6" y="11" width="5.6" height="26" rx="2.8" />
@@ -136,61 +150,49 @@ function Mark({ size = 22 }) {
   );
 }
 
-function Table({ data: tbl }) {
+// A markdown table slice from report.md or orchestration.md, as an Astryx Table.
+function SliceTable({ data: tbl, label }) {
   if (!tbl) return null;
+  const rows = tbl.rows.map((row, r) => ({ id: r, row }));
+  const columns = tbl.header.map((h, c) => ({
+    key: `c${c}`,
+    header: h,
+    width: proportional(c === 0 ? 1 : 2, { minWidth: 110 }),
+    renderCell: (item) => <Text type="inherit">{inline(item.row[c] || "")}</Text>,
+  }));
   return (
-    <div className="scroll" tabIndex={0}>
-      <table>
-        <thead>
-          <tr>{tbl.header.map((cell) => <th key={cell}>{cell}</th>)}</tr>
-        </thead>
-        <tbody>
-          {tbl.rows.map((row, r) => (
-            <tr key={r}>{row.map((cell, c) => <td key={c} data-col={tbl.header[c]}>{inline(cell)}</td>)}</tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="table-wrap" role="region" aria-label={label}>
+      <Table data={rows} columns={columns} idKey="id" density="compact" verticalAlign="top" />
     </div>
   );
 }
 
-function CopyButton({ value, label, text = "Copy" }) {
-  const [state, setState] = useState("idle");
-  async function copy(event) {
-    const button = event.currentTarget;
-    let ok = false;
-    try {
-      await navigator.clipboard.writeText(value);
-      ok = true;
-    } catch {
-      const textarea = document.createElement("textarea");
-      textarea.value = value;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      ok = document.execCommand("copy");
-      textarea.remove();
-      button.focus();
-    }
-    setState(ok ? "copied" : "failed");
-    window.setTimeout(() => setState("idle"), 1600);
-  }
-  const shown = state === "copied" ? "Copied" : state === "failed" ? "Copy failed: select the text" : text;
+function Chapter({ id, n, kicker, title, children }) {
   return (
-    <button className="copy" type="button" onClick={copy} aria-label={label}>
-      <span role="status">{shown}</span>
-    </button>
+    <section id={id} className="chapter" aria-labelledby={`${id}-title`}>
+      <header className="chapter-head">
+        <span className="chapter-n">§ {pad(n)}</span>
+        <span className="chapter-kicker">{kicker}</span>
+      </header>
+      <div className="chapter-body">
+        <Heading level={2} id={`${id}-title`} className="chapter-title">{title}</Heading>
+        {children}
+      </div>
+    </section>
   );
 }
 
-function Command({ text, index }) {
-  return (
-    <div className="command">
-      <pre><code>{text}</code></pre>
-      <CopyButton value={text} label={`Copy command ${index}`} />
-    </div>
-  );
+// True below 640px: the criteria table folds its Proof and By columns into the first.
+function useNarrow() {
+  const query = "(max-width: 640px)";
+  const [narrow, setNarrow] = useState(() => matchMedia(query).matches);
+  useEffect(() => {
+    const list = matchMedia(query);
+    const onChange = () => setNarrow(list.matches);
+    list.addEventListener("change", onChange);
+    return () => list.removeEventListener("change", onChange);
+  }, []);
+  return narrow;
 }
 
 function tabFromUrl() {
@@ -202,208 +204,77 @@ function InstallSwitcher() {
   const [tab, setTab] = useState(tabFromUrl);
   const current = installs.find((i) => i.key === tab);
 
-  function onKeyDown(event) {
-    if (event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) return;
-    const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (!step) return;
-    event.preventDefault();
-    const index = installs.findIndex((i) => i.key === tab);
-    const next = installs[(index + step + installs.length) % installs.length].key;
-    setTab(next);
-    document.getElementById(`tab-${next}`)?.focus();
+  // TabList moves focus on the arrow keys, Home and End; selection follows
+  // focus (automatic activation, as in the WAI-ARIA tabs pattern).
+  function onFocus(event) {
+    const key = event.target.closest('[role="tab"]')?.id?.replace(/^tab-/, "");
+    if (key && key !== tab && installs.some((i) => i.key === key)) setTab(key);
   }
 
   return (
     <div className="install">
-      <div className="tabs" role="tablist" aria-label="Install route" onKeyDown={onKeyDown}>
-        {installs.map((i) => (
-          <button
-            key={i.key}
-            id={`tab-${i.key}`}
-            role="tab"
-            type="button"
-            aria-selected={i.key === tab}
-            aria-controls={`panel-${i.key}`}
-            tabIndex={i.key === tab ? 0 : -1}
-            className={i.key === tab ? "is-active" : ""}
-            onClick={() => setTab(i.key)}
-          >
-            {i.label}
-          </button>
-        ))}
+      <div onFocus={onFocus}>
+        <TabList value={tab} onChange={setTab} role="tablist" hasDivider aria-label="Install route">
+          {installs.map((i) => (
+            <Tab key={i.key} id={`tab-${i.key}`} value={i.key} label={i.label} panelId={`panel-${i.key}`} />
+          ))}
+        </TabList>
       </div>
-      <div className="panel" role="tabpanel" id={`panel-${current.key}`} aria-labelledby={`tab-${current.key}`}>
-        {current.blocks.map((block, n) => <Command key={block} text={block} index={n + 1} />)}
-        <p className="small">{current.note}</p>
+      <div className="install-panel" role="tabpanel" id={`panel-${current.key}`} aria-labelledby={`tab-${current.key}`}>
+        {current.blocks.map((block, n) => (
+          <CodeBlock key={block} code={block} language="bash" title={`step ${n + 1}`} width="100%" />
+        ))}
+        <Text type="supporting" as="p" display="block">{current.note}</Text>
         <dl className="then">
           {current.then.map(([hosts, text]) => (
             <div key={hosts}>
               <dt>Then, in {hosts}</dt>
-              <dd><code>{text}</code></dd>
+              <dd><Code>{text}</Code></dd>
             </div>
           ))}
         </dl>
-        <p className="small">
+        <Text type="supporting" as="p" display="block">
           {current.tested} Invocation per host:{" "}
-          <a href={`${BLOB}skills/oldhand/references/hosts.md`}>hosts.md</a>.
-        </p>
+          <Link href={`${BLOB}skills/oldhand/references/hosts.md`}>hosts.md</Link>.
+        </Text>
       </div>
     </div>
   );
 }
 
-// The ten stages as a stack of plates in 3D, contract at the bottom. The
-// plate whose row is hovered in the list below lifts out of the stack.
-function Stack({ active }) {
+// The hero's ledger sheet: the example run printed line by line, then the
+// verdict stamped. Plain CSS animation; under reduced motion it is all there.
+// Each row carries the report's own sentence; long ones are clamped to two
+// lines on screen, with the full text kept in the DOM and in the tooltip.
+function LedgerSheet() {
   return (
-    <div className="stack" aria-hidden="true">
-      <div className="stack-scene">
-        {stages.map(([name], i) => (
-          <div
-            key={name}
-            className={`plate${i === active ? " is-active" : ""}${name === "ship" ? " is-ship" : ""}`}
-            style={{ "--i": i }}
-          >
-            <span className="plate-n">{String(i + 1).padStart(2, "0")}</span>
-            <span className="plate-name">{name}</span>
-          </div>
+    <figure className="sheet" aria-labelledby="sheet-title">
+      <figcaption className="sheet-head">
+        <span id="sheet-title">report · csv-import-dupes</span>
+        <Link href={REPORT} color="secondary">report.md ↗</Link>
+      </figcaption>
+      <p className="sheet-prompt"><span className="sheet-caret">›</span> /oldhand {data.asked}</p>
+      <ol className="sheet-rows">
+        {run.map(([k, v, d], i) => (
+          <li key={k} style={{ "--i": i }}>
+            <span className="k">{k}</span>
+            <span className="v">{v}</span>
+            <span className="d" title={d}>{inline(d)}</span>
+          </li>
         ))}
+      </ol>
+      <div className="sheet-verdict" style={{ "--i": run.length }}>
+        <span className="k">verdict</span>
+        <span className="stamp" aria-label={`Verdict: ${verdictWord}`}>{verdictWord}</span>
+        <span className="d">{data.computed}</span>
       </div>
-    </div>
+    </figure>
   );
-}
-
-// A field of dots on a slow 3D wave behind the hero, drawn on a canvas in
-// perspective. One still frame when the reader asks for less motion; it
-// stops drawing while it is off screen.
-function DotField() {
-  const ref = useRef(null);
-  useEffect(() => {
-    const canvas = ref.current;
-    const ctx = canvas.getContext("2d");
-    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const cols = 64;
-    const rows = 26;
-    let w = 0;
-    let h = 0;
-    let color = "0,0,0";
-    let frame = 0;
-    let visible = true;
-
-    function resize() {
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      w = canvas.clientWidth;
-      h = canvas.clientHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const rgb = getComputedStyle(canvas).color.match(/\d+/g) || [0, 0, 0];
-      color = rgb.slice(0, 3).join(",");
-    }
-
-    function draw(t) {
-      ctx.clearRect(0, 0, w, h);
-      const focal = h * 1.1;
-      const horizon = h * 0.02;
-      for (let r = 0; r < rows; r++) {
-        // rows run from far (r = 0) to near (r = rows - 1)
-        const z = 2.6 - (r / (rows - 1)) * 2.2;
-        for (let c = 0; c < cols; c++) {
-          const x = (c / (cols - 1) - 0.5) * 6;
-          const y = Math.sin(x * 1.3 + t * 0.6) * 0.18 + Math.cos(z * 2.2 - t * 0.8) * 0.16;
-          const scale = focal / (z + 0.6);
-          const sx = w / 2 + x * scale * 0.55;
-          const sy = horizon + (0.9 - y) * scale * 0.42;
-          if (sx < -4 || sx > w + 4 || sy > h + 4) continue;
-          const near = 1 - z / 2.6;
-          ctx.fillStyle = `rgba(${color},${(0.08 + near * 0.32 + y * 0.4).toFixed(3)})`;
-          ctx.beginPath();
-          ctx.arc(sx, sy, 0.6 + near * 1.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
-
-    function loop(now) {
-      frame = 0;
-      draw(now / 1000);
-      if (visible) frame = requestAnimationFrame(loop);
-    }
-
-    resize();
-    draw(0);
-    const observer = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      if (visible && !still && !frame) frame = requestAnimationFrame(loop);
-    });
-    observer.observe(canvas);
-    const onResize = () => {
-      resize();
-      if (still) draw(0);
-    };
-    addEventListener("resize", onResize);
-    const scheme = matchMedia("(prefers-color-scheme: dark)");
-    scheme.addEventListener("change", onResize);
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      removeEventListener("resize", onResize);
-      scheme.removeEventListener("change", onResize);
-    };
-  }, []);
-  return <canvas className="dots" ref={ref} aria-hidden="true" />;
-}
-
-// Tilts the run card back in 3D and stands it up as it scrolls into view;
-// the pointer adds a small lean. Off when the reader asks for less motion.
-function useTilt(ref) {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let px = 0;
-    let py = 0;
-    let frame = 0;
-    const paint = () => {
-      frame = 0;
-      const box = el.getBoundingClientRect();
-      const progress = Math.min(1, Math.max(0, (innerHeight - box.top) / (innerHeight * 0.75)));
-      el.style.setProperty("--rx", `${(1 - progress) * 22 + py * -4}deg`);
-      el.style.setProperty("--ry", `${px * 5}deg`);
-    };
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(paint);
-    };
-    const move = (event) => {
-      const box = el.getBoundingClientRect();
-      px = (event.clientX - box.left) / box.width - 0.5;
-      py = (event.clientY - box.top) / box.height - 0.5;
-      schedule();
-    };
-    const leave = () => {
-      px = 0;
-      py = 0;
-      schedule();
-    };
-    paint();
-    addEventListener("scroll", schedule, { passive: true });
-    addEventListener("resize", schedule);
-    el.addEventListener("pointermove", move);
-    el.addEventListener("pointerleave", leave);
-    return () => {
-      cancelAnimationFrame(frame);
-      removeEventListener("scroll", schedule);
-      removeEventListener("resize", schedule);
-      el.removeEventListener("pointermove", move);
-      el.removeEventListener("pointerleave", leave);
-    };
-  }, [ref]);
 }
 
 export function App() {
   const [analytics, setAnalytics] = useState(readAnalyticsChoice);
-  const [active, setActive] = useState(-1);
-  const shotRef = useRef(null);
-  useTilt(shotRef);
+  const narrow = useNarrow();
   useEffect(() => {
     applyAnalyticsChoice(analytics);
   }, [analytics]);
@@ -414,138 +285,135 @@ export function App() {
     setAnalytics(next);
   }
 
+  const criteriaRows = data.criteria.rows.map(([id, outcome, proof, status, by]) => ({ id, outcome, proof, status, by }));
+  const criteriaColumns = [
+    {
+      key: "id",
+      header: "Criterion",
+      width: proportional(narrow ? 3 : 5, { minWidth: narrow ? 110 : 150 }),
+      renderCell: (r) => (
+        <VStack gap={0.5}>
+          <Text weight="semibold" type="inherit">{r.id}</Text>
+          <Text type="supporting">{inline(r.outcome)}</Text>
+          {narrow && <Text type="supporting">proof {r.proof} · by <Code size="inherit">{r.by}</Code></Text>}
+        </VStack>
+      ),
+    },
+    !narrow && { key: "proof", header: "Proof", width: proportional(1, { minWidth: 56 }) },
+    {
+      key: "status",
+      header: "Status",
+      width: proportional(1, { minWidth: 64 }),
+      renderCell: (r) => <Badge label={r.status} variant={r.status === "pass" ? "success" : "error"} />,
+    },
+    !narrow && { key: "by", header: "By", width: proportional(1.5, { minWidth: 130 }), renderCell: (r) => <Code>{r.by}</Code> },
+  ].filter(Boolean);
+
   return (
     <>
       <header className="top">
-        <a className="wordmark" href="#top"><Mark /> oldhand</a>
-        <nav aria-label="Sections">
+        <a className="wordmark" href="#top"><Mark /> <span>oldhand</span></a>
+        <nav aria-label="Sections" className="top-nav">
           <a href="#how">How it works</a>
           <a href="#example">Example</a>
           <a href="#benchmark">Benchmark</a>
           <a href="#install">Install</a>
-          <a href={REPO}>GitHub</a>
         </nav>
+        <Button label="GitHub ↗" href={REPO} size="sm" variant="ghost" />
       </header>
 
       <main id="top">
-        <section className="hero">
-          <DotField />
-          <p className="eyebrow">v{data.version} · MIT · eleven agent skills</p>
-          <h1>Make your coding agent prove it is done.</h1>
-          <p className="sub">
-            For Claude Code, Codex, Cursor, Copilot, Gemini CLI and any agent that reads{" "}
-            <code>SKILL.md</code>. One request runs through ten stages, and a small script reads the
-            recorded evidence and prints the verdict, so the model can't declare itself done.
-          </p>
-          <Command text={NPX} index={1} />
-          <p className="alt">
-            Then type <code>/oldhand</code> and describe the work, or <code>/oldhand --lean</code> for
-            one agent. Also as a{" "}
-            <a href="#install">Claude Code or Codex plugin</a>.
-          </p>
-        </section>
-
-        <section className="shot" aria-labelledby="shot-title" ref={shotRef}>
-          <div className="card">
-            <div className="card-head">
-              <span id="shot-title">One run, from its report</span>
-              <a href={REPORT}>report.md</a>
-            </div>
-            <p className="prompt">
-              <span className="clamp">/oldhand {data.asked}</span>
+        <section className="hero" aria-labelledby="hero-title">
+          <div className="hero-copy">
+            <p className="eyebrow">
+              Oldhand v{data.version} · MIT · eleven agent skills
             </p>
-            <ol className="run">
-              {run.map(([k, v, d]) => (
-                <li key={k}>
-                  <span className="k">{k}</span>
-                  <span className="v">{v}</span>
-                  <span className="d">{inline(d)}</span>
-                </li>
-              ))}
-              <li className="verdict">
-                <span className="k">verdict</span>
-                <span className="v">{verdictWord}</span>
-                <span className="d">{data.computed}</span>
-              </li>
-            </ol>
+            <h1 id="hero-title" className="display">
+              Make your coding agent <em>prove</em> it&nbsp;is&nbsp;done.
+            </h1>
+            <p className="lede">
+              For Claude Code, Codex, Cursor, Copilot, Gemini CLI and any agent that reads{" "}
+              <Code size="inherit">SKILL.md</Code>. One request runs through ten stages, and a small
+              script reads the recorded evidence and prints the verdict, so the model can't declare
+              itself done.
+            </p>
+            <div className="hero-install">
+              <CodeBlock code={NPX} language="bash" title="install" width="100%" hasLanguageLabel={false} />
+            </div>
+            <HStack gap={3} align="center" wrap="wrap" className="hero-actions">
+              <Button label="All install options" href="#install" variant="primary" size="lg" />
+              <Button label="Read the conductor skill" href={`${BLOB}skills/oldhand/SKILL.md`} variant="ghost" size="lg" />
+            </HStack>
+            <p className="alt">
+              Then type <Code>/oldhand</Code> and describe the work, or <Code>/oldhand --lean</Code> for
+              one agent. Also as a <Link href="#install">Claude Code or Codex plugin</Link>.
+            </p>
           </div>
+          <LedgerSheet />
         </section>
 
+        <p className="stats-caption">From the example run below</p>
         <ul className="stats" aria-label="Numbers from the example run">
           <li><b>{criteriaIds.length}</b><span>criteria, each proved end to end</span></li>
-          <li><b>2</b><span>root causes; the request <a href={`${BLOB}examples/csv-import-dupes/oldhand/rca.md`}>assumed one</a></span></li>
+          <li><b>2</b><span>root causes; the request <Link href={`${BLOB}examples/csv-import-dupes/oldhand/rca.md`}>assumed one</Link></span></li>
           <li><b>{data.findings.rows.length}</b><span>review finding, fixed before the verdict</span></li>
           <li><b>{data.qaScore}</b><span>QA scenarios through the real CLI</span></li>
         </ul>
 
-        <section id="how">
-          <h2>How it works</h2>
-          <p>
-            The conductor, <a href={`${BLOB}skills/oldhand/SKILL.md`}>oldhand</a>, routes one request
-            through ten stage skills in order. <code>rca</code> runs only for bugs,{" "}
-            <code>research</code> only when something new is built. Each stage writes its file into{" "}
-            <code>.oldhand/&lt;task&gt;/</code> and can run alone.
+        <Chapter id="how" n={1} kicker="The chain" title="How it works">
+          <p className="prose">
+            The conductor, <Link href={`${BLOB}skills/oldhand/SKILL.md`}>oldhand</Link>, routes one request
+            through ten stage skills in order. <Code>rca</Code> runs only for bugs,{" "}
+            <Code>research</Code> only when something new is built. Each stage writes its file into{" "}
+            <Code>.oldhand/&lt;task&gt;/</Code> and can run alone.
           </p>
-          <Stack active={active} />
-          <ol className="stages" onMouseLeave={() => setActive(-1)}>
+          <ol className="stages">
             {stages.map(([name, text], i) => (
-              <li key={name} onMouseEnter={() => setActive(i)} onFocus={() => setActive(i)}>
-                <span className="n">{String(i + 1).padStart(2, "0")}</span>
-                <a href={`${BLOB}skills/oldhand-${name}/SKILL.md`}>{name}</a>
+              <li key={name} className={name === "ship" ? "is-ship" : ""}>
+                <span className="n">{pad(i + 1)}</span>
+                <a className="stage-name" href={`${BLOB}skills/oldhand-${name}/SKILL.md`}>{name}</a>
                 <span className="t">{text}</span>
               </li>
             ))}
           </ol>
           <ul className="tools" aria-label="The three scripts">
             {tools.map(([name, path, text]) => (
-              <li key={name}><a href={BLOB + path}>{name}</a> {text}</li>
+              <li key={name}>
+                <Link href={BLOB + path}><Code>{name}</Code></Link>
+                <span>{text}</span>
+              </li>
             ))}
           </ul>
-        </section>
+        </Chapter>
 
-        <section id="example">
-          <h2>Example run</h2>
-          <p>
+        <Chapter id="example" n={2} kicker="One recorded run" title="Example run">
+          <p className="prose">
             The example is a seeded bug in a small Python importer. A transient write failure plus a
             retry stored a CSV batch twice. The project and the task folder the pack wrote are in{" "}
-            <a href={EXAMPLE_DIR}>examples/csv-import-dupes</a>; the table is read from its{" "}
-            <a href={REPORT}>report.md</a> at build time.
+            <Link href={EXAMPLE_DIR}>examples/csv-import-dupes</Link>; the table is read from its{" "}
+            <Link href={REPORT}>report.md</Link> at build time.
           </p>
-          <div className="scroll" tabIndex={0}>
-            <table className="ledger">
-              <thead>
-                <tr><th>Criterion</th><th>Proof</th><th>Status</th><th>By</th></tr>
-              </thead>
-              <tbody>
-                {data.criteria.rows.map(([id, outcome, proof, status, by]) => (
-                  <tr key={id}>
-                    <td><b>{id}</b><span className="outcome">{inline(outcome)}</span></td>
-                    <td>{proof}</td>
-                    <td className={`st st-${status}`}>{status}</td>
-                    <td>{by}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="table-wrap">
+            <Table data={criteriaRows} columns={criteriaColumns} idKey="id" verticalAlign="top" />
           </div>
-          <p className="small">
-            {data.verdict}: {criteriaPassed} of {criteriaIds.length} criteria pass on the current tree.{" "}
-            {data.computed}
+          <p className="verdict-line">
+            <Badge label={verdictWord} variant={verdictWord === "VERIFIED" ? "success" : "warning"} />
+            <span>{criteriaPassed} of {criteriaIds.length} criteria pass on the current tree. {data.computed}</span>
           </p>
-          <details>
-            <summary>Review findings, root cause and what was not verified</summary>
-            <h3>Review findings</h3>
-            <Table data={data.findings} />
-            <h3>Root cause</h3>
-            <p>{inline(data.rootCause || "")}</p>
-            <h3>Not verified</h3>
-            <ul>{data.notVerified.map((item, i) => <li key={i}>{inline(item)}</li>)}</ul>
-          </details>
-        </section>
+          <Collapsible defaultIsOpen={false} trigger={<Text weight="semibold">Review findings, root cause and what was not verified</Text>}>
+            <VStack gap={4} paddingBlockStart={3}>
+              <Heading level={3}>Review findings</Heading>
+              <SliceTable data={data.findings} label="Review findings" />
+              <Heading level={3}>Root cause</Heading>
+              <p className="prose">{inline(data.rootCause || "")}</p>
+              <Heading level={3}>Not verified</Heading>
+              <ul className="plain">{data.notVerified.map((item, i) => <li key={i}>{inline(item)}</li>)}</ul>
+            </VStack>
+          </Collapsible>
+        </Chapter>
 
-        <section id="benchmark">
-          <h2>Benchmark</h2>
-          <p>
+        <Chapter id="benchmark" n={3} kicker={`${bench.runs} runs, one hidden check`} title="Benchmark">
+          <p className="prose">
             {bench.runs} headless Claude Code runs on {bench.tasks} small bug-fix tasks, {bench.hard} of
             them harder multi-file ones, one run per task and route. A hidden check drives the real
             program and decides whether the work was really done; the agent never sees it.
@@ -559,70 +427,68 @@ export function App() {
             </div>
             {bench.arms.map((a) => (
               <div key={a.key} className="bench-row" role="row">
-                <span role="cell" className="bench-arm">{a.key === "plain" ? a.label : <code>{a.label}</code>}</span>
-                <span role="cell" data-label="Passed"><b>{a.passed}</b> of {a.runs}</span>
-                <span role="cell" data-label="False DONE" className={a.falseDone ? "bench-bad" : ""}><b>{a.falseDone}</b></span>
+                <span role="cell" className="bench-arm">{a.key === "plain" ? a.label : <Code>{a.label}</Code>}</span>
+                <span role="cell" data-label="Passed" className="bench-num"><b>{a.passed}</b> / {a.runs}</span>
+                <span role="cell" data-label="False DONE">
+                  <Badge label={String(a.falseDone)} variant={a.falseDone ? "error" : "neutral"} />
+                </span>
                 <span role="cell" className="bench-cost">
                   <span className="bench-bar" aria-hidden="true"><i style={{ width: `${(a.tokens / maxTokens) * 100}%` }} /></span>
-                  <span>
-                    {Math.floor(a.tokens).toLocaleString("en-US")}, ${a.cost.toFixed(2)}
-                    {a.key !== "plain" && plainArm ? `, ${(a.cost / plainArm.cost).toFixed(1)}x` : ""}
+                  <span className="bench-figs">
+                    {Math.floor(a.tokens).toLocaleString("en-US")} tok · ${a.cost.toFixed(2)}
+                    {a.key !== "plain" && plainArm ? ` · ${(a.cost / plainArm.cost).toFixed(1)}×` : ""}
                   </span>
                 </span>
               </div>
             ))}
           </div>
-          <p className="small">
+          <Text type="supporting" as="p" display="block">
             Medians per run. Cost at API prices as Claude Code reports it: ${bench.totalCost.toFixed(2)} for
-            all {bench.runs} runs, {benchDate}, model alias <code>{benchModel}</code>.
-          </p>
+            all {bench.runs} runs, {benchDate}, model alias <Code>{benchModel}</Code>.
+          </Text>
           {bench.falseDone.map((f) => (
-            <p key={f.task + f.arm}>
-              The false DONE ({f.arm} agent, <code>{f.task}</code>): it tested its change by writing its
-              own fixture over the project's <code>config.json</code>, deleted it, shipped a program that
+            <blockquote key={f.task + f.arm} className="callout">
+              The false DONE ({f.arm} agent, <Code>{f.task}</Code>): it tested its change by writing its
+              own fixture over the project's <Code>config.json</Code>, deleted it, shipped a program that
               crashes, and reported done. Both Oldhand runs of that task passed.
-            </p>
+            </blockquote>
           ))}
           <ul className="plain">
-            <li>On small, clearly specified fixes the model is already good, and Oldhand costs several times as much. Use <code>--lean</code> or plain prompting for small, low-risk changes.</li>
+            <li>On small, clearly specified fixes the model is already good, and Oldhand costs several times as much. Use <Code>--lean</Code> or plain prompting for small, low-risk changes.</li>
             <li>One run per task and route is too few to measure a failure rate. It does measure cost, and it caught one real case of the failure Oldhand is built for.</li>
-            <li>Every task was small, so <code>/oldhand</code> chose the lean route each time, and the full chain with review and QA sub-agents hasn't been measured yet.</li>
+            <li>Every task was small, so <Code>/oldhand</Code> chose the lean route each time, and the full chain with review and QA sub-agents hasn't been measured yet.</li>
           </ul>
-          <p>
+          <p className="prose">
             Tasks, method, every run and how to re-run it:{" "}
-            <a href={`${BLOB}bench/README.md`}>bench/README.md</a>.
+            <Link href={`${BLOB}bench/README.md`}>bench/README.md</Link>.
           </p>
-        </section>
+        </Chapter>
 
-        <section id="install">
-          <h2>Install</h2>
+        <Chapter id="install" n={4} kicker={`${installs.length} routes, each tested ${TESTED}`} title="Install">
           <InstallSwitcher />
-        </section>
+        </Chapter>
 
-        <section id="stops">
-          <h2>What it will not do</h2>
-          <p>
+        <Chapter id="stops" n={5} kicker="Hard stops" title="What it will not do">
+          <p className="prose">
             The hard stops, as written at the top of{" "}
-            <a href={`${BLOB}skills/oldhand/SKILL.md`}>the conductor skill</a>. {data.hardStopsIntro}
+            <Link href={`${BLOB}skills/oldhand/SKILL.md`}>the conductor skill</Link>. {data.hardStopsIntro}
           </p>
           {/* one span per item: in a grid, a bare <code> child would take the number column */}
           <ol className="stops">{data.hardStops.map((item, i) => <li key={i}><span>{inline(item)}</span></li>)}</ol>
-        </section>
+        </Chapter>
 
-        <section id="models">
-          <h2>Models</h2>
-          <p>
+        <Chapter id="models" n={6} kicker="Lead, worker, scout" title="Models">
+          <p className="prose">
             The skills name roles, and one dated file maps them to models. The lead owns the contract,
             the review chair, the final check and the release decision. Workers implement,
             investigate, review and drive QA. Scouts sweep files, read logs and run read-only checks.{" "}
-            <a href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</a> has the
+            <Link href={`${BLOB}skills/oldhand/references/orchestration.md`}>orchestration.md</Link> has the
             current models ({data.modelsDate}).
           </p>
-          <Table data={data.models} />
-        </section>
+          <SliceTable data={data.models} label="Models per host and role" />
+        </Chapter>
 
-        <section id="scope">
-          <h2>Limits</h2>
+        <Chapter id="scope" n={7} kicker="Read before you adopt" title="Limits">
           <ul className="plain">
             <li>It is instructions plus three small scripts, so an agent can still ignore it. The ledger only refuses to print VERIFIED without evidence on the current tree.</li>
             <li>It costs turns and tokens. Review lenses and QA scenarios are sub-agents; the conductor tells you the count before spawning more than ten.</li>
@@ -630,38 +496,46 @@ export function App() {
             <li>Skip it for typos, lookups and one-line edits. The skill says so itself.</li>
             <li>The example ran in a host with no sub-agent tool, so its reviews and QA were run by one agent in turn. Its report says so.</li>
           </ul>
-        </section>
+        </Chapter>
 
-        <section id="skill">
-          <h2>The skill</h2>
-          <details>
-            <summary>
-              The conductor, <code>skills/oldhand/SKILL.md</code>: {skillLines} lines, imported when this page was built
-            </summary>
-            <div className="skill-actions">
-              <CopyButton value={skillText} label="Copy the whole SKILL.md" text="Copy raw" />
-              <a href={`${BLOB}skills/oldhand/SKILL.md`}>View on GitHub</a>
-            </div>
-            <pre className="skill" tabIndex={0} aria-label="SKILL.md source">{skillText}</pre>
-          </details>
-        </section>
+        <Chapter id="skill" n={8} kicker="The source" title="The skill">
+          <Collapsible
+            defaultIsOpen={false}
+            trigger={
+              <Text weight="semibold">
+                The conductor, <Code>skills/oldhand/SKILL.md</Code>: {skillLines} lines, imported when this page was built
+              </Text>
+            }
+          >
+            <VStack gap={3} paddingBlockStart={3}>
+              <Link href={`${BLOB}skills/oldhand/SKILL.md`}>View on GitHub ↗</Link>
+              <CodeBlock code={skillText} language="markdown" title="SKILL.md" width="100%" maxHeight={560} isWrapped />
+            </VStack>
+          </Collapsible>
+        </Chapter>
       </main>
 
-      <footer>
-        <span>oldhand v{data.version} · MIT · Berwin Singh</span>
-        <nav aria-label="Project links">
-          <a href={REPO}>GitHub</a>
-          <a href={`${REPO}/issues`}>Issues</a>
-          <a href={`${REPO}/discussions`}>Discussions</a>
-          <a href={`${BLOB}SECURITY.md`}>Security</a>
-        </nav>
+      <footer className="foot">
+        <div className="foot-close">
+          <p className="foot-line">Install the eleven skills</p>
+          <CodeBlock code={NPX} language="bash" title="install" width="100%" hasLanguageLabel={false} />
+        </div>
+        <div className="foot-row">
+          <span>oldhand v{data.version} · MIT · Berwin Singh</span>
+          <nav aria-label="Project links">
+            <Link href={REPO} color="secondary">GitHub</Link>
+            <Link href={`${REPO}/issues`} color="secondary">Issues</Link>
+            <Link href={`${REPO}/discussions`} color="secondary">Discussions</Link>
+            <Link href={`${BLOB}SECURITY.md`} color="secondary">Security</Link>
+          </nav>
+        </div>
         <p className="analytics">
           {analytics === "granted" ? "Google Analytics is on." : "Google Analytics is off; nothing is sent."}{" "}
           <button type="button" className="link" onClick={toggleAnalytics}>
             {analytics === "granted" ? "Turn it off" : "Turn on Google Analytics"}
           </button>
           {" · "}
-          <a href="https://policies.google.com/technologies/partner-sites">How Google uses data</a>
+          <Link href="https://policies.google.com/technologies/partner-sites" color="secondary">How Google uses data</Link>
         </p>
       </footer>
     </>
